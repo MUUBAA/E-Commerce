@@ -1,0 +1,44 @@
+import React from 'react';
+import { Search, ChevronDown, User, ShoppingCart } from 'lucide-react';
+
+const Header: React.FC = () => {
+  return (
+    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm">
+      <div className="container mx-auto flex items-center justify-between p-2 md:p-4">
+        <div className="flex items-center">
+          <h1 className="font-italic text-4xl font-bold text-red-600">
+            zepto
+          </h1>
+          <div className="ml-4 hidden cursor-pointer items-center md:flex">
+            <span className="font-semibold">Select Location</span>
+            <ChevronDown className="h-5 w-5" />
+          </div>
+        </div>
+
+        <div className="flex-grow px-4 md:px-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for 'kurkure'"
+              className="w-full rounded-xl border border-gray-300 bg-gray-100 py-2 pl-10 pr-4 focus:border-red-500 focus:ring-red-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <button className="flex items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100">
+            <User className="h-6 w-6 text-gray-700" />
+            <span className="hidden text-sm font-medium md:block">Profile</span>
+          </button>
+          <button className="flex items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100">
+            <ShoppingCart className="h-6 w-6 text-gray-700" />
+            <span className="hidden text-sm font-medium md:block">Cart</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
