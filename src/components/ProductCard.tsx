@@ -23,43 +23,48 @@ const ProductCard: React.FC<ProductCardProps> = ({
   weight,
 }) => {
   return (
-    <div className="flex h-full w-full flex-col rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="relative flex min-w-[160px] max-w-[180px] flex-col rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
       {/* Image section */}
-      <div className="relative p-2">
-        <img className="w-full rounded-md" src={imageUrl} alt={name} />
-        <button className="absolute bottom-[-8px] right-4 rounded-lg border border-red-500 bg-white px-4 py-1 text-sm font-bold text-red-500 shadow-lg transition-colors hover:bg-red-50">
+      <div className="relative mb-3">
+        <img 
+          className="h-32 w-full rounded-md object-cover" 
+          src={imageUrl} 
+          alt={name} 
+        />
+        <button className="absolute bottom-2 right-2 rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50">
           ADD
         </button>
       </div>
 
-      {/* Details section */}
-      <div className="flex flex-grow flex-col px-3 pb-3">
-        <div className="flex-grow">
-          {/* Price section */}
-          <div className="flex items-center">
-            <p className="rounded bg-green-600 px-2 py-1 text-sm font-bold text-white">{price}</p>
-            {originalPrice && (
-              <p className="ml-2 text-sm text-gray-500 line-through">{originalPrice}</p>
-            )}
-          </div>
-          {discount && <p className="mt-1 text-xs font-semibold text-green-700">{discount}</p>}
-
-          {/* Product Name */}
-          <h3 className="mt-2 text-sm font-medium text-gray-800">{name}</h3>
-
-          {/* Weight */}
-          {weight && <p className="mt-1 text-sm text-gray-500">{weight}</p>}
-        </div>
-
-        {/* Rating */}
-        {rating && (
-          <div className="mt-2 flex items-center text-sm text-gray-500">
-            <Star className="h-4 w-4 text-yellow-400" fill="currentColor" />
-            <span className="ml-1 font-bold text-gray-700">{rating}</span>
-            {reviews && <span className="ml-1">({reviews})</span>}
-          </div>
+      {/* Price section */}
+      <div className="mb-2 flex items-baseline gap-2">
+        <span className="rounded bg-green-600 px-2 py-1 text-sm font-bold text-white">{price}</span>
+        {originalPrice && (
+          <span className="text-sm text-gray-500 line-through">{originalPrice}</span>
         )}
       </div>
+
+      {/* Discount */}
+      {discount && (
+        <p className="mb-2 text-xs font-semibold text-green-700">{discount}</p>
+      )}
+
+      {/* Product Name */}
+      <h3 className="mb-1 line-clamp-2 text-sm font-medium leading-tight text-gray-800">{name}</h3>
+
+      {/* Weight */}
+      {weight && (
+        <p className="mb-2 text-xs text-gray-500">{weight}</p>
+      )}
+
+      {/* Rating */}
+      {rating && (
+        <div className="flex items-center gap-1 text-xs text-gray-600">
+          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+          <span className="font-semibold text-gray-800">{rating}</span>
+          {reviews && <span>({reviews})</span>}
+        </div>
+      )}
     </div>
   );
 };

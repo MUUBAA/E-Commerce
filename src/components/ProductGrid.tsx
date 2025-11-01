@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductCard from './ProductCard';
 
-interface ProductCarouselProps {
+interface ProductGridProps {
   title: string;
   products: {
     name: string;
@@ -9,10 +9,13 @@ interface ProductCarouselProps {
     originalPrice?: string;
     imageUrl: string;
     discount?: string;
+    rating?: number;
+    reviews?: string;
+    weight?: string;
   }[];
 }
 
-const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products }) => {
+const ProductGrid: React.FC<ProductGridProps> = ({ title, products }) => {
   return (
     <div className="mb-6">
       <div className="mb-3 flex items-center justify-between">
@@ -22,9 +25,10 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products }) =>
         </button>
       </div>
       
-      <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
+      {/* Mobile: Horizontal scroll, Tablet+: Grid layout */}
+      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide sm:grid sm:grid-cols-3 sm:overflow-visible md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
         {products.map((product, index) => (
-          <div key={`${product.name}-${index}`} className="flex-shrink-0">
+          <div key={`${product.name}-${index}`} className="flex-shrink-0 sm:flex-shrink">
             <ProductCard {...product} />
           </div>
         ))}
@@ -33,4 +37,4 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, products }) =>
   );
 };
 
-export default ProductCarousel;
+export default ProductGrid;
