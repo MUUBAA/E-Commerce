@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "",
+"RedirectUrl": "",
+"LaunchCommand": "",
+"WorkingDirectory": "C:\\workspace\\personal\\E-Commerce\\MarketNest-1\\server\\Server",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

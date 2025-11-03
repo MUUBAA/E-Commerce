@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/spa-proxy-manifest",
+  "SpaProxyServer": {
+    "ServerUrl": "http://localhost:5173",
+    "LaunchCommand": "npm run dev",
+    "WorkingDirectory": "..\\..\\client",
+    "MaxTimeoutInSeconds": 120
+  },
+  "ProxyServer": {
+    "ProxyUrl": "https://localhost:5001",
+    "ForceHttps": false
+  }
+}
