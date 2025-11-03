@@ -21,6 +21,21 @@
           "Microsoft.AspNetCore.App"
         ]
       },
+      "Microsoft.AspNetCore.SpaProxy/9.0.10": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Microsoft.AspNetCore.SpaProxy.dll": {}
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.AspNetCore.SpaProxy.dll": {}
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ],
+        "build": {
+          "build/Microsoft.AspNetCore.SpaProxy.targets": {}
+        }
+      },
       "Microsoft.Extensions.ApiDescription.Server/9.0.0": {
         "type": "package",
         "build": {
@@ -128,6 +143,21 @@
         "lib/net9.0/Microsoft.AspNetCore.OpenApi.xml",
         "microsoft.aspnetcore.openapi.9.0.10.nupkg.sha512",
         "microsoft.aspnetcore.openapi.nuspec"
+      ]
+    },
+    "Microsoft.AspNetCore.SpaProxy/9.0.10": {
+      "sha512": "MiCiYQDvJIGjPYhBIUbbhECpjvfKJmK0+99hVJUT+DPaoTMEDDhFYCMqD+dva62Lh8wr2HfagUcLTw9mJcjK1A==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.spaproxy/9.0.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "build/Microsoft.AspNetCore.SpaProxy.targets",
+        "lib/net9.0/Microsoft.AspNetCore.SpaProxy.dll",
+        "microsoft.aspnetcore.spaproxy.9.0.10.nupkg.sha512",
+        "microsoft.aspnetcore.spaproxy.nuspec"
       ]
     },
     "Microsoft.Extensions.ApiDescription.Server/9.0.0": {
@@ -474,6 +504,7 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "Microsoft.AspNetCore.OpenApi >= 9.0.10",
+      "Microsoft.AspNetCore.SpaProxy >= 9.0.10",
       "Swashbuckle.AspNetCore >= 9.0.6"
     ]
   },
@@ -528,6 +559,10 @@
         "targetAlias": "net9.0",
         "dependencies": {
           "Microsoft.AspNetCore.OpenApi": {
+            "target": "Package",
+            "version": "[9.0.10, )"
+          },
+          "Microsoft.AspNetCore.SpaProxy": {
             "target": "Package",
             "version": "[9.0.10, )"
           },
