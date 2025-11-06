@@ -1,60 +1,45 @@
-var builder = WebApplication.CreateBuilder(args);
+using Server.Utils;
 
-// Services
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
-
-// CORS for client dev servers (Vite 5173, CRA 3000)
-const string CorsPolicyName = "AllowClient";
-builder.Services.AddCors(options =>
+try
 {
-    options.AddPolicy(CorsPolicyName, policy =>
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod());
-});
+    var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+    // Add services to the container.
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
 
-// Middleware
-app.UseSwagger();
-app.UseSwaggerUI();
+    AuthProvider.Confiqure(builder.Services, builder.Configuration);
+    SwaggerProvider.Configure(builder.Services);
+    ComponentRegistry.Registry(builder.Services, builder.Configuration).GetAwaiter().GetResult();
 
-app.UseHttpsRedirection();
-app.UseCors(CorsPolicyName);
+    var app = builder.Build();
 
-// Minimal sample endpoint (keep template)
-var summaries = new[]
+    DataMigration.Configure(app.Services);
+
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+ // Configure the HTTP request pipeline.
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.UseStaticFiles();
+
+        app.MapFallbackToFile("/index.html");
+
+    app.Run();
+}
+catch (Exception ex)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    // Log the exception or handle it as needed
+    Console.WriteLine($"An error occurred: {ex.Message}");
+    // Optionally, rethrow the exception if you want to terminate the application
+    throw;
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-// Controllers
-app.MapControllers();
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

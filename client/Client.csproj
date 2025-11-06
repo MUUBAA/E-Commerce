@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.Build.NoTargets/3.7.0">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ClientBuildCommand>npm run build</ClientBuildCommand>
+  </PropertyGroup>
+
+  <Target Name="Build">
+    <Message Importance="high" Text="Building Client (npm run build)..." />
+    <Exec Command="$(ClientBuildCommand)" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+</Project>
+
