@@ -1,13 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/spa-proxy-manifest",
   "SpaProxyServer": {
-    "ServerUrl": "http://localhost:5173",
+    "ServerUrl": "http://localhost:5015",
     "LaunchCommand": "npm run dev",
-    "WorkingDirectory": "..\\..\\client",
+    "WorkingDirectory": "C:\\workspace\\personal\\E-Commerce\\Nest\\client",
     "MaxTimeoutInSeconds": 120
   },
   "ProxyServer": {
-    "ProxyUrl": "https://localhost:5001",
+    "ProxyUrl": "https://localhost:5200",
     "ForceHttps": false
   }
 }

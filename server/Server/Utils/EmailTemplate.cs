@@ -31,7 +31,7 @@ namespace Server.Utils
             <img src='' alt='Nest' style='height: 48px;'/>
         </div>
         <h2 style='color: #2d3e50;'>Reset Your Password</h2>
-        <p>Dear {user.Username},</p>
+        <p>Dear {user.Name},</p>
         <p>We received a request to reset your password for your Nest account. Click the button below to set a new password:</p>
         <div style='text-align:center; margin: 32px 0;'>
             <a href='{resetLink}' style='background: #515DEF; color: #fff; text-decoration: none; padding: 14px 32px; border-radius: 6px; font-size: 16px; display: inline-block;'>Reset Password</a>
