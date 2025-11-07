@@ -148,10 +148,10 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
         <h3 className="font-medium text-gray-900 mb-4 text-center">Select a delivery location</h3>
         
         <div className="flex space-x-3 mb-4">
-          <button className="flex-1 rounded-lg border border-gray-300 py-3 text-center text-gray-700 transition-colors hover:bg-gray-50">
+          <button className="flex-1 cursor-pointer rounded-lg border border-gray-300 py-3 text-center text-gray-700 transition-colors hover:bg-gray-50">
             Search Location
           </button>
-          <button className="flex-1 rounded-lg bg-pink-500 py-3 text-center text-white transition-colors hover:bg-pink-600">
+          <button className="flex-1 cursor-pointer rounded-lg bg-pink-500 py-3 text-center text-white transition-colors hover:bg-pink-600">
             Current Location
           </button>
         </div>

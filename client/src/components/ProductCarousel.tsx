@@ -19,7 +19,8 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, categorySlug, 
   
   const handleSeeAllClick = () => {
     if (categorySlug) {
-      navigate(`/category/${categorySlug}`);
+      // Navigate to specific route instead of generic category route
+      navigate(`/${categorySlug}`);
     }
   };
 
@@ -30,7 +31,7 @@ const ProductCarousel: React.FC<ProductCarouselProps> = ({ title, categorySlug, 
         {categorySlug && (
           <button 
             onClick={handleSeeAllClick}
-            className="text-sm font-medium text-pink-500 hover:text-pink-600"
+            className="cursor-pointer text-sm font-medium text-pink-500 hover:text-pink-600"
           >
             See All →
           </button>

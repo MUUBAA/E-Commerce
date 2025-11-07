@@ -83,7 +83,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ isOpen, onClose
           <div className="absolute w-4 h-4 bg-red-500 rounded-full -mt-2 -mr-2"></div>
         </div>
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
-        <button className="mt-6 px-6 py-2 border border-purple-500 text-purple-500 rounded-lg hover:bg-purple-50 transition-colors">
+        <button className="mt-6 cursor-pointer px-6 py-2 border border-purple-500 text-purple-500 rounded-lg hover:bg-purple-50 transition-colors">
           Browse products
         </button>
       </div>
@@ -93,7 +93,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ isOpen, onClose
   const renderAddressView = () => (
     <div className="p-6">
       {/* Add New Address Button */}
-      <button className="w-full flex items-center justify-between p-4 border border-dashed border-pink-300 rounded-lg hover:bg-pink-50 transition-colors mb-6">
+      <button className="w-full cursor-pointer flex items-center justify-between p-4 border border-dashed border-pink-300 rounded-lg hover:bg-pink-50 transition-colors mb-6">
         <span className="text-pink-500 font-medium">+ Add New Address</span>
         <ChevronRight className="h-5 w-5 text-pink-500" />
       </button>

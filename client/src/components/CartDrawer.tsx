@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { jwtDecode } from 'jwt-decode';
+import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
+import { loginUser, registerUser, forgotPassword } from '../../redux/thunk/jwtVerify';
+import type { AppDispatch } from '../../redux/stores';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type ViewState = 'empty' | 'login' | 'register';
+interface DecodedToken {
+  Email: string;
+  Name: string;
+  CreatedAt: string;
+  exp: number;
+}
+
+type ViewState = 'empty' | 'login' | 'register' | 'cart' | 'forgot';
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [currentView, setCurrentView] = useState<ViewState>('empty');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
+    name: '',
     password: '',
     confirmPassword: ''
   });
@@ -29,21 +43,115 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     setCurrentView('register');
   };
 
+  const handleForgotOpen = () => {
+    setCurrentView('forgot');
+  };
+
   const handleBackToEmpty = () => {
     setCurrentView('empty');
-    setFormData({ email: '', username: '', password: '', confirmPassword: '' });
+    setFormData({ email: '', name: '', password: '', confirmPassword: '' });
   };
 
-  const handleSubmitLogin = (e: React.FormEvent) => {
+  const handleSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login:', { email: formData.email, password: formData.password });
+    console.log('handleSubmitLogin called with:', formData);
+    setLoading(true);
+    try {
+      const response = await dispatch(loginUser({ email: formData.email, password: formData.password }));
+      console.log('Login dispatch response:', response);
+      if (response.type === "loginUser/fulfilled") {
+        toast.dismiss();
+        toast.success("Login successful!");
+        setFormData({ email: '', name: '', password: '', confirmPassword: '' });
+
+        const jwt = response.payload as string;
+        const decodedToken = jwtDecode<DecodedToken>(jwt);
+
+        console.log('Logged in user:', decodedToken);
+        
+        // Switch to cart view after successful login
+        setCurrentView('cart');
+      } else {
+        const errorMsg =
+          typeof response.payload === "string" && response.payload
+            ? response.payload === "User not found"
+              ? "User not registered"
+              : response.payload === "Invalid password"
+              ? "Invalid password"
+              : response.payload
+            : "Login failed";
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Login catch error:', error);
+      toast.error("Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmitRegister = (e: React.FormEvent) => {
+  const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log('Register:', formData);
+    console.log('handleSubmitRegister called with:', formData);
+    
+    // Validate password match
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await dispatch(registerUser({ 
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password 
+      }));
+      console.log('Register dispatch response:', response);
+      
+      if (response.type === "registerUser/fulfilled") {
+        toast.dismiss();
+        toast.success("Registration successful! Please login.");
+        setFormData({ email: '', name: '', password: '', confirmPassword: '' });
+        
+        // Switch to login view
+        setCurrentView('login');
+      } else {
+        const errorMsg =
+          typeof response.payload === "string" && response.payload
+            ? response.payload
+            : "Registration failed";
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Registration catch error:', error);
+      toast.error("Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await dispatch(forgotPassword({ email: formData.email }));
+      console.log('Forgot dispatch response:', response);
+      if (response.type === 'forgotPassword/fulfilled') {
+        toast.dismiss();
+        toast.success('If an account exists for this email, you will receive reset instructions');
+        setFormData({ email: '', name: '', password: '', confirmPassword: '' });
+        setCurrentView('login');
+      } else {
+        const errorMsg = typeof response.payload === 'string' && response.payload ? response.payload : 'Request failed';
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      console.error('Forgot catch error:', err);
+      toast.error('Request failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderEmptyCart = () => (
@@ -71,7 +179,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       
       <button 
         onClick={handleLogin}
-        className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02]"
+        className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] cursor-pointer"
       >
         Login
       </button>
@@ -111,7 +219,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         <div className="text-right">
           <button
             type="button"
-            className="text-pink-500 text-sm hover:text-pink-600 transition-colors"
+            onClick={handleForgotOpen}
+            className="text-pink-500 text-sm hover:text-pink-600 transition-colors cursor-pointer"
           >
             Forgot Password?
           </button>
@@ -119,9 +228,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02]"
+          disabled={loading}
+          className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Continue
+          {loading ? 'Logging in...' : 'Continue'}
         </button>
 
         <div className="text-center pt-4">
@@ -129,7 +239,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={handleCreateAccount}
-            className="text-pink-500 text-sm font-medium hover:text-pink-600 transition-colors"
+            className="text-pink-500 text-sm font-medium hover:text-pink-600 transition-colors cursor-pointer"
           >
             Create Account
           </button>
@@ -149,9 +259,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         <div>
           <input
             type="text"
-            placeholder="Username"
-            value={formData.username}
-            onChange={(e) => handleInputChange('username', e.target.value)}
+            placeholder="Name"
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
             className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
             required
           />
@@ -192,9 +302,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02]"
+          disabled={loading}
+          className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          Create Account
+          {loading ? 'Creating Account...' : 'Create Account'}
         </button>
 
         <div className="text-center pt-4">
@@ -202,7 +313,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           <button
             type="button"
             onClick={() => setCurrentView('login')}
-            className="text-pink-500 text-sm font-medium hover:text-pink-600 transition-colors"
+            className="text-pink-500 text-sm font-medium hover:text-pink-600 transition-colors cursor-pointer"
           >
             Login
           </button>
@@ -212,6 +323,82 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           By continuing, you agree to our{' '}
           <span className="text-pink-500">Terms of Service</span> &{' '}
           <span className="text-pink-500">Privacy Policy</span>
+        </div>
+      </form>
+    </div>
+  );
+
+  const renderCart = () => (
+    <div className="py-6">
+      <div className="flex flex-col items-center justify-center text-center py-12">
+        <div className="mb-6">
+          <div className="mx-auto h-24 w-24 rounded-full bg-gray-50 flex items-center justify-center">
+            <svg 
+              className="h-12 w-12 text-gray-400" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={1.5} 
+                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+              />
+            </svg>
+          </div>
+        </div>
+        
+        <h3 className="mb-2 text-xl font-semibold text-gray-900">Your cart is empty</h3>
+        <p className="mb-8 text-gray-500 text-sm max-w-xs">
+          Start adding items to your cart and they will appear here.
+        </p>
+        
+        <button 
+          onClick={onClose}
+          className="w-full max-w-xs rounded-xl bg-gray-900 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:shadow-lg transform hover:scale-[1.02] cursor-pointer"
+        >
+          Browse Products
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderForgotForm = () => (
+    <div className="py-6">
+      <div className="text-center mb-8">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">Reset Password</h3>
+        <p className="text-gray-600 text-sm">Enter your email and we'll send reset instructions.</p>
+      </div>
+
+      <form onSubmit={handleSubmitForgot} className="space-y-4">
+        <div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {loading ? 'Sending...' : 'Send reset link'}
+        </button>
+
+        <div className="text-center pt-4">
+          <button
+            type="button"
+            onClick={() => setCurrentView('login')}
+            className="text-pink-500 text-sm font-medium hover:text-pink-600 transition-colors cursor-pointer"
+          >
+            Back to Login
+          </button>
         </div>
       </form>
     </div>
@@ -237,8 +424,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="relative flex items-center justify-between p-6 border-b border-gray-100">
             <button 
-              onClick={currentView !== 'empty' ? handleBackToEmpty : onClose}
-              className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              onClick={currentView === 'cart' ? onClose : currentView !== 'empty' ? handleBackToEmpty : onClose}
+              className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <X className="h-5 w-5 text-gray-600" />
             </button>
@@ -250,6 +437,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             {currentView === 'empty' && renderEmptyCart()}
             {currentView === 'login' && renderLoginForm()}
             {currentView === 'register' && renderRegisterForm()}
+            {currentView === 'forgot' && renderForgotForm()}
+            {currentView === 'cart' && renderCart()}
           </div>
         </div>
       </div>

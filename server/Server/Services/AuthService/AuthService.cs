@@ -48,18 +48,11 @@ namespace Server.Services.AuthService
 
         public bool Register(RegisterUserDto userDto)
         {
-
-            var existingUser = _userService.GetUserByEmail(userDto.Email);
-
-            if (existingUser != null)
-            {
-                throw new Exception("User with this email already exists");
-            }
             var contract = new UserContract
             {
                 Name = userDto.Name,
                 Email = userDto.Email,
-                Password = new PasswordHasher<User>().HashPassword(null, userDto.Password)
+                Password = userDto.Password  // Pass plain password, let createUser hash it
             };
             return _userService.createUser(contract);
         }

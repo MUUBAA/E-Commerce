@@ -274,7 +274,7 @@ const CafePage: React.FC = () => {
                 <span className="text-lg font-bold">{cafeBanner.subtitle}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-gray-700">{cafeBanner.description}</p>
-              <button className="mt-4 rounded-full bg-gray-800 px-6 py-3 font-bold text-white transition-transform hover:scale-105">
+              <button className="mt-4 cursor-pointer rounded-full bg-gray-800 px-6 py-3 font-bold text-white transition-transform hover:scale-105">
                 {cafeBanner.buttonText}
               </button>
             </div>
@@ -344,8 +344,8 @@ const CafePage: React.FC = () => {
             </h2>
             <div className="rounded-lg bg-pink-100 px-4 py-2">
               <button 
-                onClick={() => navigate('/category/cafe-bestsellers')}
-                className="text-sm font-medium text-pink-500 hover:text-pink-600"
+                onClick={() => navigate('/cafe-bestsellers')}
+                className="cursor-pointer text-sm font-medium text-pink-500 hover:text-pink-600"
               >
                 See all →
               </button>
@@ -369,8 +369,8 @@ const CafePage: React.FC = () => {
             </h2>
             <div className="rounded-lg bg-pink-100 px-4 py-2">
               <button 
-                onClick={() => navigate('/category/cafe-snacks')}
-                className="text-sm font-medium text-pink-500 hover:text-pink-600"
+                onClick={() => navigate('/cafe-snacks')}
+                className="cursor-pointer text-sm font-medium text-pink-500 hover:text-pink-600"
               >
                 See all →
               </button>
