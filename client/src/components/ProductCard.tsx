@@ -31,7 +31,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           src={imageUrl} 
           alt={name} 
         />
-        <button className="absolute bottom-2 right-2 rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50">
+        <button className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50">
           ADD
         </button>
       </div>

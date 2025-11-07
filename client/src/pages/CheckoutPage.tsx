@@ -48,7 +48,7 @@ const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      <button className="mt-6 w-full rounded-lg bg-purple-600 py-3 text-lg font-semibold text-white shadow-sm transition-transform hover:scale-105 hover:bg-purple-700">
+      <button className="mt-6 w-full cursor-pointer rounded-lg bg-purple-600 py-3 text-lg font-semibold text-white shadow-sm transition-transform hover:scale-105 hover:bg-purple-700">
         Place Order
       </button>
     </div>

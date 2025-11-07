@@ -60,14 +60,14 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-2 md:space-x-4">
             <button 
               onClick={handleProfileClick}
-              className="flex items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
+              className="flex cursor-pointer items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
             >
               <User className="h-6 w-6 text-gray-700" />
               <span className="hidden text-sm font-medium md:block">Profile</span>
             </button>
             <button 
               onClick={handleCartClick}
-              className="flex items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
+              className="flex cursor-pointer items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
             >
               <ShoppingCart className="h-6 w-6 text-gray-700" />
               <span className="hidden text-sm font-medium md:block">Cart</span>

@@ -547,10 +547,44 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCategoryClick = (categoryName: string) => {
-    if (categoryName === 'Zepto Cafe') {
-      navigate('/cafe');
+    // Map category names to their routes
+    const categoryRoutes: Record<string, string> = {
+      'Fruits & Vegetables': '/fresh',
+      'Dairy, Bread & Eggs': '/dairy',
+      'Atta, Rice, Oil & Dals': '/atta-rice-oil-dals',
+      'Masala & Dry Fruits': '/masala-dry-fruits',
+      'Breakfast & Sauces': '/breakfast-sauces',
+      'Packaged Food': '/packaged-food',
+      'Nest Cafe': '/cafe',
+      'Tea, Coffee & More': '/tea-coffee-more',
+      'Ice Creams & More': '/ice-creams-more',
+      'Frozen Food': '/frozen-food',
+    };
+
+    const route = categoryRoutes[categoryName];
+    if (route) {
+      navigate(route);
     }
-    // Add other category navigation here if needed
+  };
+
+  const handleBuyAgainClick = (categoryName: string) => {
+    // Map buy again items to their routes
+    const categoryRoutes: Record<string, string> = {
+      'All Items': '/',
+      'Nest Cafe': '/cafe',
+      'Fruits & Vegetables': '/fresh',
+      'Dairy Products': '/dairy',
+      'Snacks & Drinks': '/packaged-food',
+      'Grocery & Kitchen': '/atta-rice-oil-dals',
+      'Sweets & Chocolates': '/ice-creams-more',
+      'Beauty & Personal...': '/beauty',
+      'Household Essentials': '/home-kitchen',
+    };
+
+    const route = categoryRoutes[categoryName];
+    if (route) {
+      navigate(route);
+    }
   };
 
   return (
@@ -562,7 +596,7 @@ const HomePage: React.FC = () => {
             Get Cigarettes <br /> at <span className="text-red-600">₹0</span> Convenience Fee
           </h2>
           <p className="mt-2 text-gray-600">Get smoking accessories, fresheners & more in minutes!</p>
-          <button className="mt-4 rounded-lg bg-red-600 px-4 py-2 font-bold text-white transition-transform hover:scale-105">
+          <button className="mt-4 cursor-pointer rounded-lg bg-red-600 px-4 py-2 font-bold text-white transition-transform hover:scale-105">
             Order now
           </button>
         </div>
@@ -614,11 +648,15 @@ const HomePage: React.FC = () => {
         <h2 className="mb-2 text-xl font-bold md:text-2xl">Buy Again</h2>
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10">
           {buyAgain.map((category) => (
-            <div key={category.name} className="text-center">
+            <div 
+              key={category.name} 
+              className="cursor-pointer text-center transition-transform hover:scale-105"
+              onClick={() => handleBuyAgainClick(category.name)}
+            >
               <img
                 src={category.imageUrl}
                 alt={category.name}
-                className="mx-auto h-20 w-20 object-contain transition-transform hover:scale-105 md:h-24 md:w-24"
+                className="mx-auto h-20 w-20 object-contain md:h-24 md:w-24"
               />
               <p className="mt-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium text-gray-700 md:text-sm">{category.name}</p>
             </div>

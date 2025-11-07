@@ -5,13 +5,13 @@ import { Coffee, Home, ToyBrick, Leaf, HardDrive, Smartphone, Sparkles, Shirt, M
 const subHeaderItems = [
   { label: 'All', icon: MoreHorizontal, path: '/' },
   { label: 'Cafe', icon: Coffee, path: '/cafe' },
-  { label: 'Home', icon: Home, path: '/category/home-kitchen' },
-  { label: 'Toys', icon: ToyBrick, path: '/category/toys-games' },
-  { label: 'Fresh', icon: Leaf, path: '/category/fruits-vegetables' },
-  { label: 'Electronics', icon: HardDrive, path: '/category/electronics' },
-  { label: 'Mobiles', icon: Smartphone, path: '/category/mobiles' },
-  { label: 'Beauty', icon: Sparkles, path: '/category/beauty-personal-care' },
-  { label: 'Fashion', icon: Shirt, path: '/category/fashion' },
+  { label: 'Home', icon: Home, path: '/home-kitchen' },
+  { label: 'Toys', icon: ToyBrick, path: '/toys' },
+  { label: 'Fresh', icon: Leaf, path: '/fresh' },
+  { label: 'Electronics', icon: HardDrive, path: '/electronics' },
+  { label: 'Mobiles', icon: Smartphone, path: '/mobiles' },
+  { label: 'Beauty', icon: Sparkles, path: '/beauty' },
+  { label: 'Fashion', icon: Shirt, path: '/fashion' },
 ];
 
 const SubHeader: React.FC = () => {
@@ -41,7 +41,7 @@ const SubHeader: React.FC = () => {
             <button
               key={item.label}
               onClick={() => handleNavigation(item.path)}
-              className={`flex items-center space-x-2 whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition-colors ${
+              className={`flex cursor-pointer items-center space-x-2 whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium transition-colors ${
                 isActive
                   ? 'border-purple-600 text-purple-600'
                   : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'

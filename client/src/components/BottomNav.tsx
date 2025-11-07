@@ -23,7 +23,7 @@ const BottomNav: React.FC = () => {
               <Link
                 key={item.href}
                 to={item.href!}
-                className={`flex flex-col items-center justify-center w-full text-sm font-medium transition-colors ${
+                className={`flex cursor-pointer flex-col items-center justify-center w-full text-sm font-medium transition-colors ${
                   isActive ? 'text-purple-600' : 'text-gray-500 hover:text-purple-600'
                 }`}>
                 <item.icon className="h-6 w-6" />
@@ -35,7 +35,7 @@ const BottomNav: React.FC = () => {
               <button
                 key={index}
                 onClick={item.action}
-                className="flex flex-col items-center justify-center w-full text-sm font-medium transition-colors text-gray-500 hover:text-purple-600"
+                className="flex cursor-pointer flex-col items-center justify-center w-full text-sm font-medium transition-colors text-gray-500 hover:text-purple-600"
               >
                 <item.icon className="h-6 w-6" />
                 <span>{item.label}</span>

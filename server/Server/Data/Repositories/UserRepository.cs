@@ -79,7 +79,8 @@ namespace Server.Data.Repositories
 
         public UserDto? GetUserByEmail(string email)
         {
-            var user = repository.Users.Where(u => u.Email == email )
+            var user = repository.Users.
+            Where(u => u.Email == email )
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
