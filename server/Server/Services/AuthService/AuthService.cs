@@ -38,6 +38,7 @@ namespace Server.Services.AuthService
             }
             var generatedToken = GenerateToken(new JWTUserParam
             {
+                Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
                 CreatedAt = user.CreatedAt
@@ -69,7 +70,11 @@ namespace Server.Services.AuthService
                 .AddClaim("UserData", userParam) 
                 .AddClaim("issuedAt",new DateTimeOffset(userParam.CreatedAt).ToUnixTimeSeconds())
                 .AddClaim(JwtRegisteredClaimNames.Jti, userParam.Name)
-                .AddClaim(ClaimTypes.NameIdentifier, userParam.Email.ToString())
+                // include user id explicitly and as NameIdentifier for downstream consumers
+                .AddClaim("id", userParam.Id)
+                .AddClaim(ClaimTypes.NameIdentifier, userParam.Id.ToString())
+                // keep email for compatibility
+                .AddClaim(ClaimTypes.Email, userParam.Email)
                 .Encode();
             return token;
         }

@@ -3,13 +3,33 @@ import { Search, ChevronDown, User, ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import UserProfileSidebar from './UserProfileSidebar';
 import LocationModal from './LocationModal';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, RootState } from '../../redux/stores';
+import { getCartItems } from '../../redux/thunk/cart';
+import { getDecryptedJwt } from '../../utils/auth';
+import { jwtDecode } from 'jwt-decode';
 
 const Header: React.FC = () => {
   const { openCart } = useCart();
+  const dispatch = useDispatch<AppDispatch>();
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
-  const handleCartClick = () => {
+  // Total items in cart (sum of quantities)
+  const cartCount = useSelector((state: RootState) =>
+    state.cart?.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) ?? 0
+  );
+
+  const handleCartClick = async () => {
+    // Try to fetch items for logged-in user before opening
+    const token = getDecryptedJwt();
+    if (token) {
+      try {
+        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+        const uid = typeof decoded.id === 'number' ? decoded.id : decoded.sub ? Number(decoded.sub) : undefined;
+        await dispatch(getCartItems({ userId: uid })).unwrap().catch(() => {});
+      } catch { /* ignore */ }
+    }
     openCart();
   };
 
@@ -67,9 +87,17 @@ const Header: React.FC = () => {
             </button>
             <button 
               onClick={handleCartClick}
-              className="flex cursor-pointer items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
+              className="relative flex cursor-pointer items-center space-x-1 rounded-lg p-2 transition-colors hover:bg-gray-100"
             >
               <ShoppingCart className="h-6 w-6 text-gray-700" />
+              {cartCount > 0 && (
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-semibold text-white"
+                  aria-label={`Cart items: ${cartCount}`}
+                >
+                  {cartCount}
+                </span>
+              )}
               <span className="hidden text-sm font-medium md:block">Cart</span>
             </button>
           </div>

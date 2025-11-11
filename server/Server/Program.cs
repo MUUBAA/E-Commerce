@@ -6,6 +6,23 @@ try
 
     // Add services to the container.
     builder.Services.AddControllers();
+
+    // CORS for client dev servers (Vite)
+    const string CorsPolicyName = "AllowClient";
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(CorsPolicyName, policy =>
+            policy.WithOrigins(
+                    "http://localhost:5015",
+                    "http://127.0.0.1:5015",
+                    "http://localhost:5173",
+                    "http://127.0.0.1:5173"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+        );
+    });
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
 
@@ -24,6 +41,7 @@ try
     app.UseSwaggerUI();
 
     app.UseHttpsRedirection();
+    app.UseCors(CorsPolicyName);
 
     app.UseAuthorization();
 
