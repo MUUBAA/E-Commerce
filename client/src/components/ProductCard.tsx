@@ -1,9 +1,12 @@
 // components/ProductCard.tsx
 import { Star } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../redux/thunk/cart';
 import type { AppDispatch, RootState } from '../../redux/stores';
+import { toast } from 'react-toastify';
+import { jwtDecode } from 'jwt-decode';
+import { getDecryptedJwt } from '../../utils/auth';
 
 interface ProductCardProps {
   productId: number;             // <-- needed
@@ -29,18 +32,33 @@ const ProductCard: React.FC<ProductCardProps> = ({
   weight,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const [isAdding, setIsAdding] = useState(false);
 
-  // If you already store user in redux:
-  const userId = useSelector((state: RootState) => state.user.UserAccount?.id
-    ?? state.user.userProfile?.Id// whichever you have
+  // Prefer userId from decrypted JWT; fallback to any stored profile if needed.
+  const fallbackUserId = useSelector((state: RootState) => state.user.UserAccount?.id
+    ?? state.user.userProfile?.Id
   );
 
-  const handleAddToCart = () => {
-    if (!userId) {
-      // Optionally route to login or show toast
-      console.warn('No user. Redirect to login.');
-      return;
+  const handleAddToCart = async () => {
+    // Extract user id from decrypted token
+    const token = getDecryptedJwt();
+    let userIdFromToken: number | undefined;
+    if (token) {
+      try {
+        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+        userIdFromToken =
+          typeof decoded.id === 'number'
+            ? decoded.id
+            : decoded.sub
+              ? Number(decoded.sub)
+              : undefined;
+      } catch {
+        // ignore; will fallback
+      }
     }
+
+    const effectiveUserId = userIdFromToken ?? fallbackUserId;
+    if (!effectiveUserId) return toast.warn('Please sign in to add items to your cart');
 
     // Extract numeric price (handles "₹199" or "$12.50")
     const numericPrice = Number(
@@ -48,18 +66,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
     );
 
     if (Number.isNaN(numericPrice)) {
-      console.error('Invalid price format for', itemName, itemPrice);
+      toast.error('Unable to parse item price');
       return;
     }
 
-    dispatch(
-      addToCart({
-        userId,
-        productId,
-        quantity: 1,        // default to 1; make dynamic if you have a qty control
-        price: numericPrice,
-      })
-    );
+    try {
+      setIsAdding(true);
+      await dispatch(
+        addToCart({
+          userId: effectiveUserId,
+          productId,
+          quantity: 1,        // default to 1; make dynamic if you have a qty control
+          price: numericPrice,
+        })
+      ).unwrap();
+      toast.success('Added to cart');
+    } catch (err: any) {
+      toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -69,8 +95,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <button
           className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50"
           onClick={handleAddToCart}
+          disabled={isAdding}
         >
-          ADD
+          {isAdding ? 'Adding...' : 'ADD'}
         </button>
       </div>
 

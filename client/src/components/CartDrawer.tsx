@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 import { loginUser, registerUser, forgotPassword } from '../../redux/thunk/jwtVerify';
-import type { AppDispatch } from '../../redux/stores';
+import type { AppDispatch, RootState } from '../../redux/stores';
+import { getCartItems } from '../../redux/thunk/cart';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -24,6 +25,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [currentView, setCurrentView] = useState<ViewState>('empty');
   const [loading, setLoading] = useState(false);
+  const cart = useSelector((s: RootState) => s.cart);
+  const hasItems = useMemo(() => (cart.items?.length ?? 0) > 0, [cart.items]);
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -69,7 +72,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
         console.log('Logged in user:', decodedToken);
         
-        // Switch to cart view after successful login
+        // Load items then switch to cart view
+        try { await dispatch(getCartItems({})).unwrap(); } catch {}
         setCurrentView('cart');
       } else {
         const errorMsg =
@@ -330,6 +334,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
   const renderCart = () => (
     <div className="py-6">
+      {!hasItems ? (
       <div className="flex flex-col items-center justify-center text-center py-12">
         <div className="mb-6">
           <div className="mx-auto h-24 w-24 rounded-full bg-gray-50 flex items-center justify-center">
@@ -361,6 +366,19 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           Browse Products
         </button>
       </div>
+      ) : (
+        <div className="space-y-4">
+          {cart.items.map((i, idx) => (
+            <div key={`${i.productId}-${idx}`} className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-800">Product #{i.productId}</span>
+                <span className="text-xs text-gray-500">Qty: {i.quantity}</span>
+              </div>
+              <div className="text-sm font-semibold text-gray-900">₹{i.price}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 
