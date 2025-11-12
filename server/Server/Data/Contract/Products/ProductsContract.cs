@@ -3,6 +3,7 @@
     public class ProductsContract : PaginationContract
     {
         public int Id { get; set; }
+        public int ProductId { get; set; }
         public string? ItemName { get; set; }
         public string? ItemDescription { get; set; }
         public decimal ItemPrice { get; set; }

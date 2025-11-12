@@ -14,6 +14,7 @@ namespace Server.Services
     {
         bool createUser(UserContract contract);
         bool updateUser(UserUpdate user);
+        bool updateUserAddress(string address);
         UserDto GetUserByEmail(string email);
         User GetUserById(int id);
         bool UpdateUserPasswordById(int userId, string newPassword);
@@ -117,6 +118,19 @@ namespace Server.Services
                 UpdatedAt = DateTime.UtcNow,
                 UpdatedBy = _userContext.UserId
             };
+            _userRepository.UpdateUser(user);
+            return true;
+        }
+        public bool updateUserAddress(string address)
+        {
+            if (string.IsNullOrWhiteSpace(address)) throw new Exception("Address is required");
+            var userIdStr = _userContext.UserId;
+            if (string.IsNullOrWhiteSpace(userIdStr)) throw new Exception("Unauthorized");
+            if (!int.TryParse(userIdStr, out var userIdInt)) throw new Exception("Invalid user id");
+            var user = _userRepository.GetUserById(userIdInt) ?? throw new NotFoundException("User not found");
+            user.Address = address;
+            user.UpdatedAt = DateTime.UtcNow;
+            user.UpdatedBy = userIdStr;
             _userRepository.UpdateUser(user);
             return true;
         }

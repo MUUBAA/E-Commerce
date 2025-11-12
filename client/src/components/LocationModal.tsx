@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { X, Search, MapPin, Navigation } from 'lucide-react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { X, Search, Navigation } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { getDecryptedJwt } from '../../utils/auth';
+import { MapContainer, Marker, TileLayer, useMapEvents, useMap } from 'react-leaflet';
+import { Icon, Map as LeafletMap } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -8,28 +14,260 @@ interface LocationModalProps {
 
 type ModalView = 'location' | 'map';
 
+type LatLng = {
+  lat: number;
+  lng: number;
+};
+
+const defaultLocation: LatLng = { lat: 12.9716, lng: 77.5946 };
+
+const leafletMarkerIcon = new Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  shadowAnchor: [12, 41],
+});
+
 const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
   const [currentView, setCurrentView] = useState<ModalView>('location');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<LatLng>(defaultLocation);
+  const [addressPreview, setAddressPreview] = useState<string>('');
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  const setMapInstance = useCallback((map: LeafletMap) => {
+    mapRef.current = map;
+  }, []);
+
+  const geoApiKey = (import.meta as any)?.env?.VITE_GEO_API_KEY || '8eb348cc908a4478b167b2c15e15fa17';
+
+  const buildGeoApiUrl = (query: string) => {
+    const override = (import.meta as any)?.env?.VITE_GEO_API_URL as string | undefined;
+    if (override) {
+      let url = override;
+      if (override.includes('{query}')) {
+        url = url.replace('{query}', encodeURIComponent(query));
+      } else {
+        const separator = override.includes('?') ? '&' : '?';
+        url = `${override}${separator}q=${encodeURIComponent(query)}`;
+      }
+      if (url.includes('{key}')) {
+        url = url.replace('{key}', geoApiKey);
+      } else {
+        url += url.includes('?') ? `&key=${geoApiKey}` : `?key=${geoApiKey}`;
+      }
+      return url;
+    }
+    return `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(query)}&key=${geoApiKey}`;
+  };
+
+  const requestGeoData = async (query: string) => {
+    const url = buildGeoApiUrl(query);
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Geo API failed');
+    }
+    return response.json();
+  };
+
+  const reverseGeocodeWithKey = async (lat: number, lon: number) => {
+    const data = await requestGeoData(`${lat}+${lon}`);
+    const formatted =
+      data?.results?.[0]?.formatted ||
+      data?.display_name ||
+      data?.features?.[0]?.properties?.display_name ||
+      `${lat},${lon}`;
+    return formatted as string;
+  };
+
+  const forwardGeocodeWithKey = async (query: string) => {
+    const data = await requestGeoData(query);
+    const result = data?.results?.[0];
+    if (!result) {
+      throw new Error('Location not found');
+    }
+    return {
+      coords: {
+        lat: result.geometry.lat,
+        lng: result.geometry.lng,
+      } as LatLng,
+      formatted: result.formatted as string || query,
+    };
+  };
+
+  const fetchAddressPreview = async (coords: LatLng) => {
+    setIsPreviewLoading(true);
+    try {
+      const formatted = await reverseGeocodeWithKey(coords.lat, coords.lng);
+      setAddressPreview(formatted);
+    } catch (error) {
+      setAddressPreview('');
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentView === 'map' && mapRef.current) {
+      setTimeout(() => {
+        mapRef.current?.invalidateSize();
+        mapRef.current?.flyTo([selectedLocation.lat, selectedLocation.lng], 15);
+      }, 120);
+    }
+  }, [currentView, selectedLocation]);
+
+  const saveAddressToBackend = async (address: string) => {
+    const token = getDecryptedJwt();
+    if (!token) throw new Error('Not authenticated');
+    const inferredBase =
+      (typeof window !== 'undefined' && window.location.origin.includes('5015'))
+        ? 'https://localhost:5200'
+        : '';
+    const base = (import.meta as any)?.env?.VITE_API_BASE_URL || inferredBase;
+    await axios.put(
+      `${base}/users/address`,
+      { address },
+      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+    );
+  };
 
   const handleAddNewAddress = () => {
     setCurrentView('map');
+    setAddressPreview('');
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const coords: LatLng = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          };
+          setSelectedLocation(coords);
+          await fetchAddressPreview(coords);
+        },
+        () => undefined,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
   };
 
   const handleBackToLocation = () => {
     setCurrentView('location');
   };
 
-  const handleEnableLocation = () => {
-    // Handle enable current location logic
-    console.log('Enable current location');
+  const handleUseCurrentLocation = async (saveImmediately: boolean) => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported by this browser.');
+      return;
+    }
+    setIsSubmitting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const coords: LatLng = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        };
+        try {
+          if (saveImmediately) {
+            const address = await reverseGeocodeWithKey(coords.lat, coords.lng);
+            await saveAddressToBackend(address);
+            toast.success('Address saved');
+            onClose();
+          } else {
+            setSelectedLocation(coords);
+            mapRef.current?.flyTo([coords.lat, coords.lng], 16);
+            await fetchAddressPreview(coords);
+          }
+        } catch (e: any) {
+          toast.error(typeof e?.message === 'string' ? e.message : 'Failed to update address');
+        } finally {
+          setIsSubmitting(false);
+        }
+      },
+      (err) => {
+        toast.error(err?.message || 'Failed to get location');
+        setIsSubmitting(false);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   };
 
-  const handleSearchLocation = () => {
-    // Handle search location logic
-    console.log('Search location:', searchQuery);
+  const handleSearchLocation = async () => {
+    if (!searchQuery.trim()) {
+      toast.warn('Enter a location to search');
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const { coords, formatted } = await forwardGeocodeWithKey(searchQuery);
+      setSelectedLocation(coords);
+      setAddressPreview(formatted);
+      mapRef.current?.flyTo([coords.lat, coords.lng], 16);
+    } catch (e: any) {
+      toast.error(typeof e?.message === 'string' ? e.message : 'Failed to find location');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
+  const handleSavePinnedLocation = async () => {
+    setIsSubmitting(true);
+    try {
+      const address =
+        addressPreview || (await reverseGeocodeWithKey(selectedLocation.lat, selectedLocation.lng));
+      await saveAddressToBackend(address);
+      toast.success('Address saved');
+      onClose();
+    } catch (e: any) {
+      toast.error(typeof e?.message === 'string' ? e.message : 'Failed to save address');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const MapInstanceSetter = ({ setMap }: { setMap: (map: LeafletMap) => void }) => {
+    const map = useMap();
+    useEffect(() => {
+      setMap(map);
+    }, [map, setMap]);
+    return null;
+  };
+
+  const LocationMarker = () => {
+    const map = useMapEvents({
+      click: (event) => {
+        const coords: LatLng = { lat: event.latlng.lat, lng: event.latlng.lng };
+        setSelectedLocation(coords);
+        fetchAddressPreview(coords);
+      },
+    });
+
+    useEffect(() => {
+      map.flyTo([selectedLocation.lat, selectedLocation.lng], map.getZoom());
+    }, [map, selectedLocation]);
+
+    return (
+      <Marker
+        position={[selectedLocation.lat, selectedLocation.lng]}
+        draggable
+        icon={leafletMarkerIcon}
+        eventHandlers={{
+          dragend: (event) => {
+            const latLng = event.target.getLatLng();
+            const coords: LatLng = { lat: latLng.lat, lng: latLng.lng };
+            setSelectedLocation(coords);
+            fetchAddressPreview(coords);
+          },
+        }}
+      />
+    );
+  };
   const renderLocationView = () => (
     <div className="p-6">
       {/* Search Bar */}
@@ -56,10 +294,11 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
         <button
-          onClick={handleEnableLocation}
-          className="rounded-lg border border-pink-500 px-4 py-2 text-sm font-medium text-pink-500 transition-colors hover:bg-pink-50"
+          onClick={() => handleUseCurrentLocation(true)}
+          className="rounded-lg border border-pink-500 px-4 py-2 text-sm font-medium text-pink-500 transition-colors hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
         >
-          Enable
+          {isSubmitting ? 'Saving...' : 'Enable'}
         </button>
       </div>
 
@@ -86,80 +325,66 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
   );
 
   const renderMapView = () => (
-    <div className="flex flex-col h-full">
-      {/* Search Bar */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search a new address"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-10 pr-4 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500"
+    <div className="flex h-full flex-col">
+      <div className="border-b border-gray-200 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search for an address or landmark"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-10 pr-4 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500"
+            />
+          </div>
+          <button
+            onClick={handleSearchLocation}
+            disabled={isSearching}
+            className="rounded-lg bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSearching ? 'Searching…' : 'Search'}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex-1">
+        <MapContainer
+          center={[selectedLocation.lat, selectedLocation.lng]}
+          zoom={16}
+          scrollWheelZoom
+          className="h-full w-full"
+          style={{ minHeight: '320px' }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; OpenStreetMap contributors"
           />
-        </div>
+          <MapInstanceSetter setMap={setMapInstance} />
+          <LocationMarker />
+        </MapContainer>
       </div>
 
-      {/* Map Area */}
-      <div className="flex-1 relative bg-gray-100 min-h-[300px]">
-        {/* Mock Map Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200">
-          {/* Mock Streets */}
-          <div className="absolute top-0 left-0 w-full h-full opacity-30">
-            <div className="absolute top-16 left-0 w-full h-0.5 bg-gray-400"></div>
-            <div className="absolute top-32 left-0 w-full h-0.5 bg-gray-400"></div>
-            <div className="absolute top-48 left-0 w-full h-0.5 bg-gray-400"></div>
-            <div className="absolute top-0 left-16 w-0.5 h-full bg-gray-400"></div>
-            <div className="absolute top-0 left-32 w-0.5 h-full bg-gray-400"></div>
-            <div className="absolute top-0 left-48 w-0.5 h-full bg-gray-400"></div>
-          </div>
+      <div className="border-t border-gray-200 bg-white p-4">
+        <div className="mb-3 text-sm text-gray-700">
+          {isPreviewLoading
+            ? 'Resolving address…'
+            : addressPreview || 'Tap on the map or drag the pin to set your delivery location.'}
         </div>
-
-        {/* Mock Buildings/Areas */}
-        <div className="absolute top-8 left-8 w-16 h-12 bg-green-200 rounded opacity-60 flex items-center justify-center">
-          <span className="text-xs text-green-800 font-medium">School</span>
-        </div>
-        <div className="absolute top-16 right-12 w-20 h-8 bg-blue-200 rounded opacity-60 flex items-center justify-center">
-          <span className="text-xs text-blue-800 font-medium">1st Cross Road</span>
-        </div>
-
-        {/* Location Pin */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-full">
-          <div className="relative">
-            <MapPin className="h-8 w-8 text-pink-500 drop-shadow-lg" fill="currentColor" />
-            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-pink-500 rounded-full opacity-50"></div>
-          </div>
-        </div>
-
-        {/* Delivery Message */}
-        <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-full">
-          <div className="bg-black text-white px-4 py-2 rounded-lg text-sm whitespace-nowrap">
-            <div className="font-medium">Order will be delivered here</div>
-            <div className="text-xs opacity-90">Place the pin to your exact location</div>
-            {/* Arrow pointing down */}
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black"></div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Section */}
-      <div className="p-4 bg-white border-t border-gray-200">
-        <h3 className="font-medium text-gray-900 mb-4 text-center">Select a delivery location</h3>
-        
-        <div className="flex space-x-3 mb-4">
-          <button className="flex-1 cursor-pointer rounded-lg border border-gray-300 py-3 text-center text-gray-700 transition-colors hover:bg-gray-50">
-            Search Location
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            onClick={() => handleUseCurrentLocation(false)}
+            className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            Use Current Location
           </button>
-          <button className="flex-1 cursor-pointer rounded-lg bg-pink-500 py-3 text-center text-white transition-colors hover:bg-pink-600">
-            Current Location
+          <button
+            onClick={handleSavePinnedLocation}
+            disabled={isSubmitting}
+            className="flex-1 rounded-lg bg-pink-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? 'Saving…' : 'Save Location'}
           </button>
-        </div>
-
-        {/* Selected Location */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <div className="text-sm font-medium text-green-800">Smaraka Vidya</div>
-          <div className="text-sm text-green-700">Kendra School</div>
         </div>
       </div>
     </div>

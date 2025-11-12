@@ -16,6 +16,8 @@ namespace Server.Data.Entities.Users
         public string? PasswordResetToken { get; set; }
         [Column("password_reset_token_expiry")]
         public DateTime? PasswordResetTokenExpiry { get; set; }
+        [Column("address")]
+        public string? Address { get; set; }
 
     }
 }

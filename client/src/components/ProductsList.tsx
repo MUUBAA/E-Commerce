@@ -1,20 +1,50 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.js';
-import { fetchAllProducts } from '../../redux/thunk/product.js';
+import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.js';
 import ProductCard from './ProductCard';
+import type { Product } from '../../redux/slices/productsSlice.js';
 
 interface ProductsListProps {
   categoryId?: number;
 }
 
-const ProductsList: React.FC<ProductsListProps> = ({ categoryId }) => {
+const ProductsList: React.FC<ProductsListProps> = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { products, loading, error } = useSelector((state: RootState) => state.products);
-
+  const [products, setProducts] = useState<Product[]> ([]);
+  const { loading, error } = useSelector((state: RootState) => state.products);
+  const FetchProducts = async () => {
+      try {
+        const preparePayload : GetAllProductsPayload = {
+          categoryId: 1, // Example categoryId for Fruits & Vegetables
+          itemName: "",
+          itemsPerPage: 20,
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: 0
+        };
+        const response = await dispatch(fetchAllProducts(preparePayload));
+        if (response.meta.requestStatus === 'fulfilled') {
+          if (Array.isArray(response.payload)) {
+            setProducts(response.payload);
+            console.log(response.payload);
+          } else if (response.payload && typeof response.payload === 'object') {
+            setProducts(response?.payload?.items || []); // Convert single product to array
+            console.log('Fetched products:', response.payload);
+          } else {
+            console.error('Unexpected response payload:', response.payload);
+            setProducts([]); // Fallback to an empty array
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    };
+    ;
+    
   useEffect(() => {
-    dispatch(fetchAllProducts({ categoryId }));
-  }, [dispatch, categoryId]);
+    FetchProducts();
+  }, [dispatch]);
 
   if (loading) {
     return (
@@ -45,6 +75,7 @@ const ProductsList: React.FC<ProductsListProps> = ({ categoryId }) => {
       {products.map((product) => (
         <ProductCard
           key={product.productId}
+          productId={product.productId ?? product.id}
           itemName={product.itemName}
           itemPrice={`₹${product.itemPrice}`}
           itemUrl={product.itemUrl}

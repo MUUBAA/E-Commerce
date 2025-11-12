@@ -9,7 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 import { getDecryptedJwt } from '../../utils/auth';
 
 interface ProductCardProps {
-  productId: number;             // <-- needed
+  id: number;               // original id from API            // <-- needed
   itemName: string;
   itemPrice: string;             // like "₹199" or "199.00"
   originalPrice?: string;
@@ -21,7 +21,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
-  productId,
+  id,
   itemName,
   itemPrice,
   originalPrice,
@@ -33,6 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [isAdding, setIsAdding] = useState(false);
+  console.log('ProductId in handleAddToCart:', id);
 
   // Prefer userId from decrypted JWT; fallback to any stored profile if needed.
   const fallbackUserId = useSelector((state: RootState) => state.user.UserAccount?.id
@@ -40,6 +41,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 
   const handleAddToCart = async () => {
+    if (!id || Number(id) <= 0) {
+      return toast.error('Invalid product. Please try again.');
+    }
     // Extract user id from decrypted token
     const token = getDecryptedJwt();
     let userIdFromToken: number | undefined;
@@ -57,8 +61,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       }
     }
 
-    const effectiveUserId = userIdFromToken ?? fallbackUserId;
-    if (!effectiveUserId) return toast.warn('Please sign in to add items to your cart');
+    const UserId = userIdFromToken ?? fallbackUserId;
+    if (!UserId) return toast.warn('Please sign in to add items to your cart');
 
     // Extract numeric price (handles "₹199" or "$12.50")
     const numericPrice = Number(
@@ -74,8 +78,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       setIsAdding(true);
       await dispatch(
         addToCart({
-          userId: effectiveUserId,
-          productId,
+          userId: UserId,
+          productId: id,
           quantity: 1,        // default to 1; make dynamic if you have a qty control
           price: numericPrice,
         })

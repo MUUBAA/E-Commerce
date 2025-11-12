@@ -8,6 +8,6 @@ namespace Server.Utils
     }
     public class UserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
     {
-        public string UserId => httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        public string UserId => httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
     }
 }

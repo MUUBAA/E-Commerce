@@ -43,5 +43,13 @@ namespace Server.Controllers.UserController
             var response = _userService.GetUserByEmail(email);
             return Ok(new GenericApiResponse<UserDto>(true, "success", response));
         }
+
+        [HttpPut]
+        [Route("/users/address")]
+        public IActionResult UpdateAddress([FromBody] UpdateAddressRequest request)
+        {
+            var ok = _userService.updateUserAddress(request.Address);
+            return Ok(new GenericApiResponse<string>(ok, ok ? "Address updated" : "Failed to update address"));
+        }
       }
     }

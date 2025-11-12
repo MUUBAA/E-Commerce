@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
@@ -50,11 +50,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     setCurrentView('forgot');
   };
 
-  const handleBackToEmpty = () => {
-    setCurrentView('empty');
-    setFormData({ email: '', name: '', password: '', confirmPassword: '' });
-  };
-
   const handleSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('handleSubmitLogin called with:', formData);
@@ -67,13 +62,18 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         toast.success("Login successful!");
         setFormData({ email: '', name: '', password: '', confirmPassword: '' });
 
-        const jwt = response.payload as string;
-        const decodedToken = jwtDecode<DecodedToken>(jwt);
+        const loginJwt = response.payload as string;
+        const loginDecodedToken = jwtDecode<DecodedToken>(loginJwt);
 
-        console.log('Logged in user:', decodedToken);
+        console.log('Logged in user:', loginDecodedToken);
         
         // Load items then switch to cart view
-        try { await dispatch(getCartItems({})).unwrap(); } catch {}
+        try { 
+          await dispatch(getCartItems({})).unwrap(); 
+        } catch (err) {
+          console.error('Failed to load cart items after login:', err);
+          toast.error('Failed to load cart items');
+        }
         setCurrentView('cart');
       } else {
         const errorMsg =
@@ -422,42 +422,62 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     </div>
   );
 
+  // Fetch cart items on mount if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      dispatch(getCartItems({}));
+      setCurrentView('cart');
+    }
+  }, [dispatch]);
+
   return (
     <>
-      {/* Backdrop Overlay with Blur Effect */}
+      {/* Backdrop Overlay */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-all duration-300"
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
-      
-      {/* Cart Modal - Centered Overlay */}
-      <div 
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-          isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+
+      {/* Cart Drawer */}
+      <div
+        className={`fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden">
+        <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="relative flex items-center justify-between p-6 border-b border-gray-100">
-            <button 
-              onClick={currentView === 'cart' ? onClose : currentView !== 'empty' ? handleBackToEmpty : onClose}
-              className="absolute top-4 left-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold">My Cart</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
             >
-              <X className="h-5 w-5 text-gray-600" />
+              <X className="h-5 w-5" />
             </button>
-            <h2 className="text-lg font-semibold text-gray-900 w-full text-center">Cart</h2>
           </div>
 
           {/* Cart Content */}
-          <div className="px-6 pb-6">
+          <div className="flex-1 overflow-y-auto p-4">
             {currentView === 'empty' && renderEmptyCart()}
             {currentView === 'login' && renderLoginForm()}
             {currentView === 'register' && renderRegisterForm()}
             {currentView === 'forgot' && renderForgotForm()}
             {currentView === 'cart' && renderCart()}
           </div>
+
+          {/* Footer */}
+          {hasItems && (
+            <div className="p-4 border-t border-gray-200">
+              <button
+                className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
+              >
+                Proceed to Checkout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -43,7 +43,22 @@ namespace Server.Data.Repositories
         public void RemoveFromCart(int id)
         {
             var item = repository.CartItems.Find(id);
-            repository.CartItems.Remove(item);
+
+            if (item == null)
+                throw new Exception("Cart item not found");
+
+            if (item.Quantity > 1)
+            {
+                // Decrement quantity
+                item.Quantity -= 1;
+                repository.Update(item);
+            }
+            else
+            {
+                // Quantity is 1, remove the item completely
+                repository.CartItems.Remove(item);
+            }
+
             repository.SaveChanges();
         }
         public CartItems GetCartItem(int id)

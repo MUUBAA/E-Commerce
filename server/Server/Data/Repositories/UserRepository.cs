@@ -104,6 +104,7 @@ namespace Server.Data.Repositories
             var existingUser = repository.Users.FirstOrDefault(u => u.Id == user.Id) ?? throw new NotFoundException("User not found");
             existingUser.Name = user.Name ?? existingUser.Name;
             existingUser.Email = user.Email ?? existingUser.Email;
+            existingUser.Address = user.Address ?? existingUser.Address;
             existingUser.UpdatedAt = DateTime.UtcNow;
             existingUser.PasswordResetToken = user.PasswordResetToken;
             existingUser.PasswordResetTokenExpiry = user.PasswordResetTokenExpiry;

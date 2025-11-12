@@ -6,6 +6,7 @@ import { getDecryptedJwt } from "../../utils/auth";
 // Get JWT token from localStorage
 export interface GetAllProductsPayload
 {
+  productId?: number;
   totalItems: number;
   itemsPerPage?: number;
   totalPages: number;
