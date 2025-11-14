@@ -8,61 +8,66 @@ const CafeBestsellersPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Veg Puff',
-      price: '₹70',
+      id: 1,
+      itemName: 'Veg Puff',
+      itemPrice: '₹70',
       originalPrice: '₹79',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Adrak Chai',
-      price: '₹129',
+      id: 2,
+      itemName: 'Adrak Chai',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
       weight: '250 ml',
       rating: 4.2,
       reviews: '22.5k'
     },
     {
-      name: 'Iced Americano',
-      price: '₹129',
+      id: 3,
+      itemName: 'Iced Americano',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/iced_americano.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/iced_americano.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.2,
       reviews: '10.0k'
     },
     {
-      name: 'Spanish Coffee',
-      price: '₹169',
-      originalPrice: '₹189',
+      id: 4,
+      itemName: 'Cappuccino',
+      itemPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/spanish_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/spanish_coffee.jpg?ts=1709800030',
       weight: '350 ml',
       rating: 4.2,
       reviews: '11.7k'
     },
     {
-      name: 'Poha',
-      price: '₹115',
+      id: 5,
+      itemName: 'Poha',
+      itemPrice: '₹115',
       originalPrice: '₹129',
       discount: '₹14 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/poha.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/poha.jpg?ts=1709800030',
       weight: 'Serves 1',
       rating: 4.2,
       reviews: '20.2k'
     },
     {
-      name: 'Vietnamese Cold Coffee',
-      price: '₹189',
+      id: 6,
+      itemName: 'Vietnamese Cold Coffee',
+      itemPrice: '₹189',
       originalPrice: '₹209',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.4,
       reviews: '117.5k'
@@ -88,7 +93,7 @@ const CafeBestsellersPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
           ))}
         </div>
       </div>

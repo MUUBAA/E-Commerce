@@ -6,6 +6,7 @@ interface ProductGridProps {
   title: string;
   categorySlug?: string;
   products: {
+    id: number;
     itemName: string;
     itemPrice: string;
     originalPrice?: string;

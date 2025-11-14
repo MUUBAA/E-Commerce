@@ -3,20 +3,22 @@ import ProductGrid from '../components/ProductGrid';
 
 const electronicsProducts = [
   {
-    name: 'Wireless Headphones',
-    price: '₹1,999',
+    id: 1,
+    itemName: 'Wireless Headphones',
+    itemPrice: '₹1,999',
     originalPrice: '₹3,499',
     discount: '₹1,500 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.3,
     reviews: '567',
   },
   {
-    name: 'Smart Watch',
-    price: '₹2,499',
+    id: 2,
+    itemName: 'Smart Watch',
+    itemPrice: '₹2,499',
     originalPrice: '₹4,999',
     discount: '₹2,500 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.5,
     reviews: '892',
   },

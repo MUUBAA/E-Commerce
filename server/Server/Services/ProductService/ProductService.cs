@@ -3,7 +3,6 @@ using Server.Data.Contract.Products;
 using Server.Data.Dto;
 using Server.Data.Entities.Products;
 using Server.Data.Repositories;
-using Server.Models;
 using Server.Services.CloudinaryService;
 using static Server.Data.Exceptions.DataExceptions;
 
@@ -13,8 +12,8 @@ namespace Server.Services.ProductService
     {
       void CreateProduct(ProductsContract products);
       bool UpdateProduct(ProductUpdate productUpdate);
-      Products GetProductById(int productId);
-      PaginationResponse<Products> GetAllProducts(ProductsContract contract);
+      Product GetProductById(int productId);
+      PaginationResponse<Product> GetAllProducts(ProductsContract contract);
     }
 
     public class ProductService(IProductsRepository productsRepository, Repository repository) : IProductService
@@ -23,9 +22,9 @@ namespace Server.Services.ProductService
 
        public void CreateProduct(ProductsContract products)
        {
-            var product = new Products
+            var product = new Product
             {
-                ProductId = products.Id,
+                Id = products.Id,
                 ItemName = products.ItemName,
                 ItemDescription = products.ItemDescription,
                 ItemPrice = products.ItemPrice,
@@ -45,10 +44,10 @@ namespace Server.Services.ProductService
             return true;
         }
 
-        public PaginationResponse<Products> GetAllProducts(ProductsContract contract)
+        public PaginationResponse<Product> GetAllProducts(ProductsContract contract)
         {
             var (totalItems, count, products) = _productsRepository.GetAllProducts(contract);
-            var response = new PaginationResponse<Products>
+            var response = new PaginationResponse<Product>
             {
                 TotalItems = totalItems,
                 ItemsPerPage = count,
@@ -57,7 +56,7 @@ namespace Server.Services.ProductService
             return response;
         }
         
-        public Products GetProductById(int productId)
+        public Product GetProductById(int productId)
         {
             var product = _productsRepository.GetProductById(productId) ?? throw new NotFoundException("User not Found");
             return product;

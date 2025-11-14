@@ -13,6 +13,7 @@ const FreshPage: React.FC = () => {
   const FetchProducts = async () => {
     try {
       const preparePayload : GetAllProductsPayload = {
+        id: 0,
         categoryId: 1, // Example categoryId for Fruits & Vegetables
         itemName: "",
         itemsPerPage: 20,
@@ -26,7 +27,6 @@ const FreshPage: React.FC = () => {
           setProducts(response.payload);
         } else if (response.payload && typeof response.payload === 'object') {
           setProducts(response?.payload?.items || []); // Convert single product to array
-          console.log('Fetched products:', response.payload);
         } else {
           console.error('Unexpected response payload:', response.payload);
           setProducts([]); // Fallback to an empty array
@@ -35,18 +35,21 @@ const FreshPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch products:', error);
     }
-  };
+  }; 
+  
   useEffect(() => {
     FetchProducts();
   }, [dispatch]);
 
   // Transform API products to match ProductGrid props
   const transformedProducts = products.map((product: Product) => ({
+    id: product.id,
     itemName: product.itemName || 'Unknown Product',
     itemPrice: product.itemPrice ? `₹${product.itemPrice}` : '₹0',
     itemUrl: product.itemUrl || 'https://via.placeholder.com/150', // Placeholder image for missing URLs
     itemDescription: product.itemDescription || 'No description available',
   }));
+
 
   return (
     <div className="min-h-screen bg-gray-50">

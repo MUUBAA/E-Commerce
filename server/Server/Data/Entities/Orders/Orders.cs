@@ -6,9 +6,6 @@ namespace Server.Data.Entities.Orders
     [Table("Orders")]
     public class Orders : BaseEntities
     {
-        [Column("order_id")]
-        public int OrderId { get; set; }
-
         [Column("user_id")]
         public int UserId { get; set; }
 

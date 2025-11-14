@@ -2,7 +2,7 @@
 {
     public class ProductUpdate
     {
-        public required int ProductId { get; set; }
+        public required int Id { get; set; }
         public string? ItemName { get; set; }
         public string? ItemDescription { get; set; }
         public decimal ItemPrice { get; set; }

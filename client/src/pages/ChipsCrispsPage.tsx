@@ -8,51 +8,56 @@ const ChipsCrispsPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Uncle Chips Spicy Treat',
-      price: '₹30',
+      id: 1,
+      itemName: 'Uncle Chips Spicy Treat',
+      itemPrice: '₹30',
       originalPrice: '₹50',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/185a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/185a.jpg?ts=1688463558',
       rating: 4.7,
       reviews: '73.6k',
       weight: '1 pack (80 g)',
     },
     {
-      name: 'Lays Classic Salted',
-      price: '₹35',
+      id: 2,
+      itemName: 'Lays Classic Salted',
+      itemPrice: '₹35',
       originalPrice: '₹55',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/186a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/186a.jpg?ts=1688463558',
       rating: 4.6,
       reviews: '85.2k',
       weight: '1 pack (90 g)',
     },
     {
-      name: 'Bingo Mad Angles',
-      price: '₹28',
+      id: 3,
+      itemName: 'Bingo Mad Angles',
+      itemPrice: '₹28',
       originalPrice: '₹45',
       discount: '₹17 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/187a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/187a.jpg?ts=1688463558',
       rating: 4.5,
       reviews: '62.8k',
       weight: '1 pack (75 g)',
     },
     {
-      name: 'Kurkure Masala Munch',
-      price: '₹32',
+      id: 4,
+      itemName: 'Kurkure Masala Munch',
+      itemPrice: '₹32',
       originalPrice: '₹50',
       discount: '₹18 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/188a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/188a.jpg?ts=1688463558',
       rating: 4.7,
       reviews: '78.4k',
       weight: '1 pack (85 g)',
     },
     {
-      name: 'Haldirams Aloo Bhujia',
-      price: '₹45',
+      id: 5,
+      itemName: 'Haldirams Aloo Bhujia',
+      itemPrice: '₹45',
       originalPrice: '₹65',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/189a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/189a.jpg?ts=1688463558',
       rating: 4.8,
       reviews: '92.1k',
       weight: '1 pack (200 g)',
@@ -78,7 +83,7 @@ const ChipsCrispsPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
           ))}
         </div>
       </div>

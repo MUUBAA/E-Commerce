@@ -39,14 +39,14 @@ public class ProductsController : BaseController
     public IActionResult GetProductById([FromRoute] int productId)
     {
         var product = _productService.GetProductById(productId);
-        return Ok(new GenericApiResponse<Products>(true, "Product Fetched Sucessfully", product));
+        return Ok(new GenericApiResponse<Product>(true, "Product Fetched Sucessfully", product));
     }
     [HttpPost]
     [Route("/product/get-all")]
-    public ActionResult<GenericApiResponse<PaginationResponse<Products>>> GetAllProducts([FromBody] ProductsContract request)
+    public ActionResult<GenericApiResponse<PaginationResponse<Product>>> GetAllProducts([FromBody] ProductsContract request)
     {
         var products = _productService.GetAllProducts(request);
-        return Ok(new GenericApiResponse<PaginationResponse<Products>>(true, "Products Fetched Sucessfully", products));
+        return Ok(new GenericApiResponse<PaginationResponse<Product>>(true, "Products Fetched Sucessfully", products));
     }
 }
 

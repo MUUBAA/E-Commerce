@@ -2,19 +2,38 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { addToCart, getCartItems } from '../thunk/cart';
 
-type CartItem = {
+export interface CartItem {
   productId: number;
   quantity: number;
   price: number;
+  itemUrl?: string;
+  itemName?: string;
+  itemDescription?: string;
 };
 
 interface CartState {
-  items: CartItem[];
+   items: CartItem[];
+   page: number;
+   pageSize: number;
+   productId?: number;
+   quantity?: number;
+   price?: number;
+   userId: number;
+   itemUrl?: string;
+   itemName?: string;
+   itemDescription?: string;
   loading: boolean;
   error: string | null;
 }
 
-const initialState: CartState = { items: [], loading: false, error: null };
+const initialState: CartState = {
+  items: [],
+  page: 0,
+  pageSize: 0,
+  userId: 0,
+  loading: false,
+  error: null
+};
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -30,19 +49,7 @@ const cartSlice = createSlice({
       })
       .addCase(getCartItems.fulfilled, (state, action) => {
         state.loading = false;
-        // Accept either array payload or { items }
-        const data = action.payload as any;
-        const items = Array.isArray(data) ? data : data?.items;
-        if (Array.isArray(items)) {
-          // Normalize to CartItem shape
-          state.items = items.map((i: any) => ({
-            productId: i.productId ?? i.ProductId ?? i.id,
-            quantity: i.quantity ?? i.Qty ?? 1,
-            price: i.price ?? i.Price ?? 0
-          }));
-        } else {
-          state.items = [];
-        }
+        state.items = action.payload;
       })
       .addCase(getCartItems.rejected, (state, action) => {
         state.loading = false;

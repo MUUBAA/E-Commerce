@@ -16,6 +16,7 @@ const ProductsList: React.FC<ProductsListProps> = () => {
   const FetchProducts = async () => {
       try {
         const preparePayload : GetAllProductsPayload = {
+          id: 0,
           categoryId: 1, // Example categoryId for Fruits & Vegetables
           itemName: "",
           itemsPerPage: 20,
@@ -41,7 +42,6 @@ const ProductsList: React.FC<ProductsListProps> = () => {
       }
     };
     ;
-    
   useEffect(() => {
     FetchProducts();
   }, [dispatch]);
@@ -74,8 +74,8 @@ const ProductsList: React.FC<ProductsListProps> = () => {
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
       {products.map((product) => (
         <ProductCard
-          key={product.productId}
-          productId={product.productId ?? product.id}
+          key={product.id}
+          id={product.id}
           itemName={product.itemName}
           itemPrice={`₹${product.itemPrice}`}
           itemUrl={product.itemUrl}

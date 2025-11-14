@@ -8,57 +8,63 @@ const DairyPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Nandini Fresh Toned Fresh Milk (Pouch Blue)',
-      price: '₹24',
+      id: 1,
+      itemName: 'Nandini Fresh Toned Fresh Milk (Pouch Blue)',
+      itemPrice: '₹24',
       originalPrice: '₹30',
       discount: '₹6 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/481850a.jpg?ts=1690813329',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/481850a.jpg?ts=1690813329',
       weight: '1 pack (500 ml)',
     },
     {
-      name: 'Nandini Thick Curd Pouch',
-      price: '₹27',
+      id: 2,
+      itemName: 'Nandini Thick Curd Pouch',
+      itemPrice: '₹27',
       originalPrice: '₹30',
       discount: '₹3 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/172a.jpg?ts=1688629928',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/172a.jpg?ts=1688629928',
       weight: '1 pack (500 g)',
     },
     {
-      name: 'Amul Taaza Toned Fresh Milk',
-      price: '₹28',
+      id: 3,
+      itemName: 'Amul Taaza Toned Fresh Milk',
+      itemPrice: '₹28',
       originalPrice: '₹32',
       discount: '₹4 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40156a.jpg?ts=1690963785',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40156a.jpg?ts=1690963785',
       weight: '500 ml',
       rating: 4.5,
       reviews: '125.4k',
     },
     {
-      name: 'Amul Masti Curd',
-      price: '₹30',
+      id: 4,
+      itemName: 'Amul Masti Curd',
+      itemPrice: '₹30',
       originalPrice: '₹35',
       discount: '₹5 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10491a.jpg?ts=1688621679',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10491a.jpg?ts=1688621679',
       weight: '400 g',
       rating: 4.6,
       reviews: '98.2k',
     },
     {
-      name: 'Britannia Bread - Whole Wheat',
-      price: '₹40',
+      id: 5,
+      itemName: 'Britannia Bread - Whole Wheat',
+      itemPrice: '₹40',
       originalPrice: '₹50',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/165a.jpg?ts=1688978656',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/165a.jpg?ts=1688978656',
       weight: '400 g',
       rating: 4.4,
       reviews: '85.7k',
     },
     {
-      name: 'Amul Butter - Salted',
-      price: '₹56',
+      id: 6,
+      itemName: 'Amul Butter - Salted',
+      itemPrice: '₹56',
       originalPrice: '₹60',
       discount: '₹4 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/127a.jpg?ts=1688463542',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/127a.jpg?ts=1688463542',
       weight: '100 g',
       rating: 4.7,
       reviews: '156.3k',
@@ -84,7 +90,7 @@ const DairyPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.id}-${index}`} {...product} />
           ))}
         </div>
       </div>

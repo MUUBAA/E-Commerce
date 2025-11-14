@@ -4,10 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Server.Data.Entities.Products
 {
     [Table("Products")]
-    public class Products : BaseEntities
+    public class Product : BaseEntities
     {
-        [Column("item_id")]
-        public required int ProductId { get; set; }
         [Column("item_name")]
         public string? ItemName { get; set; }
         [Column("item_description")]

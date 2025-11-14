@@ -3,20 +3,22 @@ import ProductGrid from '../components/ProductGrid';
 
 const fashionProducts = [
   {
-    name: 'Men\'s Cotton T-Shirt',
-    price: '₹499',
+    id: 1,
+    itemName: 'Men\'s Cotton T-Shirt',
+    itemPrice: '₹499',
     originalPrice: '₹999',
     discount: '₹500 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.3,
     reviews: '234',
   },
   {
-    name: 'Women\'s Kurti',
-    price: '₹799',
+    id: 2,
+    itemName: 'Women\'s Kurti',
+    itemPrice: '₹799',
     originalPrice: '₹1,499',
     discount: '₹700 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.6,
     reviews: '567',
   },

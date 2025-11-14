@@ -8,51 +8,56 @@ const AttaRiceOilDalsPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Aashirvaad Superior MP Whole Wheat Atta',
-      price: '₹285',
+      id: 1,
+      itemName: 'Aashirvaad Superior MP Whole Wheat Atta',
+      itemPrice: '₹285',
       originalPrice: '₹320',
       discount: '₹35 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10491a.jpg?ts=1688621679',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10491a.jpg?ts=1688621679',
       weight: '5 kg',
       rating: 4.7,
       reviews: '245.8k',
     },
     {
-      name: 'Fortune Sunflower Refined Oil',
-      price: '₹235',
+      id: 2,
+      itemName: 'Fortune Sunflower Refined Oil',
+      itemPrice: '₹235',
       originalPrice: '₹280',
       discount: '₹45 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40156a.jpg?ts=1690963785',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40156a.jpg?ts=1690963785',
       weight: '2 L',
       rating: 4.5,
       reviews: '128.3k',
     },
     {
-      name: 'Tata Sampann Unpolished Toor Dal',
-      price: '₹142',
+      id: 3,
+      itemName: 'Tata Sampann Unpolished Toor Dal',
+      itemPrice: '₹142',
       originalPrice: '₹210',
       discount: '₹68 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40771a.jpg?ts=1688978598',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40771a.jpg?ts=1688978598',
       weight: '1 kg',
       rating: 4.7,
       reviews: '42.4k',
     },
     {
-      name: 'India Gate Basmati Rice Classic',
-      price: '₹640',
+      id: 4,
+      itemName: 'India Gate Basmati Rice Classic',
+      itemPrice: '₹640',
       originalPrice: '₹750',
       discount: '₹110 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10791a.jpg?ts=1688978830',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10791a.jpg?ts=1688978830',
       weight: '5 kg',
       rating: 4.6,
       reviews: '1.2k',
     },
     {
-      name: 'Tata Sampann Unpolished Moong Dal',
-      price: '₹158',
+      id: 5,
+      itemName: 'Tata Sampann Unpolished Moong Dal',
+      itemPrice: '₹158',
       originalPrice: '₹235',
       discount: '₹77 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40772a.jpg?ts=1688978598',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/40772a.jpg?ts=1688978598',
       weight: '1 kg',
       rating: 4.6,
       reviews: '38.2k',
@@ -78,7 +83,7 @@ const AttaRiceOilDalsPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
           ))}
         </div>
       </div>

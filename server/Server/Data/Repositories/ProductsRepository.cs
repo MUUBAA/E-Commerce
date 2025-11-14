@@ -7,15 +7,15 @@ namespace Server.Data.Repositories
 {
     public interface IProductsRepository
     {
-        int CreateProduct(Products products);
+        int CreateProduct(Product products);
         void UpdateProduct(ProductUpdate productUpdate);
-        Products? GetProductById(int productId);
-        (long, int, List<Products> products) GetAllProducts(ProductsContract contract);
+        Product? GetProductById(int productId);
+        (long, int, List<Product> products) GetAllProducts(ProductsContract contract);
         List<ProductSearchDto> SearchProductsByName(string itemName);
     }
     public class ProductsRepository(Repository repository) : IProductsRepository
     {
-        public int CreateProduct(Products products)
+        public int CreateProduct(Product products)
         {
             var existingProduct = repository.Products.FirstOrDefault(p => p.ItemName == products.ItemName);
             if (existingProduct != null)
@@ -42,7 +42,7 @@ namespace Server.Data.Repositories
 
         public void UpdateProduct(ProductUpdate productUpdate)
         {
-            var existingProduct = repository.Products.FirstOrDefault(p => p.Id == productUpdate.ProductId);
+            var existingProduct = repository.Products.FirstOrDefault(p => p.Id == productUpdate.Id);
             if (existingProduct == null)
             {
                 throw new Exception("Product not found.");
@@ -58,12 +58,12 @@ namespace Server.Data.Repositories
             repository.SaveChanges();
         }
 
-         public Products? GetProductById(int productId)
+         public Product? GetProductById(int productId)
         {
             return  repository.Products.FirstOrDefault(p => p.Id == productId); 
         }
 
-        public (long, int, List<Products> products) GetAllProducts(ProductsContract contract)
+        public (long, int, List<Product> products) GetAllProducts(ProductsContract contract)
         {
               var page = contract.Page <= 0 ? 1 : contract.Page;
               var pageSize = contract.PageSize <= 0 ? 10 : contract.PageSize;

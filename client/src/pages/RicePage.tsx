@@ -17,6 +17,7 @@ const RicePage: React.FC = () => {
   const FetchProducts = async () => {
       try {
         const preparePayload : GetAllProductsPayload = {
+          id: 0,
           categoryId: 3, // Example categoryId for Fruits & Vegetables
           itemName: "",
           itemsPerPage: 20,
@@ -47,6 +48,7 @@ const RicePage: React.FC = () => {
 
   // Transform API products to match ProductCard props
   const transformedProducts = products.map((product: Product) => ({
+    id: product.id,
     itemName: product.itemName,
     itemPrice: `₹${product.itemPrice}`,
     originalPrice: product.itemPrice > 0 ? `₹${Math.round(product.itemPrice * 1.2)}` : undefined, // Example calculation

@@ -29,71 +29,78 @@ const CafePage: React.FC = () => {
   // Cafe products for different sections
   const cafeProducts = [
     {
-      name: 'Vietnamese Cold Coffee',
-      price: '₹189',
+      id: 6,
+      itemName: 'Vietnamese Cold Coffee',
+      itemPrice: '₹189',
       originalPrice: '₹209',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.4,
       reviews: '117.5k'
     },
     {
-      name: 'Adrak Chai',
-      price: '₹129',
+      id: 2,
+      itemName: 'Adrak Chai',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
       weight: '250 ml',
       rating: 4.2,
       reviews: '22.5k'
     },
     {
-      name: 'Mini Butter Croissants',
-      price: '₹129',
+      id: 3,
+      itemName: 'Mini Butter Croissants',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/croissants.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/croissants.jpg?ts=1709800030',
       weight: '1 pack',
       rating: 4.2,
       reviews: '10.0k'
     },
     {
-      name: 'Chili Cheese Toast',
-      price: '₹169',
+      id: 4,
+      itemName: 'Chili Cheese Toast',
+      itemPrice: '₹169',
       originalPrice: '₹189',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_toast.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_toast.jpg?ts=1709800030',
       weight: '1 piece',
       rating: 4.2,
       reviews: '11.7k'
     },
     {
-      name: 'Chocolate Mousse',
-      price: '₹115',
+      id: 5,
+      itemName: 'Chocolate Mousse',
+      itemPrice: '₹115',
       originalPrice: '₹129',
       discount: '₹14 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chocolate_mousse.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chocolate_mousse.jpg?ts=1709800030',
       weight: 'Serves 1',
       rating: 4.2,
       reviews: '20.2k'
     },
     {
-      name: 'Kesari Rasmalai',
-      price: '₹169',
+      id: 1,
+      itemName: 'Kesari Rasmalai',
+      itemPrice: '₹169',
       originalPrice: '₹189',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/rasmalai.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/rasmalai.jpg?ts=1709800030',
       weight: '2 pieces',
       rating: 4.6,
       reviews: '14.6k'
     },
     {
-      name: 'Hazelnut Cold Coffee',
-      price: '₹169',
+      id: 7,
+      itemName: 'Hazelnut Cold Coffee',
+      itemPrice: '₹169',
       originalPrice: '₹189',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/hazelnut_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/hazelnut_coffee.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.5,
       reviews: '995'
@@ -102,21 +109,23 @@ const CafePage: React.FC = () => {
 
   const newlyLaunched = [
     {
-      name: 'Veg Puff',
-      price: '₹70',
+      id: 1,
+      itemName: 'Veg Puff',
+      itemPrice: '₹70',
       originalPrice: '₹79',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Chocolate Bao',
-      price: '₹89',
+      id: 2,
+      itemName: 'Adrak Chai',
+      itemPrice: '₹129',
       originalPrice: '₹99',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chocolate_bao.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chocolate_bao.jpg?ts=1709800030',
       weight: '2 Pieces',
       rating: 4.2,
       reviews: '260'
@@ -125,61 +134,67 @@ const CafePage: React.FC = () => {
 
   const bestsellers = [
     {
-      name: 'Veg Puff',
-      price: '₹70',
+      id: 1,
+      itemName: 'Veg Puff',
+      itemPrice: '₹70',
       originalPrice: '₹79',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Adrak Chai',
-      price: '₹129',
+      id: 2,
+      itemName: 'Adrak Chai',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/adrak_chai.jpg?ts=1709800030',
       weight: '250 ml',
       rating: 4.2,
       reviews: '22.5k'
     },
     {
-      name: 'Iced Americano',
-      price: '₹129',
+      id: 3,
+      itemName: 'Iced Americano',
+      itemPrice: '₹129',
       originalPrice: '₹149',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/iced_americano.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/iced_americano.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.2,
       reviews: '10.0k'
     },
     {
-      name: 'Spanish Coffee',
-      price: '₹169',
+      id: 4,
+      itemName: 'Spanish Coffee',
+      itemPrice: '₹169',
       originalPrice: '₹189',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/spanish_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/spanish_coffee.jpg?ts=1709800030',
       weight: '350 ml',
       rating: 4.2,
       reviews: '11.7k'
     },
     {
-      name: 'Poha',
-      price: '₹115',
+      id: 5,
+      itemName: 'Poha',
+      itemPrice: '₹115',
       originalPrice: '₹129',
       discount: '₹14 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/poha.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/poha.jpg?ts=1709800030',
       weight: 'Serves 1',
       rating: 4.2,
       reviews: '20.2k'
     },
     {
-      name: 'Vietnamese Cold Coffee',
-      price: '₹189',
+      id: 6,
+      itemName: 'Vietnamese Cold Coffee',
+      itemPrice: '₹189',
       originalPrice: '₹209',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/vietnamese_coffee.jpg?ts=1709800030',
       weight: '450 ml',
       rating: 4.4,
       reviews: '117.5k'
@@ -188,61 +203,67 @@ const CafePage: React.FC = () => {
 
   const snackTime = [
     {
-      name: 'Bun Maska',
-      price: '₹89',
+      id: 1,
+      itemName: 'Bun Maska',
+      itemPrice: '₹89',
       originalPrice: '₹99',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bun_maska.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bun_maska.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Veg Puff',
-      price: '₹70',
+      id: 2,
+      itemName: 'Veg Puff',
+      itemPrice: '₹70',
       originalPrice: '₹79',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Chicken Puff',
-      price: '₹80',
+      id: 3,
+      itemName: 'Chicken Puff',
+      itemPrice: '₹80',
       originalPrice: '₹89',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chicken_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chicken_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.3,
       reviews: '83.6k'
     },
     {
-      name: 'Cheese Maggi',
-      price: '₹99',
+      id: 4,
+      itemName: 'Cheese Maggi',
+      itemPrice: '₹99',
       originalPrice: '₹109',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_maggi.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_maggi.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '100.0k'
     },
     {
-      name: 'Plain Maggi',
-      price: '₹79',
+      id: 5,
+      itemName: 'Plain Maggi',
+      itemPrice: '₹79',
       originalPrice: '₹89',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/plain_maggi.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/plain_maggi.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '97.8k'
     },
     {
-      name: 'Bhelpuri',
-      price: '₹119',
+      id: 6,
+      itemName: 'Bhelpuri',
+      itemPrice: '₹119',
       originalPrice: '₹139',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bhelpuri.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bhelpuri.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '42.5k'
@@ -328,7 +349,7 @@ const CafePage: React.FC = () => {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {newlyLaunched.map((product, index) => (
-              <div key={`${product.name}-${index}`} className="flex-shrink-0">
+              <div key={`${product.itemName}-${index}`} className="flex-shrink-0">
                 <ProductCard {...product} />
               </div>
             ))}
@@ -353,7 +374,7 @@ const CafePage: React.FC = () => {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {bestsellers.map((product, index) => (
-              <div key={`${product.name}-${index}`} className="flex-shrink-0">
+              <div key={`${product.itemName}-${index}`} className="flex-shrink-0">
                 <ProductCard {...product} />
               </div>
             ))}
@@ -378,7 +399,7 @@ const CafePage: React.FC = () => {
           </div>
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {snackTime.map((product, index) => (
-              <div key={`${product.name}-${index}`} className="flex-shrink-0">
+              <div key={`${product.itemName}-${index}`} className="flex-shrink-0">
                 <ProductCard {...product} />
               </div>
             ))}

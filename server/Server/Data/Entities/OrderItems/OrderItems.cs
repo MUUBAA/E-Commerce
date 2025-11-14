@@ -6,9 +6,6 @@ namespace Server.Data.Entities.OrderItems
     [Table("OrderItems")]
     public class OrderItems: BaseEntities
     {
-        [Column("order_item_id")]
-        public required int OrderItemId { get; set; }
-
         [Column("order_id")]
         public int OrderId { get; set; }
 

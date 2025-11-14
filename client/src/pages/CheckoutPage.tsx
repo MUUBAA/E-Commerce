@@ -19,7 +19,7 @@ const CheckoutPage: React.FC = () => {
       <h2 className="mb-4 text-2xl font-bold">Checkout</h2>
 
       <div className="mb-4 divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white shadow-sm">
-        {cartItems.map((item, index) => (
+        {cartItems.map((item) => (
           <div key={item.name} className="flex items-center justify-between p-4">
             <div>
               <p className="font-semibold">{item.name}</p>

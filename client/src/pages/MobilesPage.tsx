@@ -3,20 +3,22 @@ import ProductGrid from '../components/ProductGrid';
 
 const mobilesProducts = [
   {
-    name: 'iPhone 15 Pro',
-    price: '₹1,29,999',
+    id: 1,
+    itemName: 'iPhone 15 Pro',
+    itemPrice: '₹1,29,999',
     originalPrice: '₹1,39,999',
     discount: '₹10,000 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.8,
     reviews: '1,234',
   },
   {
-    name: 'Samsung Galaxy S24',
-    price: '₹79,999',
+    id: 2,
+    itemName: 'Samsung Galaxy S24',
+    itemPrice: '₹79,999',
     originalPrice: '₹89,999',
     discount: '₹10,000 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.6,
     reviews: '987',
   },

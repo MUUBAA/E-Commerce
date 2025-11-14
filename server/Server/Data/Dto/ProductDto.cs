@@ -2,7 +2,7 @@ namespace Server.Data.Dto
 {
     public class ProductDto
     {
-        public int ProductId { get; set; }
+        public int Id { get; set; }
         public string? ItemName { get; set; }
         public string? ItemDescription { get; set; }
         public decimal ItemPrice { get; set; }

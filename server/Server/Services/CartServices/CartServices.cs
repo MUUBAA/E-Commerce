@@ -10,7 +10,7 @@ namespace Server.Services.CartServices
         bool AddToCart(CartItemAdd contract);
         bool RemoveFromCart(int id);
         CartItems GetCartItem(int id);
-        PaginationResponse<CartItems> GetCartItems(CartItemContract contract);
+        PaginationResponse<CartItemDto> GetCartItems(CartItemContract contract);
     }
     public class CartServices(ICartRepository cartRepository) : ICartServices
     {
@@ -28,10 +28,10 @@ namespace Server.Services.CartServices
         {
             return cartRepository.GetCartItem(id);
         }
-        public PaginationResponse<CartItems> GetCartItems(CartItemContract contract)
+        public PaginationResponse<CartItemDto> GetCartItems(CartItemContract contract)
         {
             var (totalItems, totalPages, items) = cartRepository.GetCartItems(contract);
-            return new PaginationResponse<CartItems>
+            return new PaginationResponse<CartItemDto>
             {
                 TotalItems = totalItems,
                 ItemsPerPage = contract.PageSize,

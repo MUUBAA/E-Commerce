@@ -8,61 +8,67 @@ const CafeSnacksPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Bun Maska',
-      price: '₹89',
+      id: 1,
+      itemName: 'Bun Maska',
+      itemPrice: '₹89',
       originalPrice: '₹99',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bun_maska.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bun_maska.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Veg Puff',
-      price: '₹70',
+      id: 2,
+      itemName: 'Veg Puff',
+      itemPrice: '₹70',
       originalPrice: '₹79',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/veg_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.4,
       reviews: '72.4k'
     },
     {
-      name: 'Chicken Puff',
-      price: '₹80',
+      id: 3,
+      itemName: 'Chicken Puff',
+      itemPrice: '₹80',
       originalPrice: '₹89',
       discount: '₹9 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chicken_puff.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chicken_puff.jpg?ts=1709800030',
       weight: '1 Piece',
       rating: 4.3,
       reviews: '83.6k'
     },
     {
-      name: 'Cheese Maggi',
-      price: '₹99',
+      id: 4,
+      itemName: 'Cheese Maggi',
+      itemPrice: '₹99',
       originalPrice: '₹109',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_maggi.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/cheese_maggi.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '100.0k'
     },
     {
-      name: 'Plain Maggi',
-      price: '₹79',
+      id: 5,
+      itemName: 'Plain Maggi',
+      itemPrice: '₹79',
       originalPrice: '₹89',
       discount: '₹10 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/plain_maggi.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/plain_maggi.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '97.8k'
     },
     {
-      name: 'Bhelpuri',
-      price: '₹119',
+      id: 6,
+      itemName: 'Bhelpuri',
+      itemPrice: '₹119',
       originalPrice: '₹139',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bhelpuri.jpg?ts=1709800030',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bhelpuri.jpg?ts=1709800030',
       weight: '1 Portion',
       rating: 4.3,
       reviews: '42.5k'
@@ -88,7 +94,7 @@ const CafeSnacksPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.id}-${index}`} {...product} />
           ))}
         </div>
       </div>

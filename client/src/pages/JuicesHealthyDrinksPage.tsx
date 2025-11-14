@@ -8,51 +8,56 @@ const JuicesHealthyDrinksPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Dabur Hommade Organic Coconut Milk',
-      price: '₹74',
+      id: 1,
+      itemName: 'Dabur Hommade Organic Coconut Milk',
+      itemPrice: '₹74',
       originalPrice: '₹89',
       discount: '₹15 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45698a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45698a.jpg?ts=1688463558',
       rating: 4.7,
       reviews: '9.9k',
       weight: '1 pc (200 ml)',
     },
     {
-      name: 'Real Fruit Power Orange Juice',
-      price: '₹120',
+      id: 2,
+      itemName: 'Real Fruit Power Orange Juice',
+      itemPrice: '₹120',
       originalPrice: '₹145',
       discount: '₹25 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45699a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45699a.jpg?ts=1688463558',
       rating: 4.5,
       reviews: '15.6k',
       weight: '1 L',
     },
     {
-      name: 'Tropicana Mixed Fruit Delight',
-      price: '₹115',
+      id: 3,
+      itemName: 'Tropicana Mixed Fruit Delight',
+      itemPrice: '₹115',
       originalPrice: '₹138',
       discount: '₹23 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45700a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45700a.jpg?ts=1688463558',
       rating: 4.6,
       reviews: '18.2k',
       weight: '1 L',
     },
     {
-      name: 'Paper Boat Aamras',
-      price: '₹85',
+      id: 4,
+      itemName: 'Paper Boat Aamras',
+      itemPrice: '₹85',
       originalPrice: '₹105',
       discount: '₹20 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45701a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45701a.jpg?ts=1688463558',
       rating: 4.7,
       reviews: '12.4k',
       weight: '250 ml',
     },
     {
-      name: 'Raw Pressery Cold Pressed Green Juice',
-      price: '₹165',
+      id: 5,
+      itemName: 'Raw Pressery Cold Pressed Green Juice',
+      itemPrice: '₹165',
       originalPrice: '₹195',
       discount: '₹30 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45702a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/45702a.jpg?ts=1688463558',
       rating: 4.8,
       reviews: '8.7k',
       weight: '250 ml',
@@ -78,7 +83,7 @@ const JuicesHealthyDrinksPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
           ))}
         </div>
       </div>

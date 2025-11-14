@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { fetchAllProducts } from "../thunk/product";
 
 export interface Product {
-    productId: number;
+    id: number;
     itemName: string;
     itemDescription: string;
     itemPrice: number;
@@ -10,7 +10,6 @@ export interface Product {
     categoryName: string;
     stockQuantity: number;
     itemUrl: string;
-    id: number;
     createdAt: string;
     createdBy: string | null;
     updatedAt: string | null;

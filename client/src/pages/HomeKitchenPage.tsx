@@ -3,20 +3,22 @@ import ProductGrid from '../components/ProductGrid';
 
 const homeProducts = [
   {
-    name: 'Kitchen Utensil Set',
-    price: '₹799',
+    id: 1,
+    itemName: 'Kitchen Utensil Set',
+    itemPrice: '₹799',
     originalPrice: '₹1,299',
     discount: '₹500 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.4,
     reviews: '345',
   },
   {
-    name: 'Bed Sheet Set',
-    price: '₹999',
+    id: 2,
+    itemName: 'Bed Sheet Set',
+    itemPrice: '₹999',
     originalPrice: '₹1,799',
     discount: '₹800 OFF',
-    imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
+    itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/sliding_images/jpeg/placeholder.jpg',
     rating: 4.5,
     reviews: '456',
   },

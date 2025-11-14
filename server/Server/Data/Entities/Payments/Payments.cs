@@ -6,9 +6,6 @@ namespace Server.Data.Entities.Payments
     [Table("Payments")]
     public class Payments: BaseEntities
     {
-        [Column("payment_id")]
-        public required int PaymentId { get; set; }
-
         [Column("order_id")]
         public int OrderId { get; set; }
 

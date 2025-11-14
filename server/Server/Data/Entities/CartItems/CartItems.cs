@@ -1,14 +1,12 @@
 ﻿using Server.Data.Base;
 using System.ComponentModel.DataAnnotations.Schema;
+using Server.Data.Entities.Products;
 
 namespace Server.Data.Entities.CartItems
 {
     [Table("CartItems")]
     public class CartItems: BaseEntities
     {
-        [Column("cart_item_id")]
-        public int CartItemId { get; set; }
-
         [Column("user_id")]
         public int UserId { get; set; }
 
@@ -20,5 +18,7 @@ namespace Server.Data.Entities.CartItems
 
         [Column("price")]
         public decimal Price { get; set; }
+        public Product? Products { get; set; }
+
     }
 }

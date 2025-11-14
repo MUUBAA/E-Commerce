@@ -8,51 +8,56 @@ const SpicesSeasoningsPage: React.FC = () => {
 
   const products = [
     {
-      name: 'Catch Jeera Whole',
-      price: '₹43',
+      id: 1,
+      itemName: 'Catch Jeera Whole',
+      itemPrice: '₹43',
       originalPrice: '₹68',
       discount: '₹25 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10227a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10227a.jpg?ts=1688463558',
       rating: 4.7,
       reviews: '58.8k',
       weight: '1 pack (100 g)',
     },
     {
-      name: 'Everest Turmeric Powder',
-      price: '₹58',
+      id: 2,
+      itemName: 'Daily Good Mustard / Rai / Sarso Small',
+      itemPrice: '₹18',
       originalPrice: '₹85',
       discount: '₹27 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10228a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10228a.jpg?ts=1688463558',
       rating: 4.6,
       reviews: '45.2k',
       weight: '1 pack (200 g)',
     },
     {
-      name: 'MDH Red Chilli Powder',
-      price: '₹52',
+      id: 3,
+      itemName: 'MDH Red Chilli Powder',
+      itemPrice: '₹52',
       originalPrice: '₹78',
       discount: '₹26 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10229a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10229a.jpg?ts=1688463558',
       rating: 4.5,
       reviews: '38.9k',
       weight: '1 pack (100 g)',
     },
     {
-      name: 'Everest Garam Masala',
-      price: '₹68',
+      id: 4,
+      itemName: 'Everest Garam Masala',
+      itemPrice: '₹68',
       originalPrice: '₹95',
       discount: '₹27 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10230a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10230a.jpg?ts=1688463558',
       rating: 4.8,
       reviews: '52.1k',
       weight: '1 pack (100 g)',
     },
     {
-      name: 'Catch Coriander Powder',
-      price: '₹48',
+      id: 5,
+      itemName: 'Catch Coriander Powder',
+      itemPrice: '₹48',
       originalPrice: '₹72',
       discount: '₹24 OFF',
-      imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10231a.jpg?ts=1688463558',
+      itemUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/images/products/sliding_image/10231a.jpg?ts=1688463558',
       rating: 4.6,
       reviews: '41.3k',
       weight: '1 pack (200 g)',
@@ -78,7 +83,7 @@ const SpicesSeasoningsPage: React.FC = () => {
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product, index) => (
-            <ProductCard key={`${product.name}-${index}`} {...product} />
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
           ))}
         </div>
       </div>

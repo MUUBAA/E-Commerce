@@ -1,4 +1,6 @@
-﻿using Server.Data.Contract.CartItems;
+﻿using Microsoft.EntityFrameworkCore;
+using Server.Data.Contract.CartItems;
+using Server.Data.Dto;
 using Server.Data.Entities.CartItems;
 using Server.Utils;
 
@@ -9,7 +11,7 @@ namespace Server.Data.Repositories
         void AddToCart(CartItemAdd contract);
         void RemoveFromCart(int id);
         CartItems GetCartItem(int id);
-        (long, int, List<CartItems>) GetCartItems(CartItemContract contract);
+        (long, int, List<CartItemDto>) GetCartItems(CartItemContract contract);
 
     }
     public class CartRepository(Repository repository, IUserContext userContext) : ICartRepository
@@ -63,22 +65,44 @@ namespace Server.Data.Repositories
         }
         public CartItems GetCartItem(int id)
         {
-            return repository.CartItems.Find(id);
+            var item = repository.CartItems.Find(id);
+            if (item == null)
+            {
+                throw new Exception("Cart item not found");
+            }
+            return item;
         }
 
-        public (long, int, List<CartItems>) GetCartItems(CartItemContract contract)
+        public (long, int, List<CartItemDto>) GetCartItems(CartItemContract contract)
         {
             var page = contract.Page <= 0 ? 1 : contract.Page;
             var pageSize = contract.PageSize <= 0 ? 10 : contract.PageSize;
 
-            var query = repository.CartItems.Where(c => !c.IsDeleted && c.UserId == contract.UserId);
+            var query = repository.CartItems
+            .Where(c => !c.IsDeleted && c.UserId == contract.UserId)
+            .Include(c => c.Products);
+
 
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
             var items = query
-                 .Skip((page - 1) * pageSize)
-                 .Take(pageSize)
-                 .ToList();
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(c => new CartItemDto
+            { 
+               Id = c.Id,
+               UserId = c.UserId,
+               ProductId = c.Products.Id,
+               Quantity = c.Quantity,
+               Price = c.Price,
+               ItemDescription = c.Products.ItemDescription,
+               ItemName = c.Products.ItemName,
+               ItemUrl = c.Products.ItemUrl,
+               ItemPrice = c.Products.ItemPrice
+            })
+            .ToList();
+
             return (totalItems, totalPages, items);
         }
 

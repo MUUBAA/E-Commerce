@@ -30,10 +30,10 @@ namespace Server.Controllers.CartController
 
         [HttpPost]
         [Route("cart/get-all")]
-        public ActionResult<GenericApiResponse<PaginationResponse<CartItems>>> GetCartItems(CartItemContract contract)
+        public ActionResult<GenericApiResponse<PaginationResponse<CartItemDto>>> GetCartItems(CartItemContract contract)
         {
             var items = cartServices.GetCartItems(contract);
-            return Ok(new GenericApiResponse<PaginationResponse<CartItems>>(true, "Cart items fetched successfully", items));
+            return Ok(new GenericApiResponse<PaginationResponse<CartItemDto>>(true, "Cart items fetched successfully", items));
         }
 
         [HttpDelete]

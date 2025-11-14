@@ -1,12 +1,13 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, {  useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 import { loginUser, registerUser, forgotPassword } from '../../redux/thunk/jwtVerify';
-import type { AppDispatch, RootState } from '../../redux/stores';
-import { getCartItems } from '../../redux/thunk/cart';
-
+import type { AppDispatch } from '../../redux/stores';
+import { getCartItems, type GetAllCartPayload } from '../../redux/thunk/cart';
+import type { CartItem } from '../../redux/slices/cartSlice';
+import { getDecryptedJwt } from '../../utils/auth';
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,9 +25,9 @@ type ViewState = 'empty' | 'login' | 'register' | 'cart' | 'forgot';
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
   const [currentView, setCurrentView] = useState<ViewState>('empty');
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const cart = useSelector((s: RootState) => s.cart);
-  const hasItems = useMemo(() => (cart.items?.length ?? 0) > 0, [cart.items]);
+  const hasItems = cartItems.length > 0;
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -49,6 +50,21 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const handleForgotOpen = () => {
     setCurrentView('forgot');
   };
+   const token = getDecryptedJwt();
+      let userIdFromToken: number | undefined;
+      if (token) {
+        try {
+          const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+          userIdFromToken =
+            typeof decoded.id === 'number'
+              ? decoded.id
+              : decoded.sub
+                ? Number(decoded.sub)
+                : undefined;
+        } catch {
+          // ignore; will fallback
+        }
+      }
 
   const handleSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,34 +82,69 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         const loginDecodedToken = jwtDecode<DecodedToken>(loginJwt);
 
         console.log('Logged in user:', loginDecodedToken);
-        
-        // Load items then switch to cart view
-        try { 
-          await dispatch(getCartItems({})).unwrap(); 
-        } catch (err) {
-          console.error('Failed to load cart items after login:', err);
-          toast.error('Failed to load cart items');
-        }
-        setCurrentView('cart');
+
+        // Call the function to fetch cart products
       } else {
         const errorMsg =
           typeof response.payload === "string" && response.payload
-            ? response.payload === "User not found"
-              ? "User not registered"
-              : response.payload === "Invalid password"
-              ? "Invalid password"
-              : response.payload
+            ? response.payload
             : "Login failed";
         toast.error(errorMsg);
       }
-    } catch (error) {
-      console.error('Login catch error:', error);
+    } catch (err) {
+      console.error('Login catch error:', err);
       toast.error("Login failed");
     } finally {
       setLoading(false);
     }
   };
-
+   
+  const FetchCartItems = async () => {
+    try {
+      const preparePayload: GetAllCartPayload = {
+        userId: userIdFromToken ?? 0,
+        page: 0,
+        pageSize: 20,
+        productId: 0,
+        quantity: 0,
+        price: 0,
+        itemDescription: '',
+        itemName: '',
+        itemUrl: ''
+      };
+      const response = await dispatch(getCartItems(preparePayload));
+      if(response.meta.requestStatus === 'fulfilled') {
+        if (Array.isArray(response.payload)) {
+          setCartItems(response.payload);
+          console.log('Fetched cart items array:', response.payload);
+          setCurrentView('cart');
+        } 
+        else if(response.payload && typeof response.payload === 'object' ) {
+          setCartItems(response?.payload?.items || []); 
+          console.log('Fetched cart items array:', response.payload.items);// Convert single item to array
+          setCurrentView('cart');
+        }
+        
+        else {
+          console.error('Unexpected cart items payload:', response.payload);
+          setCartItems([]); // Fallback to empty array
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching cart items:', error);
+      setCartItems([]); // Fallback to empty array on error
+    }
+  }
+  // Move useEffect to top-level, not inside handleSubmitLogin
+  useEffect(() => {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+      FetchCartItems();
+      setCurrentView('cart');
+    }
+  }, [dispatch]);
+      // Optionally, you can decode and get userId here if needed
+      
   const handleSubmitRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('handleSubmitRegister called with:', formData);
@@ -110,9 +161,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         name: formData.name, 
         email: formData.email, 
         password: formData.password 
-      }));
-      console.log('Register dispatch response:', response);
-      
+      }));      
       if (response.type === "registerUser/fulfilled") {
         toast.dismiss();
         toast.success("Registration successful! Please login.");
@@ -133,7 +182,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleSubmitForgot = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,7 +250,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         <div>
           <input
             type="email"
-            placeholder="Email / Username"
+            placeholder="Email"
             value={formData.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             className="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
@@ -335,46 +384,72 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const renderCart = () => (
     <div className="py-6">
       {!hasItems ? (
-      <div className="flex flex-col items-center justify-center text-center py-12">
-        <div className="mb-6">
-          <div className="mx-auto h-24 w-24 rounded-full bg-gray-50 flex items-center justify-center">
-            <svg 
-              className="h-12 w-12 text-gray-400" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={1.5} 
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
+        <div className="flex flex-col items-center justify-center text-center py-12">
+          <div className="mb-6">
+            <div className="mx-auto h-24 w-24 rounded-full bg-gray-50 flex items-center justify-center">
+              <svg 
+                className="h-12 w-12 text-gray-400" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={1.5} 
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+            </div>
           </div>
+          <h3 className="mb-2 text-xl font-semibold text-gray-900">Your cart is empty</h3>
+          <p className="mb-8 text-gray-500 text-sm max-w-xs">
+            Start adding items to your cart and they will appear here.
+          </p>
+          <button 
+            onClick={onClose}
+            className="w-full max-w-xs rounded-xl bg-gray-900 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:shadow-lg transform hover:scale-[1.02] cursor-pointer"
+          >
+            Browse Products
+          </button>
         </div>
-        
-        <h3 className="mb-2 text-xl font-semibold text-gray-900">Your cart is empty</h3>
-        <p className="mb-8 text-gray-500 text-sm max-w-xs">
-          Start adding items to your cart and they will appear here.
-        </p>
-        
-        <button 
-          onClick={onClose}
-          className="w-full max-w-xs rounded-xl bg-gray-900 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-gray-800 hover:shadow-lg transform hover:scale-[1.02] cursor-pointer"
-        >
-          Browse Products
-        </button>
-      </div>
       ) : (
         <div className="space-y-4">
-          {cart.items.map((i, idx) => (
-            <div key={`${i.productId}-${idx}`} className="flex items-center justify-between rounded-lg border p-3">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-800">Product #{i.productId}</span>
-                <span className="text-xs text-gray-500">Qty: {i.quantity}</span>
+          {cartItems.map((i, idx) => (
+            <div
+              key={`${i.productId}-${idx}`}
+              className="flex items-center gap-3 rounded-xl border p-3"
+            >
+              {/* product image */}
+              <img
+                src={i.itemUrl}
+                alt={i.itemName}
+                className="h-14 w-14 rounded-lg object-cover flex-shrink-0"
+              />
+
+              {/* title + subtitle */}
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-gray-900 line-clamp-2">
+                  {i.itemName}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {i.itemDescription}
+                </div>
               </div>
-              <div className="text-sm font-semibold text-gray-900">₹{i.price}</div>
+
+              {/* qty controls + price */}
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center rounded-full border px-3 py-1 text-sm font-medium">
+                  <button className="px-1 text-lg leading-none">−</button>
+                  <span className="px-2">{i.quantity}</span>
+                  <button className="px-1 text-lg leading-none">+</button>
+                </div>
+
+                <div className="text-sm font-semibold text-gray-900">
+                  ₹{i.price}
+                </div>
+               
+              </div>
             </div>
           ))}
         </div>
@@ -421,15 +496,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       </form>
     </div>
   );
-
-  // Fetch cart items on mount if user is logged in
-  useEffect(() => {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-      dispatch(getCartItems({}));
-      setCurrentView('cart');
-    }
-  }, [dispatch]);
 
   return (
     <>
@@ -483,5 +549,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     </>
   );
 };
+      
 
 export default CartDrawer;

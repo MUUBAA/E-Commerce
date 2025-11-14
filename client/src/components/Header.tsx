@@ -16,9 +16,10 @@ const Header: React.FC = () => {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   // Total items in cart (sum of quantities)
-  const cartCount = useSelector((state: RootState) =>
-    state.cart?.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) ?? 0
-  );
+  const cartCount = useSelector((state: RootState) => {
+    const items = Array.isArray(state.cart?.items) ? state.cart.items : [];
+    return items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  });
 
   const handleCartClick = async () => {
     // Try to fetch items for logged-in user before opening
@@ -26,8 +27,15 @@ const Header: React.FC = () => {
     if (token) {
       try {
         const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
-        const uid = typeof decoded.id === 'number' ? decoded.id : decoded.sub ? Number(decoded.sub) : undefined;
-        await dispatch(getCartItems({ userId: uid })).unwrap().catch(() => {});
+        const uid =
+          typeof decoded.id === 'number'
+            ? decoded.id
+            : decoded.sub
+            ? Number(decoded.sub)
+            : 0; // Default to 0 if undefined
+        await dispatch(
+          getCartItems({ userId: uid, page: 1, pageSize: 10 })
+        ).unwrap().catch(() => {});
       } catch { /* ignore */ }
     }
     openCart();

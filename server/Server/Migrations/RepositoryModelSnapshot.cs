@@ -31,10 +31,6 @@ namespace Server.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CartItemId")
-                        .HasColumnType("int")
-                        .HasColumnName("cart_item_id");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
@@ -84,6 +80,8 @@ namespace Server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProductId");
+
                     b.ToTable("CartItems");
                 });
 
@@ -95,10 +93,6 @@ namespace Server.Migrations
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasColumnType("longtext")
-                        .HasColumnName("address");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
@@ -125,10 +119,6 @@ namespace Server.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("order_id");
-
-                    b.Property<int>("OrderItemId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_item_id");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(65,30)")
@@ -186,10 +176,6 @@ namespace Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_deleted");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
 
                     b.Property<bool>("Status")
                         .HasColumnType("tinyint(1)")
@@ -256,10 +242,6 @@ namespace Server.Migrations
                         .HasColumnType("int")
                         .HasColumnName("order_id");
 
-                    b.Property<int>("PaymentId")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_id");
-
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("longtext")
@@ -283,7 +265,7 @@ namespace Server.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("Server.Data.Entities.Products.Products", b =>
+            modelBuilder.Entity("Server.Data.Entities.Products.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -338,10 +320,6 @@ namespace Server.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("item_url");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("item_id");
-
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int")
                         .HasColumnName("stock_quantity");
@@ -368,6 +346,10 @@ namespace Server.Migrations
                         .HasColumnName("id");
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("longtext")
+                        .HasColumnName("address");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
@@ -424,6 +406,17 @@ namespace Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Server.Data.Entities.CartItems.CartItems", b =>
+                {
+                    b.HasOne("Server.Data.Entities.Products.Product", "Products")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }
