@@ -17,9 +17,10 @@ const Header: React.FC = () => {
 
   // Total items in cart (sum of quantities)
   const cartCount = useSelector((state: RootState) => {
-    const items = Array.isArray(state.cart?.items) ? state.cart.items : [];
-    return items.reduce((sum, item) => sum + (item.quantity || 0), 0);
-  });
+  return state.cart?.totalItems ?? 0;
+});
+
+  
 
   const handleCartClick = async () => {
     // Try to fetch items for logged-in user before opening
@@ -34,7 +35,7 @@ const Header: React.FC = () => {
             ? Number(decoded.sub)
             : 0; // Default to 0 if undefined
         await dispatch(
-          getCartItems({ userId: uid, page: 1, pageSize: 10 })
+          getCartItems({ id: 0,userId: uid, page: 1, pageSize: 10 })
         ).unwrap().catch(() => {});
       } catch { /* ignore */ }
     }

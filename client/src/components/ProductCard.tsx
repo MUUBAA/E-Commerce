@@ -1,8 +1,8 @@
 // components/ProductCard.tsx
 import { Star } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../redux/thunk/cart';
+import { addToCart, removeCartItem } from '../../redux/thunk/cart';
 import type { AppDispatch, RootState } from '../../redux/stores';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
@@ -32,17 +32,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   weight,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [isAdding, setIsAdding] = useState(false);
-
+  // Get quantity from Redux cart state
+  const cartQuantity = useSelector((state: RootState) => {
+    const item = state.cart.items.find((ci) => ci.productId === id);
+    return item ? item.quantity : 0;
+  });
   // Prefer userId from decrypted JWT; fallback to any stored profile if needed.
   const fallbackUserId = useSelector((state: RootState) => state.user.UserAccount?.id
     ?? state.user.userProfile?.Id
   );
-  const handleAddToCart = async () => {
+  const handleIncrease = async () => {
     if (!id || Number(id) <= 0) {
       return toast.error('Invalid product. Please try again.');
     }
-    // Extract user id from decrypted token
     const token = getDecryptedJwt();
     let userIdFromToken: number | undefined;
     if (token) {
@@ -58,36 +60,38 @@ const ProductCard: React.FC<ProductCardProps> = ({
         // ignore; will fallback
       }
     }
-    
-
     const UserId = userIdFromToken ?? fallbackUserId;
     if (!UserId) return toast.warn('Please sign in to add items to your cart');
-
-    // Extract numeric price (handles "₹199" or "$12.50")
-    const numericPrice = Number(
-      String(itemPrice).replace(/[^\d.]/g, '')
-    );
-
+    const numericPrice = Number(String(itemPrice).replace(/[^\d.]/g, ''));
     if (Number.isNaN(numericPrice)) {
       toast.error('Unable to parse item price');
       return;
     }
-
     try {
-      setIsAdding(true);
       await dispatch(
         addToCart({
+          id: 0, // or some logic to generate a unique cart item id
           userId: UserId,
           productId: id,
-          quantity: 1,        // default to 1; make dynamic if you have a qty control
+          quantity: 1,
           price: numericPrice,
         })
       ).unwrap();
       toast.success('Added to cart');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
-    } finally {
-      setIsAdding(false);
+    }
+  };
+
+  const handleDecrease = async () => {
+    if (cartQuantity <= 0) return;
+    try {
+      await dispatch(
+        removeCartItem({ id })
+      ).unwrap();
+      toast.success('Removed from cart');
+    } catch (err: unknown) {
+      toast.error(typeof err === 'string' ? err : 'Failed to remove from cart');
     }
   };
 
@@ -95,13 +99,30 @@ const ProductCard: React.FC<ProductCardProps> = ({
     <div className="relative flex min-w-[160px] max-w-[180px] flex-col rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
       <div className="relative mb-3">
         <img className="h-32 w-full rounded-md object-cover" src={itemUrl} alt={itemName} />
-        <button
-          className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50"
-          onClick={handleAddToCart}
-          disabled={isAdding}
-        >
-          {isAdding ? 'Adding...' : 'ADD'}
-        </button>
+        {cartQuantity > 0 ? (
+          <div className="absolute bottom-2 right-2 flex items-center rounded-md border border-pink-500 bg-white">
+            <button
+              className="px-2 py-1 text-pink-500 text-lg font-bold"
+              onClick={handleDecrease}
+            >
+              −
+            </button>
+            <span className="px-3 py-1 text-pink-500 font-semibold">{cartQuantity}</span>
+            <button
+              className="px-2 py-1 text-pink-500 text-lg font-bold"
+              onClick={handleIncrease}
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <button
+            className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50"
+            onClick={handleIncrease}
+          >
+            ADD
+          </button>
+        )}
       </div>
 
       <div className="mb-2 flex items-baseline gap-2">

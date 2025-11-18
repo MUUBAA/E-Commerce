@@ -11,5 +11,6 @@
         public string? ItemDescription { get; set; }
         public decimal? ItemPrice { get; set; }
         public string? ItemUrl { get; set; }
+        public decimal? TotalPrice { get; set; }
     }
 }

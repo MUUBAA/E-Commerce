@@ -11,7 +11,7 @@ namespace Server.Data.Repositories
         void AddToCart(CartItemAdd contract);
         void RemoveFromCart(int id);
         CartItems GetCartItem(int id);
-        (long, int, List<CartItemDto>) GetCartItems(CartItemContract contract);
+        (long totalItems, int totalPages, decimal totalPrice, List<CartItemDto>) GetCartItems(CartItemContract contract);
 
     }
     public class CartRepository(Repository repository, IUserContext userContext) : ICartRepository
@@ -25,7 +25,7 @@ namespace Server.Data.Repositories
             if (existingItem != null)
             {
                 existingItem.Quantity += contract.Quantity;
-                existingItem.Price = contract.Price;
+                existingItem.Price += contract.Price;
                 repository.Update(existingItem);
             }
             else
@@ -38,31 +38,30 @@ namespace Server.Data.Repositories
                     Price = contract.Price
                 };
                 repository.CartItems.Add(newItem);
-                repository.SaveChanges();
+                
             }
+            repository.SaveChanges();
         }
 
         public void RemoveFromCart(int id)
         {
             var item = repository.CartItems.Find(id);
-
             if (item == null)
+            {
                 throw new Exception("Cart item not found");
-
+            }
             if (item.Quantity > 1)
             {
-                // Decrement quantity
-                item.Quantity -= 1;
+                item.Quantity--;
                 repository.Update(item);
             }
             else
             {
-                // Quantity is 1, remove the item completely
                 repository.CartItems.Remove(item);
             }
-
             repository.SaveChanges();
         }
+
         public CartItems GetCartItem(int id)
         {
             var item = repository.CartItems.Find(id);
@@ -73,7 +72,7 @@ namespace Server.Data.Repositories
             return item;
         }
 
-        public (long, int, List<CartItemDto>) GetCartItems(CartItemContract contract)
+        public (long totalItems, int totalPages, decimal totalPrice, List<CartItemDto>) GetCartItems(CartItemContract contract)
         {
             var page = contract.Page <= 0 ? 1 : contract.Page;
             var pageSize = contract.PageSize <= 0 ? 10 : contract.PageSize;
@@ -82,30 +81,30 @@ namespace Server.Data.Repositories
             .Where(c => !c.IsDeleted && c.UserId == contract.UserId)
             .Include(c => c.Products);
 
-
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            var totalPrice = query.Sum(c => c.Price * c.Quantity);
 
             var items = query
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(c => new CartItemDto
-            { 
-               Id = c.Id,
-               UserId = c.UserId,
-               ProductId = c.Products.Id,
-               Quantity = c.Quantity,
-               Price = c.Price,
-               ItemDescription = c.Products.ItemDescription,
-               ItemName = c.Products.ItemName,
-               ItemUrl = c.Products.ItemUrl,
-               ItemPrice = c.Products.ItemPrice
+            {
+                Id = c.Id,
+                UserId = c.UserId,
+                ProductId = c.Products != null ? c.Products.Id : 0,
+                Quantity = c.Quantity,
+                Price = c.Price,
+                ItemDescription = c.Products != null ? c.Products.ItemDescription : null,
+                ItemName = c.Products != null ? c.Products.ItemName : null,
+                ItemUrl = c.Products != null ? c.Products.ItemUrl : null,
+                ItemPrice = c.Products != null ? c.Products.ItemPrice : 0
             })
             .ToList();
 
-            return (totalItems, totalPages, items);
+            return (totalItems, totalPages, totalPrice, items);
         }
 
 
-        }
+    }
 }

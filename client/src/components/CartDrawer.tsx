@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 import { loginUser, registerUser, forgotPassword } from '../../redux/thunk/jwtVerify';
 import type { AppDispatch } from '../../redux/stores';
-import { getCartItems, type GetAllCartPayload } from '../../redux/thunk/cart';
+import { addToCart, getCartItems, removeCartItem, type GetAllCartPayload } from '../../redux/thunk/cart';
 import type { CartItem } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
 interface CartDrawerProps {
@@ -27,6 +27,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const [currentView, setCurrentView] = useState<ViewState>('empty');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   const hasItems = cartItems.length > 0;
   const [formData, setFormData] = useState({
     email: '',
@@ -68,7 +69,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
   const handleSubmitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('handleSubmitLogin called with:', formData);
     setLoading(true);
     try {
       const response = await dispatch(loginUser({ email: formData.email, password: formData.password }));
@@ -103,6 +103,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     try {
       const preparePayload: GetAllCartPayload = {
         userId: userIdFromToken ?? 0,
+        id: 0,
         page: 0,
         pageSize: 20,
         productId: 0,
@@ -116,18 +117,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       if(response.meta.requestStatus === 'fulfilled') {
         if (Array.isArray(response.payload)) {
           setCartItems(response.payload);
-          console.log('Fetched cart items array:', response.payload);
+          setTotalPrice(0);
           setCurrentView('cart');
         } 
         else if(response.payload && typeof response.payload === 'object' ) {
           setCartItems(response?.payload?.items || []); 
-          console.log('Fetched cart items array:', response.payload.items);// Convert single item to array
+          setTotalPrice(response?.payload?.totalPrice || 0);
           setCurrentView('cart');
         }
-        
         else {
-          console.error('Unexpected cart items payload:', response.payload);
-          setCartItems([]); // Fallback to empty array
+          setCartItems([]);
+          setTotalPrice(0);
         }
       }
     } catch (error) {
@@ -205,6 +205,51 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleIncrease = async (item: CartItem) => {
+    const token = getDecryptedJwt();
+    let userIdFromToken: number | undefined;
+    if (token) {
+      try {
+        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+        userIdFromToken =
+          typeof decoded.id === 'number'
+            ? decoded.id
+            : decoded.sub
+              ? Number(decoded.sub)
+              : undefined;
+      } catch {
+        // ignore; will fallback
+      }
+    }
+    const UserId = userIdFromToken ?? 0;
+    if (!UserId) return toast.warn('Please sign in to add items to your cart');
+    const numericPrice = Number(String(item.price));
+    if (Number.isNaN(numericPrice)) {
+      toast.error('Unable to parse item price');
+      return;
+    }
+    try {
+      await dispatch(
+        addToCart({
+          id: item.id,
+          userId: UserId,
+          productId: item.productId, // Use productId from getAllCart
+          quantity: 1,
+          price: numericPrice,
+        })
+      ).unwrap();
+      toast.success('Added to cart');
+      FetchCartItems();
+    } catch (err: unknown) {
+      toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
+    }
+  };
+
+  const handleDecrease = async (item: CartItem) => {
+    await dispatch(removeCartItem({ id: item.id }));
+    FetchCartItems();
   };
 
   const renderEmptyCart = () => (
@@ -414,45 +459,90 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
-          {cartItems.map((i, idx) => (
-            <div
-              key={`${i.productId}-${idx}`}
-              className="flex items-center gap-3 rounded-xl border p-3"
-            >
-              {/* product image */}
-              <img
-                src={i.itemUrl}
-                alt={i.itemName}
-                className="h-14 w-14 rounded-lg object-cover flex-shrink-0"
-              />
+        <>
+          <div className="space-y-4 mb-4">
+            {cartItems.map((i, idx) => (
+              <div
+                key={`${i.productId}-${idx}`}
+                className="flex items-center gap-3 rounded-xl border p-3"
+              >
+                {/* product image */}
+                <img
+                  src={i.itemUrl}
+                  alt={i.itemName}
+                  className="h-14 w-14 rounded-lg object-cover flex-shrink-0"
+                />
 
-              {/* title + subtitle */}
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-gray-900 line-clamp-2">
-                  {i.itemName}
+                {/* title + subtitle */}
+                <div className="flex-1">
+                  <div className="text-sm font-semibold text-gray-900 line-clamp-2">
+                    {i.itemName}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {i.itemDescription}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">
-                  {i.itemDescription}
+
+                {/* qty controls + price */}
+                <div className="flex flex-col items-end gap-1">
+                  {i.quantity > 0 ? (
+                    <div className="flex items-center rounded-full border px-3 py-1 text-sm font-medium">
+                        <button
+                          className="px-2 py-1 text-pink-500 text-lg font-bold hover:cursor-pointer"
+                          onClick={() => handleDecrease(i)}
+                        >
+                          −
+                        </button>
+                        <span className="px-3 py-1 text-pink-500 font-semibold">{i.quantity}</span>
+                        <button
+                          className="px-2 py-1 text-pink-500 text-lg font-bold hover:cursor-pointer"
+                          onClick={() => handleIncrease(i)}
+                        >
+                          +
+                        </button>
+                    </div>
+                  ) : (
+                    <button
+                      className="px-4 py-1 rounded-full border text-sm font-medium text-green-600 border-green-600 hover:bg-green-50"
+                      onClick={() => handleIncrease(i)}
+                    >
+                      ADD
+                    </button>
+                  )}
+                  <div className="text-sm font-semibold text-gray-900">
+                    ₹{i.price}
+                  </div>
                 </div>
               </div>
-
-              {/* qty controls + price */}
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center rounded-full border px-3 py-1 text-sm font-medium">
-                  <button className="px-1 text-lg leading-none">−</button>
-                  <span className="px-2">{i.quantity}</span>
-                  <button className="px-1 text-lg leading-none">+</button>
-                </div>
-
-                <div className="text-sm font-semibold text-gray-900">
-                  ₹{i.price}
-                </div>
-               
-              </div>
+            ))}
+          </div>
+          {/* Bill summary */}
+          <div className="rounded-xl border bg-white p-4 shadow-sm mb-4">
+            <div className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+              <span className="inline-block bg-gray-100 rounded-full px-2 py-1 text-xs font-medium text-gray-600 mr-2">
+                <svg className="inline h-4 w-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-6 4h6a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Bill summary
+              </span>
             </div>
-          ))}
-        </div>
+            <div className="flex justify-between text-sm py-1">
+              <span>Item Total</span>
+              <span className="line-through text-gray-400 mr-2">₹333</span>
+              <span className="font-semibold text-gray-900">₹{totalPrice}</span>
+            </div>
+            <div className="flex justify-between text-sm py-1">
+              <span>Handling Fee</span>
+              <span className="text-green-600 font-semibold">FREE</span>
+            </div>
+            <div className="flex justify-between text-sm py-1">
+              <span>Delivery Fee</span>
+              <span className="text-green-600 font-semibold">FREE</span>
+            </div>
+            <div className="flex justify-between text-base font-bold border-t pt-2 mt-2">
+              <span>To Pay</span>
+              <span className="text-gray-900">₹{totalPrice}</span>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

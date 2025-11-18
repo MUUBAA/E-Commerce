@@ -2,6 +2,7 @@
 using Server.Data.Dto;
 using Server.Data.Entities.CartItems;
 using Server.Data.Repositories;
+// Force recompilation for PaginationResponse update
 
 namespace Server.Services.CartServices
 {
@@ -30,14 +31,15 @@ namespace Server.Services.CartServices
         }
         public PaginationResponse<CartItemDto> GetCartItems(CartItemContract contract)
         {
-            var (totalItems, totalPages, items) = cartRepository.GetCartItems(contract);
+            var (totalItems, totalPages, totalPrice, items) = cartRepository.GetCartItems(contract);
             return new PaginationResponse<CartItemDto>
             {
                 TotalItems = totalItems,
                 ItemsPerPage = contract.PageSize,
                 TotalPages = totalPages,
                 CurrentPage = contract.Page,
-                Items = items
+                Items = items,
+                TotalPrice = totalPrice
             };
         }
     }

@@ -7,7 +7,6 @@ using Server.Services.ProductService;
 using Server.Utils;
 
 namespace Server.Controllers.ProductController;
-[Authorize]
 [ApiController]
 public class ProductsController : BaseController
 {

@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import { getDecryptedJwt } from '../../utils/auth';
 
 export interface AddToCartPayload {
+  id: number;         // cart item id, if needed for updates
   userId: number;    // make this required to avoid surprise undefined
   productId: number;
   quantity: number;
@@ -12,6 +13,7 @@ export interface AddToCartPayload {
 }
 
 export interface GetAllCartPayload {
+   id: number;
    page: number;
    pageSize: number;
    userId: number;
@@ -104,6 +106,36 @@ export const addToCart = createAsyncThunk<
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.data?.message || 'Failed to add product to cart');
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const removeCartItem = createAsyncThunk<
+  any, // Replace with the actual return type if known
+  { id: number }
+>(
+  'cart/remove',
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const token = getDecryptedJwt();
+      if (!token) return rejectWithValue('No authentication token found');
+
+      const response = await axios.delete(
+        `/cart/remove`,
+        {
+          params: { id },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'text/plain',
+          },
+        }
+      );
+      return response.data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(error.response?.data?.message || 'Failed to remove cart item');
       }
       return rejectWithValue('An unexpected error occurred');
     }

@@ -8,5 +8,8 @@
         public int CurrentPage { get; set; }
         public List<T> Items { get; set; } = new();
 
+        // Optional: Used for cart total price
+        public decimal? TotalPrice { get; set; }
+
     }
 }
