@@ -18,12 +18,13 @@ const JuicesHealthyDrinksPage: React.FC = () => {
     try {
       const preparePayload: GetAllProductsPayload = {
         id: 0,
-        categoryId: 6, // Juices & Healthy Drinks category
+        categoryId: 8, // Juices & Healthy Drinks category
         itemName: '',
         itemsPerPage: 20,
         totalItems: 0,
         totalPages: 0,
-        currentPage: 0
+        currentPage: 0,
+        pageSize: 60
       };
       const response = await dispatch(fetchAllProducts(preparePayload));
       if (response.meta.requestStatus === 'fulfilled') {

@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Package, MapPin, User, ChevronRight } from "lucide-react";
 import { getUserById } from "../../redux/thunk/user";
+import { resetJwt } from "../../redux/slices/loginUser";
+import { getDecryptedJwt } from '../../utils/auth';
+import { jwtDecode } from 'jwt-decode';
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../redux/stores";
 
@@ -16,6 +20,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   onClose,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<SidebarView>("main");
   const { UserAccount, loading } = useSelector(
     (state: RootState) => state.user
@@ -30,12 +35,36 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
     setCurrentView("main");
   };
 
+  const handleLogout = () => {
+    dispatch(resetJwt());
+    localStorage.removeItem("jwtToken");
+    localStorage.clear();
+    navigate("/");
+  };
+
   useEffect(() => {
     if (!isOpen) return;
 
-    const userId = 2; // TEMP: your real logged-in user id goes here
-
-    dispatch(getUserById({ id: userId }));
+    // Get userId from JWT
+    const token = getDecryptedJwt();
+    let userIdFromToken: number | undefined;
+    if (token) {
+      try {
+        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+        userIdFromToken =
+          typeof decoded.id === 'number'
+            ? decoded.id
+            : decoded.sub
+              ? Number(decoded.sub)
+              : undefined;
+      } catch {
+        // ignore; will fallback
+      }
+    }
+    const userId = userIdFromToken;
+    if (userId) {
+      dispatch(getUserById({ id: userId }));
+    }
   }, [isOpen, dispatch]);
 
   // 🔹 2) Sync local state when UserAccount changes
@@ -68,7 +97,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
       <div className="space-y-2">
         <button
           onClick={() => setCurrentView("orders")}
-          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <div className="flex items-center">
             <Package className="h-5 w-5 text-gray-600 mr-3" />
@@ -79,7 +108,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
         <button
           onClick={() => setCurrentView("address")}
-          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <div className="flex items-center">
             <MapPin className="h-5 w-5 text-gray-600 mr-3" />
@@ -90,7 +119,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
         <button
           onClick={() => setCurrentView("profile")}
-          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
         >
           <div className="flex items-center">
             <User className="h-5 w-5 text-gray-600 mr-3" />
@@ -102,8 +131,12 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
       {/* Log Out Button */}
       <div className="mt-8 pt-6 border-t border-gray-200">
-        <button className="w-full text-left p-4 rounded-lg hover:bg-gray-50 transition-colors">
-          <span className="text-gray-900 font-medium">Log Out</span>
+        <button
+          type="button"
+          className="w-full p-4 rounded-lg hover:bg-gray-50 transition-colors text-left text-gray-900 font-medium cursor-pointer"
+          onClick={handleLogout}
+        >
+          Log Out
         </button>
       </div>
     </div>
@@ -121,7 +154,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           No orders yet
         </h3>
-        <button className="mt-6 cursor-pointer px-6 py-2 border border-purple-500 text-purple-500 rounded-lg hover:bg-purple-50 transition-colors">
+        <button className="mt-6 cursor-pointer px-6 py-2 border border-purple-500 text-purple-500 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer">
           Browse products
         </button>
       </div>
@@ -130,36 +163,44 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const renderAddressView = () => (
     <div className="p-6">
-      {/* Add New Address Button */}
-      <button className="w-full cursor-pointer flex items-center justify-between p-4 border border-dashed border-pink-300 rounded-lg hover:bg-pink-50 transition-colors mb-6">
-        <span className="text-pink-500 font-medium">+ Add New Address</span>
-        <ChevronRight className="h-5 w-5 text-pink-500" />
-      </button>
-
       {/* Saved Addresses Section */}
       <div className="mb-6">
-        <h4 className="text-lg font-semibold text-gray-900 mb-4">
-          Saved Addresses
+        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <MapPin className="h-6 w-6 text-pink-500" />
+          Saved Address
         </h4>
       </div>
 
-      {/* No Address State */}
-      <div className="text-center py-16">
-        <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-          <div className="w-16 h-20 bg-yellow-400 rounded-b-full transform rotate-12"></div>
-          <div className="absolute w-2 h-2 bg-red-500 rounded-full -mt-4 -ml-2"></div>
-          <div className="absolute w-1 h-1 bg-purple-500 rounded-full mt-2 ml-4"></div>
-        </div>
+      {/* Address Card or No Address State */}
+      <div className="flex justify-center items-center min-h-[180px]">
         {loading ? (
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Loading address...
-          </h3>
+          <div className="flex flex-col items-center">
+            <svg className="animate-spin h-8 w-8 text-pink-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+            <span className="text-gray-500">Loading address...</span>
+          </div>
+        ) : values.address ? (
+          <div className="bg-white shadow-md rounded-xl p-6 flex items-center gap-4 border border-pink-100 w-full max-w-md">
+            <div className="flex-shrink-0 bg-pink-100 rounded-full p-3">
+              <MapPin className="h-7 w-7 text-pink-500" />
+            </div>
+            <div>
+              <div className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                <span>Primary Address</span>
+                <span className="inline-block bg-pink-100 text-pink-600 text-xs px-2 py-0.5 rounded-full">Default</span>
+              </div>
+              <div className="text-gray-700 text-sm whitespace-pre-line">{values.address}</div>
+            </div>
+          </div>
         ) : (
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            {values.address || "No address available"}
-          </h3>
+          <div className="flex flex-col items-center text-gray-400">
+            <MapPin className="h-12 w-12 mb-4 text-pink-200" />
+            <span className="text-lg font-semibold mb-1">No address available</span>
+            <span className="text-sm">You have not added any address yet.</span>
+          </div>
         )}
-        {/* <p className="text-gray-600 text-sm">To see the saved address here, add your work or home address</p> */}
       </div>
     </div>
   );
@@ -174,8 +215,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           <input
             type="text"
             value={values.name}
-            onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            disabled
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
           />
         </div>
 
@@ -186,28 +227,25 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           <input
             type="email"
             value={values.email}
-            onChange={(e) =>
-              setValues((v) => ({ ...v, email: e.target.value }))
-            }
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            disabled
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
           />
         </div>
-
-        <button
-          type="submit"
-          className="w-full bg-pink-500 text-white py-3 rounded-lg font-semibold hover:bg-pink-600 transition-colors"
-        >
-          Submit
-        </button>
       </form>
 
-      {/* Delete Account Section */}
+      {/* Logout Account Section */}
       <div className="mt-8 pt-6 border-t border-gray-200">
-        <h4 className="text-pink-500 font-semibold mb-2">Delete Account</h4>
-        <p className="text-gray-600 text-sm">
-          Deleting your account will remove all your orders, wallet amount and
-          any active referral
+        <h4 className="text-pink-500 font-semibold mb-2">Log Out</h4>
+        <p className="text-gray-600 text-sm mb-4">
+          Logging out will end your current session. You can log in again anytime to access your account.
         </p>
+        <button
+          type="button"
+          className="w-full p-3 rounded-lg bg-pink-500 text-white font-semibold hover:bg-pink-600 transition-colors cursor-pointer"
+          onClick={handleLogout}
+        >
+          Log Out
+        </button>
       </div>
     </div>
   );
@@ -245,7 +283,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <button
             onClick={currentView !== "main" ? handleBackToMain : onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <X className="h-5 w-5 text-gray-600" />
           </button>

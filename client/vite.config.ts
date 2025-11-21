@@ -24,7 +24,7 @@ export default defineConfig({
         secure: false,
         changeOrigin: true,
       },
-      "^/user/.*": {
+      "^/users/.*": {
         target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,

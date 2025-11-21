@@ -14,15 +14,14 @@ interface UiCategory {
 }
 
 const uiCategories: UiCategory[] = [
-  { name: "Fruits & Vegetables", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762506139/fruits_vegtables_nduscl.png", route: "/fruits-vegetables" },
-  { name: "Dairy, Bread & Eggs", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581539/Dairy_breads_eggs_svznko.png", route: "/dairy-bread-eggs" },
-  { name: "Atta, Rice, Oil & Dals", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762506139/Atta_rice_oils_y8xqnw.png", route: "/atta-rice-oil-dals" },
-  { name: "Masala & Dry Fruits", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581704/Masala_dry_fruits_lo639d.png", route: "/masala-dry-fruits" },
-  { name: "Breakfast & Sauces", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762506139/Breakfast_sauces_fvrvil.png", route: "/breakfast-sauces" },
+  { name: "Fruits & Vegetables", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762506139/fruits_vegtables_nduscl.png", route: "/fresh" },
+  { name: "Rices & Oils", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762506139/Atta_rice_oils_y8xqnw.png", route: "/rice" },
+  { name: "Atta & Dals", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1763705568/organic_tatava_eotml9.webp", route: "/dal-pulses" },
+  { name: "Spices & Seasonings", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581704/Masala_dry_fruits_lo639d.png", route: "/spices-seasonings" },
+  { name: "Chips & Crisps", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1763705102/munchies_ms4r6c.png", route: "/chips-crisps" },
   { name: "Nest Cafe", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581731/nest_cafe_wbby2v.png", route: "/cafe" },
-  { name: "Tea, Coffee & More", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581939/Tea_coffe_more_oz0tvz.png", route: "/tea-coffee-more" },
-  { name: "Ice Creams & More", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581576/Icecreams_more_w6kcxp.png", route: "/ice-creams-more" },
-  { name: "Frozen Food", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581556/Frozen_foods_w1zqxm.png", route: "/frozen-food" },
+  { name: "Juices & Healthy Drinks", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1763705012/juices_cwza5z.png ", route: "/juices-healthy-drinks" },
+  { name: "Salt, Sugar & Jaggery", imageUrl: "https://res.cloudinary.com/dulie41id/image/upload/v1762581878/pure_jaggery_kvezgk.webp", route: "/salt-sugar-jaggery" },
 ];
 
 // 👇 These are the “old homepage rows” with their own categoryIds + routes
@@ -33,12 +32,12 @@ interface HomeSection {
 }
 
 const homeSections: HomeSection[] = [
-  { title: "Fruits & Vegetables", categoryId: 1, seeAllRoute: "/fruits-vegetables" },
+  { title: "Fruits & Vegetables", categoryId: 1, seeAllRoute: "/fresh" },
   { title: "Rice",            categoryId: 3,  seeAllRoute: "/rice" },
-  { title: "Dal & Pulses",    categoryId: 2, seeAllRoute: "/dal-and-pulses" },
-  { title: "Spices & Seasonings", categoryId: 5,  seeAllRoute: "/masala-dry-fruits" },
+  { title: "Dal & Pulses",    categoryId: 2, seeAllRoute: "/dal-pulses" },
+  { title: "Spices & Seasonings", categoryId: 5,  seeAllRoute: "/spices-seasonings" },
   { title: "Chips & Crisps",  categoryId: 7, seeAllRoute: "/chips-crisps" },
-  { title: "Juices & Healthy Drinks", categoryId: 13, seeAllRoute: "/juices-healthy-drinks" },
+  { title: "Juices & Healthy Drinks", categoryId: 8, seeAllRoute: "/juices-healthy-drinks" },
   { title: "Salt, Sugar & Jaggery", categoryId: 6, seeAllRoute: "/salt-sugar-jaggery" },
   // 👆 adjust categoryId values to match your backend
 ];

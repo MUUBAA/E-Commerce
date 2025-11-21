@@ -108,6 +108,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
       const formatted = await reverseGeocodeWithKey(coords.lat, coords.lng);
       setAddressPreview(formatted);
     } catch (error) {
+      console.error('Failed to fetch address preview:', error);
       setAddressPreview('');
     } finally {
       setIsPreviewLoading(false);
@@ -270,19 +271,6 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
   };
   const renderLocationView = () => (
     <div className="p-6">
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search a new address"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 bg-gray-50 py-3 pl-10 pr-4 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500"
-        />
-      </div>
-
-      {/* Use Current Location */}
       <div className="mb-6 flex items-center justify-between rounded-lg border border-gray-200 p-4">
         <div className="flex items-center">
           <div className="mr-3 flex h-8 w-8 items-center justify-center rounded-full bg-pink-100">
@@ -295,7 +283,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
         </div>
         <button
           onClick={() => handleUseCurrentLocation(true)}
-          className="rounded-lg border border-pink-500 px-4 py-2 text-sm font-medium text-pink-500 transition-colors hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg border border-pink-500 px-4 py-2 text-sm font-medium text-pink-500 transition-colors hover:bg-pink-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Saving...' : 'Enable'}
@@ -305,7 +293,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
       {/* Add New Address */}
       <button
         onClick={handleAddNewAddress}
-        className="flex w-full items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50 cursor-pointer"
       >
         <div className="flex items-center">
           <div className="mr-3 text-pink-500">
@@ -341,7 +329,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
           <button
             onClick={handleSearchLocation}
             disabled={isSearching}
-            className="rounded-lg bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {isSearching ? 'Searching…' : 'Search'}
           </button>
@@ -374,14 +362,14 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             onClick={() => handleUseCurrentLocation(false)}
-            className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 cursor-pointer"
           >
             Use Current Location
           </button>
           <button
             onClick={handleSavePinnedLocation}
             disabled={isSubmitting}
-            className="flex-1 rounded-lg bg-pink-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-lg bg-pink-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {isSubmitting ? 'Saving…' : 'Save Location'}
           </button>
@@ -420,7 +408,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
           <div className="relative flex items-center justify-between p-6 border-b border-gray-100">
             <button 
               onClick={currentView !== 'location' ? handleBackToLocation : onClose}
-              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
             >
               <X className="h-5 w-5 text-gray-600" />
             </button>
