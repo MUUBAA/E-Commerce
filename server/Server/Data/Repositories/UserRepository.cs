@@ -49,7 +49,12 @@ namespace Server.Data.Repositories
         }
         public int AddUser(User user)
         {
-            User? existingUser = null;
+            User? existingUser = repository.Users.FirstOrDefault(u => u.Email == user.Email);
+            if (existingUser != null)
+            {
+                throw new EntityDuplicateException("User with the same email already exists");
+            }
+            
             if (!string.IsNullOrEmpty(user.Email))
             {
                 existingUser = repository.Users.FirstOrDefault(u => u.Email == user.Email);

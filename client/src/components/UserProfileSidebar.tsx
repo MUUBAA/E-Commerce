@@ -40,6 +40,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
     dispatch(resetJwt());
     localStorage.removeItem("jwtToken");
     localStorage.clear();
+    setValues({ name: "", email: "", address: "" });
+    setCurrentView("main");
     navigate("/");
   };
 

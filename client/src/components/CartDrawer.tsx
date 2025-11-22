@@ -78,12 +78,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         toast.success("Login successful!");
         setFormData({ email: '', name: '', password: '', confirmPassword: '' });
 
-        const loginJwt = response.payload as string;
-        const loginDecodedToken = jwtDecode<DecodedToken>(loginJwt);
-
-        console.log('Logged in user:', loginDecodedToken);
-
-        // Call the function to fetch cart products
+        await FetchCartItems();
+        setCurrentView("cart");
       } else {
         const errorMsg =
           typeof response.payload === "string" && response.payload
@@ -154,55 +150,42 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
   setLoading(true);
   try {
-    const response = await dispatch(
+    const { token, message } = await dispatch(
       registerUser({
         name: formData.name,
         email: formData.email,
         password: formData.password,
       })
-    );
+    ).unwrap(); // <-- throws if rejected
 
-    if (response.type === "registerUser/fulfilled") {
-      const { token, message } = response.payload as {
-        token: string;
-        message: string;
-      };
+    toast.dismiss();
+    toast.success(message || "Registration successful!");
 
-      toast.dismiss();
-      toast.success(message || "Registration successful!");
-
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-        console.log("Registered user:", decoded);
-      } catch (err) {
-        console.warn("Failed to decode token from register:", err);
-      }
-
-      await FetchCartItems();
-      setCurrentView("cart");
-
-      // Clear form
-      setFormData({
-        email: "",
-        name: "",
-        password: "",
-        confirmPassword: "",
-      });
-    } else {
-      const errorMsg =
-        typeof response.payload === "string" && response.payload
-          ? response.payload
-          : "Registration failed";
-      toast.error(errorMsg);
+    try {
+      const decoded = jwtDecode<DecodedToken>(token);
+      console.log("Registered user:", decoded);
+    } catch (err) {
+      console.warn("Failed to decode token from register:", err);
     }
+
+    await FetchCartItems();
+    setCurrentView("cart");
+
+    setFormData({
+      email: "",
+      name: "",
+      password: "",
+      confirmPassword: "",
+    });
   } catch (error) {
     console.error("Registration catch error:", error);
-    toast.error("Registration failed");
+    toast.error(
+      typeof error === "string" && error ? error : "Registration failed"
+    );
   } finally {
     setLoading(false);
   }
 };
-
 
   const handleSubmitForgot = async (e: React.FormEvent) => {
     e.preventDefault();
