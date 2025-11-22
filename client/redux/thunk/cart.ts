@@ -65,7 +65,7 @@ export const addToCart = createAsyncThunk<
   async (payload, { rejectWithValue }) => {
     try {
       const token = getDecryptedJwt();
-      if (!token) return rejectWithValue('No authentication token found');
+      if (!token) return rejectWithValue('Please sign in to add items to your cart');
 
       // Ensure userId in payload matches token
       type JwtPayload = { id?: number; sub?: string; [k: string]: unknown };

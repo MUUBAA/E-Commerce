@@ -136,7 +136,20 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     if (token) {
       FetchCartItems();
       setCurrentView('cart');
+    } else {
+      setCartItems([]);
+      setCurrentView('login');
     }
+
+    // Listen for logout event to reset cart and show login view
+    const handleUserLoggedOut = () => {
+      setCartItems([]);
+      setCurrentView('login');
+    };
+    window.addEventListener('user-logged-out', handleUserLoggedOut);
+    return () => {
+      window.removeEventListener('user-logged-out', handleUserLoggedOut);
+    };
   }, [dispatch]);
       
  const handleSubmitRegister = async (e: React.FormEvent) => {
@@ -244,7 +257,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         })
       ).unwrap();
       toast.success('Added to cart');
-      FetchCartItems();
+      await FetchCartItems();
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
     }
