@@ -9,13 +9,14 @@ using Server.Data.Entities.Users;
 using Server.Services.MessageServices;
 using Server.Utils;
 using System.Security.Cryptography;
+using Server.Data.Contract.Auth;
 
 namespace Server.Services.AuthService
 {
     public interface IAuthService
     {
         string Login(string email, string password);
-        bool Register(RegisterUserDto userDto);
+        public RegisterContract Register(RegisterUserDto userDto);
         bool ForgotPassword(ForgotPasswordRequestDto request);
         bool ResetPassword(ResetPasswordRequestDto resetDto);
     }
@@ -47,7 +48,7 @@ namespace Server.Services.AuthService
 
         }
 
-        public bool Register(RegisterUserDto userDto)
+        public RegisterContract Register(RegisterUserDto userDto)
         {
             var contract = new UserContract
             {
@@ -55,7 +56,34 @@ namespace Server.Services.AuthService
                 Email = userDto.Email,
                 Password = userDto.Password  // Pass plain password, let createUser hash it
             };
-            return _userService.createUser(contract);
+            var created = _userService.createUser(contract);
+            if (!created)
+            {
+                return new RegisterContract
+                {
+                    Sucess = false,
+                    Message = "Failed to create user"
+                };
+            }
+
+            var user = _userService.GetUserByEmail(userDto.Email);
+
+            var jwtParam = new JWTUserParam
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var token = GenerateToken(jwtParam, 7);
+
+            return new RegisterContract
+            {
+                Sucess = true,
+                Token = token,
+                Message = "User registered sucessfully"
+            };
         }
         private string GenerateToken(JWTUserParam userParam, int expireInDays)
         {
@@ -96,7 +124,7 @@ namespace Server.Services.AuthService
         }
         private bool SendForgotPasswordEmail(UserDto user, string token)
         {
-            var resetLink = $"{_appUrl}/reset-password?token={token}";
+            var resetLink = $"{_appUrl}reset-password?token={token}";
             var (subject, body) = _emailTemplate.SendForgotPasswordEmail(user, resetLink);
              _emailService.SendEmail(user.Email!, subject, body);
             return true;

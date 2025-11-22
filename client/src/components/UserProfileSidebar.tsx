@@ -25,6 +25,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   const { UserAccount, loading } = useSelector(
     (state: RootState) => state.user
   );
+  const isLoggedIn = Boolean(localStorage.getItem('jwtToken'));
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -85,11 +86,10 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           <User className="h-8 w-8 text-white" />
         </div>
         <div className="ml-4">
-          {/* // in renderMainView() */}
           <h3 className="text-lg font-semibold text-gray-900">
-            {values.name || "Guest"}
+            {values.name || (!isLoggedIn ? "Guest" : "No details")}
           </h3>
-          <p className="text-gray-600">{values.email}</p>
+          <p className="text-gray-600">{values.email || (!isLoggedIn ? "" : "No details")}</p>
         </div>
       </div>
 
@@ -129,16 +129,18 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
         </button>
       </div>
 
-      {/* Log Out Button */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <button
-          type="button"
-          className="w-full p-4 rounded-lg hover:bg-gray-50 transition-colors text-left text-gray-900 font-medium cursor-pointer"
-          onClick={handleLogout}
-        >
-          Log Out
-        </button>
-      </div>
+      {/* Log Out Button (only if logged in) */}
+      {isLoggedIn && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            className="w-full p-4 rounded-lg hover:bg-gray-50 transition-colors text-left text-gray-900 font-medium cursor-pointer"
+            onClick={handleLogout}
+          >
+            Log Out
+          </button>
+        </div>
+      )}
     </div>
   );
 
@@ -214,7 +216,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           </label>
           <input
             type="text"
-            value={values.name}
+            value={values.name || (!isLoggedIn ? "Guest" : "No details")}
             disabled
             className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
           />
@@ -226,7 +228,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           </label>
           <input
             type="email"
-            value={values.email}
+            value={values.email || (!isLoggedIn ? "Guest" : "No details")}
             disabled
             className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
           />
@@ -234,6 +236,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
       </form>
 
       {/* Logout Account Section */}
+      { isLoggedIn  && (
       <div className="mt-8 pt-6 border-t border-gray-200">
         <h4 className="text-pink-500 font-semibold mb-2">Log Out</h4>
         <p className="text-gray-600 text-sm mb-4">
@@ -247,6 +250,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
           Log Out
         </button>
       </div>
+      )}
     </div>
   );
 
