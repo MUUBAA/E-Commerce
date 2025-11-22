@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.tsx';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.tsx';
-import ProductGrid from '../components/ProductGrid';
-import ProductCarousel from '../components/ProductCarousel';
+import ProductCard from '../components/ProductCard';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
@@ -47,7 +46,7 @@ const CafePage: React.FC = () => {
     FetchProducts();
   }, [dispatch]);
 
-  // Transform API products for ProductGrid/ProductCarousel
+  // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
     id: product.id,
     itemName: product.itemName || 'Unknown Product',
@@ -58,7 +57,7 @@ const CafePage: React.FC = () => {
     discount: product.itemPrice ? `₹20 OFF` : undefined,
     rating: 4.2, // Placeholder, replace with real if available
     reviews: '1k', // Placeholder, replace with real if available
-    weight: '1 unit', // Placeholder, replace with real if available
+    weight: '1 pack', // Placeholder, replace with real if available
   }));
 
   // Cafe banner data
@@ -71,14 +70,13 @@ const CafePage: React.FC = () => {
   };
 
   // What's On Your Mind categories (static)
-  const mindCategories = [
-    { name: '✨ Bestsellers', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/bestseller.jpg?ts=1709800030' },
-    { name: 'Breakfast', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/breakfast.jpg?ts=1709800030' },
-    { name: 'Meals', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/meals.jpg?ts=1709800030' },
-    { name: 'Chai', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chai.jpg?ts=1709800030' },
-    { name: 'Coffee', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/coffee.jpg?ts=1709800030' },
-    { name: 'Desserts', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/desserts.jpg?ts=1709800030' },
-  ];
+  // const mindCategories = [
+  //   { name: 'Breakfast', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/breakfast.jpg?ts=1709800030' },
+  //   { name: 'Meals', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/meals.jpg?ts=1709800030' },
+  //   { name: 'Chai', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chai.jpg?ts=1709800030' },
+  //   { name: 'Coffee', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/coffee.jpg?ts=1709800030' },
+  //   { name: 'Desserts', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/desserts.jpg?ts=1709800030' },
+  // ];
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -124,11 +122,8 @@ const CafePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Featured Products Carousel (dynamic) */}
-        <ProductCarousel title="" products={transformedProducts} />
-
         {/* What's On Your Mind Section (static) */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <h2 className="mb-4 text-xl font-bold text-gray-900">What's On Your Mind?</h2>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {mindCategories.map((category) => (
@@ -144,12 +139,14 @@ const CafePage: React.FC = () => {
               </div>
             ))}
           </div>
+        </div> */}
+
+        {/* Cafe Product Grid (dynamic, like other categories) */}
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+          {transformedProducts.map((product, index) => (
+            <ProductCard key={`${product.itemName}-${index}`} {...product} />
+          ))}
         </div>
-
-        {/* Cafe Product Grid (dynamic) */}
-        <ProductGrid title="Cafe Menu" products={transformedProducts} />
-
-        {/* Loading/Error/Empty States */}
         {loading && (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>

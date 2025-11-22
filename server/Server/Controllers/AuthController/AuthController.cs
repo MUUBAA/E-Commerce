@@ -21,8 +21,8 @@ namespace Server.Controllers.AuthController
         [Route("/auth/register")]
         public IActionResult Register([FromBody] RegisterUserDto userDto)
         {
-            _authService.Register(userDto);
-            return Ok();
+          var response =   _authService.Register(userDto);
+            return Ok(response);
         }
 
         [HttpPost]

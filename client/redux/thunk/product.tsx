@@ -1,6 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { getDecryptedJwt } from "../../utils/auth";
 
 
 // Get JWT token from localStorage
@@ -21,27 +20,15 @@ export const fetchAllProducts = createAsyncThunk<any, GetAllProductsPayload>(
   'products/fetchAll',
   async (payload, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('jwtToken');
-      
-      if (!token) {
-        return rejectWithValue('No authentication token found');
-      }
-      const decodedToken = getDecryptedJwt(); // Decode the base64 encoded toke
-      if (!decodedToken) {
-        return rejectWithValue('Invalid authentication token');
-      }
-
       const response = await axios.post(
         `/product/get-all`, payload || {},
         {
           headers: {
-            Authorization: `Bearer ${decodedToken}`,
             "Content-Type": "application/json-patch+json",
             Accept: 'text/plain'
           }
         }
       );
-
       return response.data.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

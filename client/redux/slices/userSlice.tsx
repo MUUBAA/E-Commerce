@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { UserData } from "./loginUser";
-import { createUser, getUserById } from "../thunk/user";
+import { getUserById } from "../thunk/user";
 
 
 interface User {
@@ -46,17 +46,6 @@ const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(createUser.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(createUser.fulfilled, (state) => {
-                state.loading = false;
-            })
-            .addCase(createUser.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload as string;
-            })
             .addCase(getUserById.pending, (state) => {
                 state.loading = true;
                 state.error = null;

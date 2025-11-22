@@ -132,10 +132,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       }
     } catch (error) {
       console.error('Error fetching cart items:', error);
-      setCartItems([]); // Fallback to empty array on error
+      setCartItems([]); 
     }
   }
-  // Move useEffect to top-level, not inside handleSubmitLogin
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
@@ -143,46 +142,67 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       setCurrentView('cart');
     }
   }, [dispatch]);
-      // Optionally, you can decode and get userId here if needed
       
-  const handleSubmitRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('handleSubmitRegister called with:', formData);
-    
-    // Validate password match
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+ const handleSubmitRegister = async (e: React.FormEvent) => {
+  e.preventDefault();
+  console.log("handleSubmitRegister called with:", formData);
 
-    setLoading(true);
-    try {
-      const response = await dispatch(registerUser({ 
-        name: formData.name, 
-        email: formData.email, 
-        password: formData.password 
-      }));      
-      if (response.type === "registerUser/fulfilled") {
-        toast.dismiss();
-        toast.success("Registration successful! Please login.");
-        setFormData({ email: '', name: '', password: '', confirmPassword: '' });
-        
-        // Switch to login view
-        setCurrentView('login');
-      } else {
-        const errorMsg =
-          typeof response.payload === "string" && response.payload
-            ? response.payload
-            : "Registration failed";
-        toast.error(errorMsg);
-      }
-    } catch (error) {
-      console.error('Registration catch error:', error);
-      toast.error("Registration failed");
-    } finally {
-      setLoading(false);
-    }
+  if (formData.password !== formData.confirmPassword) {
+    toast.error("Passwords do not match");
+    return;
   }
+
+  setLoading(true);
+  try {
+    const response = await dispatch(
+      registerUser({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      })
+    );
+
+    if (response.type === "registerUser/fulfilled") {
+      const { token, message } = response.payload as {
+        token: string;
+        message: string;
+      };
+
+      toast.dismiss();
+      toast.success(message || "Registration successful!");
+
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        console.log("Registered user:", decoded);
+      } catch (err) {
+        console.warn("Failed to decode token from register:", err);
+      }
+
+      await FetchCartItems();
+      setCurrentView("cart");
+
+      // Clear form
+      setFormData({
+        email: "",
+        name: "",
+        password: "",
+        confirmPassword: "",
+      });
+    } else {
+      const errorMsg =
+        typeof response.payload === "string" && response.payload
+          ? response.payload
+          : "Registration failed";
+      toast.error(errorMsg);
+    }
+  } catch (error) {
+    console.error("Registration catch error:", error);
+    toast.error("Registration failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleSubmitForgot = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -49,6 +49,11 @@ const FreshPage: React.FC = () => {
     itemPrice: product.itemPrice ? `₹${product.itemPrice}` : '₹0',
     itemUrl: product.itemUrl || 'https://via.placeholder.com/150', // Placeholder image for missing URLs
     itemDescription: product.itemDescription || 'No description available',
+    originalPrice: product.itemPrice ? `₹${product.itemPrice + 20}` : undefined, // Example
+    discount: product.itemPrice ? `₹20 OFF` : undefined,
+    rating: 4.2, // Placeholder, replace with real if available
+    reviews: '1k', // Placeholder, replace with real if available
+    weight: '1 unit', // Placeholder, replace with real if available
   }));
 
 

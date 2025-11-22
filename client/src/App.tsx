@@ -26,6 +26,7 @@ import { CartProvider, useCart } from "./contexts/CartContext";
 import type { ReactNode } from 'react';
 import React from 'react';
 import SaltSugarPage from "./pages/SaltSugar";
+import ResetPassword from "./components/ResetPassword";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -64,6 +65,12 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
 function AppContent() {
   const { isCartOpen, closeCart } = useCart();
+  const path = window.location.pathname;
+
+  // Only show ResetPassword without layout on /reset-password
+  if (path === "/reset-password") {
+    return <ResetPassword />;
+  }
 
   return (
     <>
