@@ -1,10 +1,10 @@
 import React, {  useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 import { X } from 'lucide-react';
 import { loginUser, registerUser, forgotPassword } from '../../redux/thunk/jwtVerify';
-import type { AppDispatch } from '../../redux/stores';
+import type { AppDispatch, RootState } from '../../redux/stores';
 import { addToCart, getCartItems, removeCartItem, type GetAllCartPayload } from '../../redux/thunk/cart';
 import type { CartItem } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
@@ -24,6 +24,8 @@ type ViewState = 'empty' | 'login' | 'register' | 'cart' | 'forgot';
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const reduxCartItems = useSelector((state: RootState) => state.cart.items);
+  const reduxTotalPrice = useSelector((state: RootState) => state.cart.totalPrice ?? 0);
   const [currentView, setCurrentView] = useState<ViewState>('empty');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -134,6 +136,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
+
       FetchCartItems();
       setCurrentView('cart');
     } else {
@@ -199,6 +202,11 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     setLoading(false);
   }
 };
+
+useEffect(() => {
+  setCartItems(reduxCartItems);
+  setTotalPrice(reduxTotalPrice);
+}, [reduxCartItems, reduxTotalPrice]);
 
   const handleSubmitForgot = async (e: React.FormEvent) => {
     e.preventDefault();
