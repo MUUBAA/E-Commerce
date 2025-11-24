@@ -33,9 +33,9 @@ const Header: React.FC = () => {
   };
 
   // Total items in cart (sum of quantities)
-  const cartCount = useSelector((state: RootState) => {
-  return state.cart?.totalItems ?? 0;
-});
+const cartCount = useSelector((state: RootState) =>
+  state.cart?.totalItems ?? 0
+);
 
   
 

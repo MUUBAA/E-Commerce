@@ -42,6 +42,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
     localStorage.clear();
     setValues({ name: "", email: "", address: "" });
     setCurrentView("main");
+    // Dispatch a custom event to notify other components (like CartDrawer)
+    window.dispatchEvent(new Event("user-logged-out"));
     navigate("/");
   };
 

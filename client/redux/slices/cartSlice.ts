@@ -10,6 +10,7 @@ export interface CartItem {
   itemUrl?: string;
   itemName?: string;
   itemDescription?: string;
+  totalPrice?: number;
 }
 
 interface CartState {
@@ -24,6 +25,7 @@ interface CartState {
   itemName?: string;
   itemDescription?: string;
   totalItems?: number;
+  totalPrice?: number;
   loading: boolean;
   error: string | null;
 }
@@ -32,6 +34,7 @@ const initialState: CartState = {
   items: [],
   page: 0,
   totalItems: 0,
+  totalPrice: 0,
   pageSize: 0,
   userId: 0,
   loading: false,
@@ -64,6 +67,15 @@ const cartSlice = createSlice({
             ? data.totalItems
             : items.reduce(
                 (sum: number, i: CartItem) => sum + (i.quantity || 0),
+                0
+              );
+
+        state.totalPrice =
+          typeof data?.totalPrice === "number"
+            ? data.totalPrice
+            : items.reduce(
+                (sum: number, i: CartItem) =>
+                  sum + (i.price || 0) * (i.quantity || 0),
                 0
               );
       })
