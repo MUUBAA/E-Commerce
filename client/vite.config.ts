@@ -14,28 +14,28 @@ export default defineConfig({
   server: {
     proxy: {
       "/swagger": {
-        target: "https://localhost:5200/",
+        target: "https://nestonlinestore.onrender.com/",
         secure: false,
         changeOrigin: true,
       },
 
       "^/auth/.*": {
-        target: "https://localhost:5200/",
+        target: "https://nestonlinestore.onrender.com/",
         secure: false,
         changeOrigin: true,
       },
       "^/users/.*": {
-        target: "https://localhost:5200/",
+        target: "https://nestonlinestore.onrender.com/",
         secure: false,
         changeOrigin: true,
       },
       "^/product/.*": {
-        target: "https://localhost:5200/",
+        target: "https://nestonlinestore.onrender.com/",
         secure: false,
         changeOrigin: true,
       },
       "^/cart/.*": {
-        target: "https://localhost:5200/",
+        target: "https://nestonlinestore.onrender.com/",
         secure: false,
         changeOrigin: true,
       },
