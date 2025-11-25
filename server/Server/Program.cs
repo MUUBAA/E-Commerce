@@ -4,62 +4,71 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // Add services to the container.
-    builder.Services.AddControllers();
+    // IMPORTANT: Bind to PORT env var for Render
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-    // CORS for client dev servers (Vite)
+
+    // CORS
     const string CorsPolicyName = "AllowClient";
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(CorsPolicyName, policy =>
-            policy.WithOrigins(
-                    "http://localhost:5015",
-                    "https://localhost:5015",
-                    "http://127.0.0.1:5015",
-                    "https://127.0.0.1:5015",
-                    "http://localhost:5173",
-                    "https://localhost:5173",
-                    "http://127.0.0.1:5173",
-                    "https://127.0.0.1:5173"
-                )
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-        );
+        {
+            // Local dev origins (your current list)
+            var origins = new List<string>
+            {
+                "http://localhost:5015",
+                "https://localhost:5015",
+                "http://127.0.0.1:5015",
+                "https://127.0.0.1:5015",
+                "http://localhost:5173",
+                "https://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://127.0.0.1:5173"
+            };
+
+            // Add production frontend origin from env var (Vercel)
+            var prodOrigin = Environment.GetEnvironmentVariable("ALLOWED_ORIGIN");
+            if (!string.IsNullOrEmpty(prodOrigin))
+            {
+                origins.Add(prodOrigin);
+            }
+
+            policy.WithOrigins(origins.ToArray())
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+                  // .AllowCredentials(); // only if you really need credentials (cookies/auth)
+        });
     });
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+    // Swagger / OpenAPI
     builder.Services.AddEndpointsApiExplorer();
 
     AuthProvider.Confiqure(builder.Services, builder.Configuration);
     SwaggerProvider.Configure(builder.Services);
-    ComponentRegistry.Registry(builder.Services, builder.Configuration).GetAwaiter().GetResult();
+
+    // Registers controllers, DbContext, services, etc.
+    await ComponentRegistry.Registry(builder.Services, builder.Configuration);
 
     var app = builder.Build();
 
     DataMigration.Configure(app.Services);
 
-    app.UseDefaultFiles();
-    app.UseStaticFiles();
- // Configure the HTTP request pipeline.
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    app.UseHttpsRedirection();
+
     app.UseCors(CorsPolicyName);
 
     app.UseAuthorization();
 
     app.MapControllers();
 
-    app.MapFallbackToFile("/index.html");
-
     app.Run();
 }
 catch (Exception ex)
 {
-    // Log the exception or handle it as needed
     Console.WriteLine($"An error occurred: {ex.Message}");
-    // Optionally, rethrow the exception if you want to terminate the application
     throw;
-
 }
