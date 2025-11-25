@@ -74,7 +74,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     setLoading(true);
     try {
       const response = await dispatch(loginUser({ email: formData.email, password: formData.password }));
-      console.log('Login dispatch response:', response);
       if (response.type === "loginUser/fulfilled") {
         toast.dismiss();
         toast.success("Login successful!");
@@ -157,7 +156,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       
  const handleSubmitRegister = async (e: React.FormEvent) => {
   e.preventDefault();
-  console.log("handleSubmitRegister called with:", formData);
 
   if (formData.password !== formData.confirmPassword) {
     toast.error("Passwords do not match");
@@ -213,7 +211,6 @@ useEffect(() => {
     setLoading(true);
     try {
       const response = await dispatch(forgotPassword({ email: formData.email }));
-      console.log('Forgot dispatch response:', response);
       if (response.type === 'forgotPassword/fulfilled') {
         toast.dismiss();
         toast.success('If an account exists for this email, you will receive reset instructions');

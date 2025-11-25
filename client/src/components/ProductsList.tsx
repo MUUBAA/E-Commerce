@@ -17,7 +17,7 @@ const ProductsList: React.FC<ProductsListProps> = () => {
       try {
         const preparePayload : GetAllProductsPayload = {
           id: 0,
-          categoryId: 1, // Example categoryId for Fruits & Vegetables
+          categoryId: 1, 
           itemName: "",
           itemsPerPage: 20,
           totalItems: 0,
@@ -28,10 +28,8 @@ const ProductsList: React.FC<ProductsListProps> = () => {
         if (response.meta.requestStatus === 'fulfilled') {
           if (Array.isArray(response.payload)) {
             setProducts(response.payload);
-            console.log(response.payload);
           } else if (response.payload && typeof response.payload === 'object') {
-            setProducts(response?.payload?.items || []); // Convert single product to array
-            console.log('Fetched products:', response.payload);
+            setProducts(response?.payload?.items || []); 
           } else {
             console.error('Unexpected response payload:', response.payload);
             setProducts([]); // Fallback to an empty array
