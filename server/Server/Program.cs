@@ -25,7 +25,8 @@ try
                 "http://localhost:5173",
                 "https://localhost:5173",
                 "http://127.0.0.1:5173",
-                "https://127.0.0.1:5173"
+                "https://127.0.0.1:5173",
+                "https://nestonlinestore.vercel.app"
             };
 
             // Add production frontend origin from env var (Vercel)
@@ -35,19 +36,15 @@ try
                 origins.Add(prodOrigin);
             }
 
-            // Allow Vercel preview and production domains (wildcard for *.vercel.app)
+            // Allow only the exact Vercel production domain and local dev
             origins.Add("https://nestonlinestore.vercel.app");
-            origins.Add("https://*.vercel.app"); // for Vercel preview deployments
 
             policy.SetIsOriginAllowed(origin =>
-                origins.Any(o =>
-                    o == origin ||
-                    (o.Contains("*.vercel.app") && origin.EndsWith(".vercel.app"))
-                )
+                origins.Contains(origin)
             )
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials(); // Enable if you use cookies/auth
+            .AllowAnyMethod();
+            // .AllowCredentials(); // Uncomment only if you use cookies/auth
         });
     });
 
