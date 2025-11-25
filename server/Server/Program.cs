@@ -35,10 +35,19 @@ try
                 origins.Add(prodOrigin);
             }
 
-            policy.WithOrigins(origins.ToArray())
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-                  // .AllowCredentials(); // only if you really need credentials (cookies/auth)
+            // Allow Vercel preview and production domains (wildcard for *.vercel.app)
+            origins.Add("https://nestonlinestore.vercel.app");
+            origins.Add("https://*.vercel.app"); // for Vercel preview deployments
+
+            policy.SetIsOriginAllowed(origin =>
+                origins.Any(o =>
+                    o == origin ||
+                    (o.Contains("*.vercel.app") && origin.EndsWith(".vercel.app"))
+                )
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Enable if you use cookies/auth
         });
     });
 
