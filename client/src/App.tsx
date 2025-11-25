@@ -18,7 +18,7 @@ import JuicesHealthyDrinksPage from "./pages/JuicesHealthyDrinksPage";
 import CafeBestsellersPage from "./pages/CafeBestsellersPage";
 import CafeSnacksPage from "./pages/CafeSnacksPage";
 import Header from "./components/Header";
-import SubHeader from "./components/SubHeader";
+// import SubHeader from "./components/SubHeader";
 import Footer from "./components/Footer";
 import BottomNav from "./components/BottomNav";
 import CartDrawer from "./components/CartDrawer";
@@ -75,7 +75,7 @@ function AppContent() {
   return (
     <>
       <Header />
-      <SubHeader />
+      {/* <SubHeader /> */}
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/cafe" element={<CafePage />} />

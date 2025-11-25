@@ -2,7 +2,7 @@
 import { Star } from 'lucide-react';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart, removeCartItem } from '../../redux/thunk/cart';
+import { addToCart, removeCartItem, getCartItems } from '../../redux/thunk/cart';
 import type { AppDispatch, RootState } from '../../redux/stores';
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
@@ -85,10 +85,28 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const handleDecrease = async () => {
     if (cartQuantity <= 0) return;
+    const token = getDecryptedJwt();
+    let userIdFromToken: number | undefined;
+    if (token) {
+      try {
+        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+        userIdFromToken =
+          typeof decoded.id === 'number'
+            ? decoded.id
+            : decoded.sub
+              ? Number(decoded.sub)
+              : undefined;
+      } catch {
+        // ignore; will fallback
+      }
+    }
+    const UserId = userIdFromToken ?? fallbackUserId;
+    if (!UserId) return toast.warn('Please sign in to remove items from your cart');
     try {
       await dispatch(
-        removeCartItem({ id })
+        removeCartItem({ productId: id, userId: UserId })
       ).unwrap();
+      await dispatch(getCartItems({ userId: UserId, id: 0, page: 0, pageSize: 20, productId: 0, quantity: 0, price: 0, itemDescription: '', itemName: '', itemUrl: '' }));
       toast.success('Removed from cart');
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to remove from cart');

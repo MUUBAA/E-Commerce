@@ -1,9 +1,10 @@
 // redux/slices/cartSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
-import { addToCart, getCartItems } from "../thunk/cart";
+import { addToCart, getCartItems, removeCartItem } from "../thunk/cart";
 
 export interface CartItem {
   id: number;
+  userId: number;
   productId: number;
   quantity: number;
   price: number;
@@ -44,9 +45,7 @@ const initialState: CartState = {
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {
-    // optional: local add/remove for optimistic updates
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getCartItems.pending, (state) => {
@@ -83,28 +82,100 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = (action.payload as string) || "Failed to load cart items";
       })
-
       .addCase(addToCart.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(addToCart.fulfilled, (state, action) => {
         state.loading = false;
-        const incoming: CartItem = action.meta.arg; // the request we sent
-        const existing = state.items.find(
-          (i) => i.productId === incoming.productId
-        );
-        if (existing) {
-          existing.quantity += incoming.quantity;
-          existing.price = incoming.price;
+
+        // Prefer using the server response if it has totals/items
+        const payload = action.payload as any;
+        const data = payload?.data ?? payload;
+
+        if (data) {
+          if (Array.isArray(data.items)) {
+            state.items = data.items;
+          } else {
+            const incoming: CartItem = action.meta.arg;
+            const existing = state.items.find(
+              (i) => i.productId === incoming.productId
+            );
+            if (existing) {
+              existing.quantity += incoming.quantity;
+              existing.price = incoming.price;
+            } else {
+              state.items.push(incoming);
+              // Only increase totalItems if quantity is 1 (new product)
+              if (incoming.quantity === 1) {
+                state.totalItems = (state.totalItems || 0) + 1;
+              }
+            }
+          }
+
+          if (typeof data.totalItems === "number") {
+            state.totalItems = data.totalItems;
+          } else {
+            // Always set to number of unique products
+            state.totalItems = state.items.length;
+          }
+
+          if (typeof data.totalPrice === "number") {
+            state.totalPrice = data.totalPrice;
+          } else {
+            state.totalPrice = state.items.reduce(
+              (sum, i) => sum + (i.price || 0) * (i.quantity || 0),
+              0
+            );
+          }
         } else {
-          state.items.push(incoming);
+          const incoming: CartItem = action.meta.arg;
+          const existing = state.items.find(
+            (i) => i.productId === incoming.productId
+          );
+          if (existing) {
+            existing.quantity += incoming.quantity;
+            existing.price = incoming.price;
+          } else {
+            state.items.push(incoming);
+            // Only increase totalItems if quantity is 1 (new product)
+            if (incoming.quantity === 1) {
+              state.totalItems = (state.totalItems || 0) + 1;
+            }
+          }
+
+          state.totalItems = state.items.length;
+          state.totalPrice = state.items.reduce(
+            (sum, i) => sum + (i.price || 0) * (i.quantity || 0),
+            0
+          );
         }
       })
+
       .addCase(addToCart.rejected, (state, action) => {
         state.loading = false;
         state.error =
           (action.payload as string) || "Failed to add product to cart";
+      })
+      .addCase(removeCartItem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeCartItem.fulfilled, (state, action) => {
+        const { productId } = action.payload;
+        const item = state.items.find((i) => i.productId === productId);
+        if (!item) return;
+
+        if (item.quantity > 1) {
+          item.quantity -= 1; // 3 → 2, 2 → 1
+        } else {
+          state.items = state.items.filter((i) => i.productId !== productId); // remove row
+        }
+      })
+      .addCase(removeCartItem.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as string) || "Failed to remove product from cart";
       });
   },
 });

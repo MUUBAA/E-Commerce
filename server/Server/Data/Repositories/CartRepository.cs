@@ -9,7 +9,7 @@ namespace Server.Data.Repositories
     public interface ICartRepository
     {
         void AddToCart(CartItemAdd contract);
-        void RemoveFromCart(int id);
+        void RemoveFromCart(int productId, int userId);
         CartItems GetCartItem(int id);
         (long totalItems, int totalPages, decimal totalPrice, List<CartItemDto>) GetCartItems(CartItemContract contract);
 
@@ -38,14 +38,17 @@ namespace Server.Data.Repositories
                     Price = contract.Price
                 };
                 repository.CartItems.Add(newItem);
-                
+
             }
             repository.SaveChanges();
         }
 
-        public void RemoveFromCart(int id)
+        public void RemoveFromCart(int productId, int userId)
         {
-            var item = repository.CartItems.Find(id);
+            var item = repository.CartItems
+        .SingleOrDefault(x => x.ProductId == productId 
+                           && x.UserId == userId 
+                           && !x.IsDeleted);
             if (item == null)
             {
                 throw new Exception("Cart item not found");

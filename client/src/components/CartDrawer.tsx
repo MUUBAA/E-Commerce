@@ -272,7 +272,7 @@ useEffect(() => {
   };
 
   const handleDecrease = async (item: CartItem) => {
-    await dispatch(removeCartItem({ id: item.id }));
+    await dispatch(removeCartItem({ productId: item.productId, userId: item.userId }));
     FetchCartItems();
   };
 

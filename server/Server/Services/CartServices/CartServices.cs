@@ -9,7 +9,7 @@ namespace Server.Services.CartServices
     public interface ICartServices
     {
         bool AddToCart(CartItemAdd contract);
-        bool RemoveFromCart(int id);
+        bool RemoveFromCart(int productId, int userId);
         CartItems GetCartItem(int id);
         PaginationResponse<CartItemDto> GetCartItems(CartItemContract contract);
     }
@@ -20,9 +20,9 @@ namespace Server.Services.CartServices
             cartRepository.AddToCart(contract);
             return true;
         }
-        public bool RemoveFromCart(int id)
+        public bool RemoveFromCart(int productId, int userId)
         {
-            cartRepository.RemoveFromCart(id);
+            cartRepository.RemoveFromCart(productId, userId);
             return true;
         }
         public CartItems GetCartItem(int id)

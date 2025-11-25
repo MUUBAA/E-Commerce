@@ -38,9 +38,9 @@ namespace Server.Controllers.CartController
 
         [HttpDelete]
         [Route("cart/remove")]
-        public ActionResult<GenericApiResponse<string>> RemoveFromCart(int id)
+        public ActionResult<GenericApiResponse<string>> RemoveFromCart(int productId, int userId)
         {
-            cartServices.RemoveFromCart(id);
+            cartServices.RemoveFromCart(productId, userId);
             return Ok(new GenericApiResponse<string>(true, "Item removed from cart successfully", null));
         }
     }
