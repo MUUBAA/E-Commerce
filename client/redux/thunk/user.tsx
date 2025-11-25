@@ -25,8 +25,10 @@ export const getUserById = createAsyncThunk<
       return rejectWithValue("Invalid authentication token");
     }
 
+    const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+    const url = `${base.replace(/\/$/, '')}/users/getById`;
     const response = await axios.get(
-      `/users/getById`,
+      url,
       {
         params: { id: payload.id },
         headers: {
