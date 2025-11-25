@@ -31,7 +31,6 @@ const DalPulsesPage: React.FC = () => {
             setProducts(response.payload);
           } else if (response.payload && typeof response.payload === 'object') {
             setProducts(response?.payload?.items || []); // Convert single product to array
-            console.log('Fetched products:', response.payload);
           } else {
             console.error('Unexpected response payload:', response.payload);
             setProducts([]); // Fallback to an empty array

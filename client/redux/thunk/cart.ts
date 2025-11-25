@@ -112,30 +112,42 @@ export const addToCart = createAsyncThunk<
   }
 );
 
+
+interface RemoveCartItemArgs {
+  productId: number;
+  userId: number;
+}
+
+interface RemoveCartItemResult {
+  productId: number;
+}
+
 export const removeCartItem = createAsyncThunk<
-  any, // Replace with the actual return type if known
-  { id: number }
+  RemoveCartItemResult,
+  RemoveCartItemArgs
 >(
   'cart/remove',
-  async ({ id }, { rejectWithValue }) => {
+  async ({ productId, userId }, { rejectWithValue }) => {
     try {
       const token = getDecryptedJwt();
       if (!token) return rejectWithValue('No authentication token found');
 
-      const response = await axios.delete(
-        `/cart/remove`,
-        {
-          params: { id },
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'text/plain',
-          },
-        }
-      );
-      return response.data;
+      const url = `/cart/remove?productId=${productId}&userId=${userId}`;
+
+      await axios.delete(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'text/plain',
+        },
+      });
+
+      // We just tell Redux which item to update
+      return { productId };
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        return rejectWithValue(error.response?.data?.message || 'Failed to remove cart item');
+        return rejectWithValue(
+          error.response?.data?.message || 'Failed to remove cart item'
+        );
       }
       return rejectWithValue('An unexpected error occurred');
     }

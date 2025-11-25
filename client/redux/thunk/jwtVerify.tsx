@@ -102,7 +102,6 @@ export const forgotPassword = createAsyncThunk<void, ForgotPasswordRequest>(
   'forgotPassword',
   async ({ email }, { rejectWithValue }) => {
     try {
-      console.log('Attempting forgot-password with:', { email });
       await axios.post(
         '/auth/forgot-password',
         { email },
@@ -113,7 +112,6 @@ export const forgotPassword = createAsyncThunk<void, ForgotPasswordRequest>(
           },
         }
       );
-      console.log('Forgot-password request successful');
     } catch (error) {
       console.error('Forgot-password error:', error);
       const axiosError = error as AxiosError<ErrorResponse>;
