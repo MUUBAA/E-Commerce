@@ -20,8 +20,10 @@ export const fetchAllProducts = createAsyncThunk<any, GetAllProductsPayload>(
   'products/fetchAll',
   async (payload, { rejectWithValue }) => {
     try {
+      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/product/get-all`;
       const response = await axios.post(
-        `/product/get-all`, payload || {},
+        url, payload || {},
         {
           headers: {
             "Content-Type": "application/json-patch+json",

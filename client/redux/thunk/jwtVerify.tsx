@@ -3,8 +3,10 @@ export const resetPassword = createAsyncThunk<any, { token: string; newPassword:
   'resetPassword',
   async ({ token, newPassword }, { rejectWithValue }) => {
     try {
+      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/auth/reset-password`;
       const response = await axios.post(
-        '/auth/reset-password',
+        url,
         { token, newPassword },
         {
           headers: {
@@ -35,8 +37,10 @@ export const loginUser = createAsyncThunk<string, LoginRequest>(
   'loginUser',
   async ({ email, password }, { rejectWithValue }) => {
     try {
+      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
       const response = await axios.post<string>(
-        `/auth/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        url,
         {},
         {
           headers: {
@@ -70,8 +74,10 @@ export const registerUser = createAsyncThunk<
   RegisterUserPayload
 >("auth/register", async (payload, { rejectWithValue }) => {
   try {
+    const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+    const url = `${base.replace(/\/$/, '')}/auth/register`;
     const response = await axios.post(
-      "/auth/register",
+      url,
       payload,
       {
         headers: {
@@ -102,8 +108,10 @@ export const forgotPassword = createAsyncThunk<void, ForgotPasswordRequest>(
   'forgotPassword',
   async ({ email }, { rejectWithValue }) => {
     try {
+      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/auth/forgot-password`;
       await axios.post(
-        '/auth/forgot-password',
+        url,
         { email },
         {
           headers: {
