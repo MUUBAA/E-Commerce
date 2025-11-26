@@ -27,7 +27,7 @@ Example (NestJS):
 ```
 app.enableCors({
   origin: [
-    'http://localhost:5173', // local dev
+    'http://localhost:5015', // local dev
     'https://yourapp.vercel.app' // production
   ],
   credentials: true,
