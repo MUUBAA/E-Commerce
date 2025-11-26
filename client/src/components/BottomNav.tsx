@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { Home, ShoppingCart, MapPin } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../../redux/stores';
 import LocationModal from './LocationModal';
 
 const BottomNav: React.FC = () => {
   const location = useLocation();
   const { openCart } = useCart();
+  // Get cart count from Redux
+  const cartCount = useSelector((state: RootState) => state.cart.totalItems || state.cart.items?.reduce((sum, i) => sum + (i.quantity || 0), 0) || 0);
 
 
   // Home, Location, Cart in nav row
@@ -35,7 +39,14 @@ const BottomNav: React.FC = () => {
                   className={`flex cursor-pointer flex-col items-center justify-center w-full text-sm font-medium transition-colors ${
                     isActive ? 'text-purple-600' : 'text-gray-500 hover:text-purple-600'
                   }`}>
-                  <item.icon className="h-6 w-6" />
+                  <span className="relative">
+                    <item.icon className="h-6 w-6" />
+                    {item.label === 'Cart' && cartCount > 0 && (
+                      <span className="absolute -top-1 -right-2 bg-pink-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center font-bold border border-white shadow">
+                        {cartCount}
+                      </span>
+                    )}
+                  </span>
                   <span>{item.label}</span>
                 </Link>
               );

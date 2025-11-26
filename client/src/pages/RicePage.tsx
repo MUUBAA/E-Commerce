@@ -61,24 +61,24 @@ const RicePage: React.FC = () => {
 
   const banners = [
     {
-      imageUrl: 'https://i.ibb.co/bJC2wT9/vegetables.png',
-      title: 'Fresh Seasonal Drops',
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581577/India_gate_all_rounder_oovbcs.webp',
+      title: 'Fresh Rozzona Basmati',
       subtitle: 'UP TO 30% OFF',
       buttonText: 'Explore',
       backgroundColor: 'bg-orange-100',
       isDark: false,
     },
     {
-      imageUrl: 'https://i.ibb.co/2j2BqjB/masala.png',
-      title: 'TULSI VIVAH SPECIALS',
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581674/jeera_rice_mm1bj7.webp',
+      title: 'SPECIALS JEERA RICE',
       subtitle: 'BEST DEALS',
       buttonText: 'Order now',
       backgroundColor: 'bg-green-700',
       isDark: true,
     },
     {
-      imageUrl: 'https://i.ibb.co/B2k0L1P/icecream.png',
-      title: "Season's Freshest APPLES",
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581546/Dawat_rosana_mini_mogra_qjh07r.webp',
+      title: "Season's Mogra Rice",
       subtitle: 'UP TO 30% OFF',
       buttonText: 'Explore now',
       backgroundColor: 'bg-blue-500',

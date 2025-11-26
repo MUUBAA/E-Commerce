@@ -86,7 +86,7 @@ namespace Server.Data.Repositories
 
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-            var totalPrice = query.Sum(c => c.Price * c.Quantity);
+            var totalPrice = query.Sum(c => c.Price);
 
             var items = query
             .Skip((page - 1) * pageSize)

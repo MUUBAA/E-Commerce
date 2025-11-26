@@ -5,6 +5,7 @@ import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import CategoryBanner from '../components/CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const JuicesHealthyDrinksPage: React.FC = () => {
@@ -13,8 +14,8 @@ const JuicesHealthyDrinksPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
 
-  // Fetch juices & healthy drinks products from API (categoryId=6)
-  const FetchProducts = async () => {
+  // Fetch juices & healthy drinks products from API (categoryId=8)
+  const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload: GetAllProductsPayload = {
         id: 0,
@@ -40,11 +41,11 @@ const JuicesHealthyDrinksPage: React.FC = () => {
       console.error('Failed to fetch products:', error);
       setProducts([]);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [dispatch, FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -59,6 +60,34 @@ const JuicesHealthyDrinksPage: React.FC = () => {
     reviews: '1k', // Placeholder, replace with real if available
     weight: '1 pack', // Placeholder, replace with real if available
   }));
+
+  // Banners for Juices & Healthy Drinks
+  const banners = [
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763696053/real_fruit_power_juice_qfr9tj.webp',
+      title: 'Real Fruit Juice',
+      subtitle: 'UP TO 10% OFF',
+      buttonText: 'Shop Now',
+      backgroundColor: 'bg-orange-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763694968/tropicana_guava_juice_fgtjtw.webp',
+      title: 'Tropicana Essentials',
+      subtitle: 'IMMUNITY BOOSTERS',
+      buttonText: 'Order now',
+      backgroundColor: 'bg-green-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763685968/paper_boat_mango_juice_f1izah.webp',
+      title: 'Paper Boat Drinks',
+      subtitle: 'BUY 2 GET 1',
+      buttonText: 'Grab Offer',
+      backgroundColor: 'bg-blue-500',
+      isDark: true,
+    },
+  ];
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -76,6 +105,15 @@ const JuicesHealthyDrinksPage: React.FC = () => {
       </div>
 
       <div className="p-4">
+        {/* Banners */}
+        <div className="mb-6">
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            {banners.map((banner, index) => (
+              <CategoryBanner key={index} {...banner} />
+            ))}
+          </div>
+        </div>
+
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {transformedProducts.map((product, index) => (

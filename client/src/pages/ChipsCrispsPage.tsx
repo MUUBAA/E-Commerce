@@ -5,6 +5,7 @@ import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import CategoryBanner from '../components/CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const ChipsCrispsPage: React.FC = () => {
@@ -13,8 +14,8 @@ const ChipsCrispsPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
 
-  // Fetch chips & crisps products from API (categoryId=5 as example)
-  const FetchProducts = async () => {
+  // Fetch chips & crisps products from API (categoryId=7)
+  const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload: GetAllProductsPayload = {
         id: 0,
@@ -40,11 +41,11 @@ const ChipsCrispsPage: React.FC = () => {
       console.error('Failed to fetch products:', error);
       setProducts([]);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [dispatch, FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -59,6 +60,34 @@ const ChipsCrispsPage: React.FC = () => {
     reviews: '1k', // Placeholder, replace with real if available
     weight: '1 pack', // Placeholder, replace with real if available
   }));
+
+  // Banners for Chips & Crisps
+  const banners = [
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581703/Lays_magicmasala_dpn6re.webp',
+      title: 'Lays Classic',
+      subtitle: 'UP TO 25% OFF',
+      buttonText: 'Shop Now',
+      backgroundColor: 'bg-yellow-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763609084/pringles_sour_cream_gvnnky.webp',
+      title: 'Pringles Sour Cream',
+      subtitle: 'LIMITED TIME DEALS',
+      buttonText: 'Order now',
+      backgroundColor: 'bg-green-700',
+      isDark: true,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581689/Kurkure_masalamunch_kqugyv.webp',
+      title: 'Kurkure Masala Munch',
+      subtitle: 'BUY 1 GET 1',
+      buttonText: 'Grab Offer',
+      backgroundColor: 'bg-orange-200',
+      isDark: false,
+    },
+  ];
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -76,6 +105,15 @@ const ChipsCrispsPage: React.FC = () => {
       </div>
 
       <div className="p-4">
+        {/* Banners */}
+        <div className="mb-6">
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            {banners.map((banner, index) => (
+              <CategoryBanner key={index} {...banner} />
+            ))}
+          </div>
+        </div>
+
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {transformedProducts.map((product, index) => (

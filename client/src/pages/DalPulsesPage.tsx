@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import CategoryBanner from '../components/CategoryBanner';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Product } from '../../redux/slices/productsSlice';
 import type { AppDispatch, RootState } from '../../redux/stores';
@@ -13,37 +14,37 @@ const DalPulsesPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
 
-  const FetchProducts = async () => {
-      try {
-        const preparePayload : GetAllProductsPayload = {
-          id: 0,
-          categoryId: 2, // Example categoryId for Fruits & Vegetables
-          itemName: "",
-          itemsPerPage: 20,
-          totalItems: 0,
-          totalPages: 0,
-          currentPage: 0,
-          pageSize: 60
-        };
-        const response = await dispatch(fetchAllProducts(preparePayload));
-        if (response.meta.requestStatus === 'fulfilled') {
-          if (Array.isArray(response.payload)) {
-            setProducts(response.payload);
-          } else if (response.payload && typeof response.payload === 'object') {
-            setProducts(response?.payload?.items || []); // Convert single product to array
-          } else {
-            console.error('Unexpected response payload:', response.payload);
-            setProducts([]); // Fallback to an empty array
-          }
+  const FetchProducts = React.useCallback(async () => {
+    try {
+      const preparePayload : GetAllProductsPayload = {
+        id: 0,
+        categoryId: 2, // Example categoryId for Dal & Pulses
+        itemName: "",
+        itemsPerPage: 20,
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 0,
+        pageSize: 60
+      };
+      const response = await dispatch(fetchAllProducts(preparePayload));
+      if (response.meta.requestStatus === 'fulfilled') {
+        if (Array.isArray(response.payload)) {
+          setProducts(response.payload);
+        } else if (response.payload && typeof response.payload === 'object') {
+          setProducts(response?.payload?.items || []); // Convert single product to array
+        } else {
+          console.error('Unexpected response payload:', response.payload);
+          setProducts([]); // Fallback to an empty array
         }
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [dispatch, FetchProducts]);
 
   // Transform API products to match ProductCard props
   const transformedProducts = products.map((product: Product) => ({
@@ -57,6 +58,34 @@ const DalPulsesPage: React.FC = () => {
     reviews: '100', // Default reviews
     weight: product.itemDescription || '100 g',
   }));
+
+  // Banners for Dal & Pulses
+  const banners = [
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762755766/green_moong_whole_nmiyse.webp',
+      title: 'Moong Dal',
+      subtitle: 'UP TO 20% OFF',
+      buttonText: 'Shop Now',
+      backgroundColor: 'bg-yellow-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581905/Split_masoor_dhal_svo39p.webp',
+      title: 'Masoor Dal',
+      subtitle: 'FRESH STOCK',
+      buttonText: 'Order now',
+      backgroundColor: 'bg-orange-200',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581514/Chana_brown_liungi.webp',
+      title: 'Chana Dal',
+      subtitle: 'BUY 1 GET 1',
+      buttonText: 'Grab Offer',
+      backgroundColor: 'bg-green-700',
+      isDark: true,
+    },
+  ];
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
       {/* Header with back button */}
@@ -73,6 +102,15 @@ const DalPulsesPage: React.FC = () => {
       </div>
 
       <div className="p-4">
+        {/* Banners */}
+        <div className="mb-6">
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            {banners.map((banner, index) => (
+              <CategoryBanner key={index} {...banner} />
+            ))}
+          </div>
+        </div>
+
         {loading && (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
