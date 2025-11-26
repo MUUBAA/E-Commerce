@@ -5,6 +5,7 @@ import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import CategoryBanner from '../components/CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const SpicesSeasoningsPage: React.FC = () => {
@@ -14,7 +15,7 @@ const SpicesSeasoningsPage: React.FC = () => {
   const { loading, error } = useSelector((state: RootState) => state.products);
 
   // Fetch spices & seasonings products from API (categoryId=5)
-  const FetchProducts = async () => {
+  const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload: GetAllProductsPayload = {
         id: 0,
@@ -40,11 +41,11 @@ const SpicesSeasoningsPage: React.FC = () => {
       console.error('Failed to fetch products:', error);
       setProducts([]);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [dispatch, FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -59,6 +60,34 @@ const SpicesSeasoningsPage: React.FC = () => {
     reviews: '1k', // Placeholder, replace with real if available
     weight: '1 pack', // Placeholder, replace with real if available
   }));
+
+  // Banners for Spices & Seasonings
+  const banners = [
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581523/Chilli_powder_swzjsk.webp',
+      title: 'Everest Chilli Powder',
+      subtitle: 'UP TO 18% OFF',
+      buttonText: 'Shop Now',
+      backgroundColor: 'bg-red-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1764150534/orika_masalas_q7mtxv.webp',
+      title: 'ORIKA Masalas',
+      subtitle: 'SPICE UP YOUR MEALS',
+      buttonText: 'Order now',
+      backgroundColor: 'bg-yellow-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581675/jeera_whole_ashirvad_qv36hp.webp',
+      title: 'Catch Jeera Powder',
+      subtitle: 'BUY 1 GET 1',
+      buttonText: 'Grab Offer',
+      backgroundColor: 'bg-green-700',
+      isDark: true,
+    },
+  ];
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -76,6 +105,15 @@ const SpicesSeasoningsPage: React.FC = () => {
       </div>
 
       <div className="p-4">
+        {/* Banners */}
+        <div className="mb-6">
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            {banners.map((banner, index) => (
+              <CategoryBanner key={index} {...banner} />
+            ))}
+          </div>
+        </div>
+
         {/* Products grid */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {transformedProducts.map((product, index) => (

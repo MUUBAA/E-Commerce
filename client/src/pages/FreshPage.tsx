@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.js';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.js';
 import ProductGrid from '../components/ProductGrid';
+import CategoryBanner from '../components/CategoryBanner';
 import type {Product} from '../../redux/slices/productsSlice';
 
 const FreshPage: React.FC = () => {
@@ -10,7 +11,7 @@ const FreshPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]> ([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
   
-  const FetchProducts = async () => {
+  const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload : GetAllProductsPayload = {
         id: 0,
@@ -36,11 +37,11 @@ const FreshPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to fetch products:', error);
     }
-  }; 
+  }, [dispatch]);
   
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [dispatch, FetchProducts]);
 
   // Transform API products to match ProductGrid props
   const transformedProducts = products.map((product: Product) => ({
@@ -56,15 +57,47 @@ const FreshPage: React.FC = () => {
     weight: '1 unit', // Placeholder, replace with real if available
   }));
 
+  // Banners for Fresh Produce
+  const banners = [
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581493/Apple_royal_gala_o3450p.webp',
+      title: 'Fresh Apples',
+      subtitle: 'UP TO 15% OFF',
+      buttonText: 'Shop Now',
+      backgroundColor: 'bg-green-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581776/Organic_tomato_country_khdaja.webp',
+      title: 'Organic Tomatoes',
+      subtitle: 'FARM FRESH',
+      buttonText: 'Order now',
+      backgroundColor: 'bg-red-100',
+      isDark: false,
+    },
+    {
+      imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581703/Lecutte_green_hlijsp.webp',
+      title: 'Green Leafy Veggies',
+      subtitle: 'BUY 1 GET 1',
+      buttonText: 'Grab Offer',
+      backgroundColor: 'bg-green-700',
+      isDark: true,
+    },
+  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-6">
+        {/* Banners */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Fresh Produce</h1>
-          <p className="mt-2 text-gray-600">Fresh fruits, vegetables, and organic products</p>
+          <div className="mb-4 grid gap-4 md:grid-cols-3">
+            {banners.map((banner, index) => (
+              <CategoryBanner key={index} {...banner} />
+            ))}
+          </div>
         </div>
-        
+
         {loading && (
           <div className="flex justify-center items-center min-h-[200px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>

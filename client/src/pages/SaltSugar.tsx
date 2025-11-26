@@ -5,6 +5,7 @@ import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import CategoryBanner from '../components/CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const SaltSugarPage: React.FC = () => {
@@ -59,6 +60,34 @@ const SaltSugarPage: React.FC = () => {
 		weight: '1 pack', // Placeholder, replace with real if available
 	}));
 
+	// Banners for Salt & Sugar
+	const banners = [
+		{
+			imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581920/Tata_salt_small_ffgszg.webp',
+			title: 'Tata Salt',
+			subtitle: 'UP TO 12% OFF',
+			buttonText: 'Shop Now',
+			backgroundColor: 'bg-gray-100',
+			isDark: false,
+		},
+		{
+			imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581920/SweetCare_sugar_fnowne.webp',
+			title: 'Organic Sugar',
+			subtitle: 'PURE & NATURAL',
+			buttonText: 'Order now',
+			backgroundColor: 'bg-yellow-100',
+			isDark: false,
+		},
+		{
+			imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763563705/tata_himalayan_pink_salt_azyexx.webp',
+			title: 'Low Sodium Salt',
+			subtitle: 'HEALTHY CHOICE',
+			buttonText: 'Grab Offer',
+			backgroundColor: 'bg-blue-500',
+			isDark: true,
+		},
+	];
+
 	return (
 		<div className="bg-gray-50 min-h-screen pb-24">
 			{/* Header with back button */}
@@ -75,6 +104,15 @@ const SaltSugarPage: React.FC = () => {
 			</div>
 
 			<div className="p-4">
+				{/* Banners */}
+				<div className="mb-6">
+					<div className="mb-4 grid gap-4 md:grid-cols-3">
+						{banners.map((banner, index) => (
+							<CategoryBanner key={index} {...banner} />
+						))}
+					</div>
+				</div>
+
 				{/* Products grid */}
 				<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
 					{transformedProducts.map((product, index) => (

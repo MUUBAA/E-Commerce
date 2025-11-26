@@ -134,7 +134,7 @@ const HomePage: React.FC = () => {
 
       {/* Zepto Experience Banner */}
       <div className="mb-4 rounded-2xl bg-purple-50 p-4 text-center shadow-sm">
-        <h3 className="font-bold text-purple-800">ALL NEW ZEPTO EXPERIENCE</h3>
+        <h3 className="font-bold text-purple-800">ALL NEW NEST EXPERIENCE</h3>
         <div className="mt-2 flex justify-around">
           <div>
             <p className="text-2xl font-bold md:text-3xl">₹0 FEES</p>

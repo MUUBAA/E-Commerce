@@ -109,12 +109,12 @@ const CafePage: React.FC = () => {
             </div>
             <div className="flex items-center gap-4">
               <img
-                src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/food_plate.jpg?ts=1709800030"
+                src="https://res.cloudinary.com/dulie41id/image/upload/v1762751208/blackPepper_maggi_elhkos.webp"
                 alt="Food"
                 className="h-20 w-20 rounded-full object-cover md:h-24 md:w-24"
               />
               <img
-                src="https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/coffee_cup.jpg?ts=1709800030"
+                src="https://res.cloudinary.com/dulie41id/image/upload/v1762751233/spanish_coffee_vyp6xv.webp"
                 alt="Coffee"
                 className="h-16 w-16 rounded-full object-cover md:h-20 md:w-20"
               />
