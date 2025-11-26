@@ -10,8 +10,8 @@ namespace Server.Utils
             using (var scope = services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<Repository>();
-                db.Database.Migrate();
-                db.Database.EnsureCreated();
+                // db.Database.Migrate();
+                // db.Database.EnsureCreated();
             }
         }
     }

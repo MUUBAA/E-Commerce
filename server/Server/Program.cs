@@ -15,36 +15,12 @@ try
     {
         options.AddPolicy(CorsPolicyName, policy =>
         {
-            // Local dev origins (your current list)
-            var origins = new List<string>
-            {
-                "http://localhost:5015",
-                "https://localhost:5015",
-                "http://127.0.0.1:5015",
-                "https://127.0.0.1:5015",
-                "http://localhost:5173",
-                "https://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://127.0.0.1:5173",
-                "https://nestonlinestore.vercel.app"
-            };
-
-            // Add production frontend origin from env var (Vercel)
-            var prodOrigin = Environment.GetEnvironmentVariable("ALLOWED_ORIGIN");
-            if (!string.IsNullOrEmpty(prodOrigin))
-            {
-                origins.Add(prodOrigin);
-            }
-
-            // Allow only the exact Vercel production domain and local dev
-            origins.Add("https://nestonlinestore.vercel.app");
-
-            policy.SetIsOriginAllowed(origin =>
-                origins.Contains(origin)
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-            // .AllowCredentials(); // Uncomment only if you use cookies/auth
+            // DEBUG: Allow any origin for troubleshooting
+            policy
+                .SetIsOriginAllowed(_ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                // .AllowCredentials(); // Uncomment only if you use cookies/auth
         });
     });
 
