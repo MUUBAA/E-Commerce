@@ -1,14 +1,10 @@
-﻿namespace Server.Data.Dto
+﻿public class PaymentDto
 {
-    public class PaymentDto
-    {
-        public string RazorpayKey { get; set; } = string.Empty;
-        public string RazorpayOrderId { get; set; } = string.Empty;
-        public int AmountInPaise { get; set; }
-        public string Currency { get; set; } = "INR";
+    public string RazorpayKey { get; set; } = default!;      // now = Stripe publishable key
+    public string RazorpayOrderId { get; set; } = default!;  // now = Stripe PaymentIntent Id
+    public int AmountInPaise { get; set; }
+    public string Currency { get; set; } = "INR";
 
-        public string? UserName { get; set; }
-        public string? UserEmail { get; set; }
-        public string? UserContact { get; set; }
-    }
+    // NEW: needed by Stripe.js
+    public string ClientSecret { get; set; } = default!;
 }
