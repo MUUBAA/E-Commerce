@@ -8,6 +8,8 @@ import type { AppDispatch, RootState } from '../../redux/stores';
 import { addToCart, getCartItems, removeCartItem, type GetAllCartPayload } from '../../redux/thunk/cart';
 import type { CartItem } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
+import { createOrder } from '../../redux/thunk/payment';
+import { useNavigate } from 'react-router-dom';
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,6 +25,47 @@ interface DecodedToken {
 type ViewState = 'empty' | 'login' | 'register' | 'cart' | 'forgot';
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+    const handleProceedToCheckout = async () => {
+      if (!hasItems) return;
+
+      const token = getDecryptedJwt();
+      if (!token) {
+        toast.warn("Please login to continue");
+        setCurrentView("login");
+        return;
+      }
+
+      // you probably have a real orderId from backend; for now use 1 or from state
+      const orderId = 1;
+
+      try {
+        setLoading(true);
+
+        const resultAction = await dispatch(
+          createOrder({
+            orderId,
+            amount: totalPrice,       // in rupees
+            paymentMethod: "STRIPE",  // your internal label
+            token,
+          })
+        );
+
+        if (createOrder.fulfilled.match(resultAction)) {
+          // paymentSlice now has clientSecret & publishableKey
+          navigate("/checkout");
+        } else {
+          const err =
+            (resultAction.payload as any)?.message || "Failed to create payment";
+          toast.error(err);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to create payment");
+      } finally {
+        setLoading(false);
+      }
+    };
   const dispatch = useDispatch<AppDispatch>();
   const reduxCartItems = useSelector((state: RootState) => state.cart.items);
   const reduxTotalPrice = useSelector((state: RootState) => state.cart.totalPrice ?? 0);
@@ -651,9 +694,11 @@ useEffect(() => {
           {hasItems && (
             <div className="p-4 border-t border-gray-200">
               <button
-                className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
+                className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
+                onClick={handleProceedToCheckout}
+                disabled={loading}
               >
-                Proceed to Checkout
+                {loading ? "Processing..." : "Proceed to Checkout"}
               </button>
             </div>
           )}
