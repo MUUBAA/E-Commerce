@@ -14,11 +14,12 @@ namespace Server.Services.MessageServices
 
     public class EmailService : IEmailService
     {
-        private readonly string _apiKey;
-        private readonly string _fromEmail;
-        private readonly string _fromName;
+        private readonly string? _apiKey;
+        private readonly string? _fromEmail;
+        private readonly string? _fromName;
         private readonly ILogger<EmailService> _logger;
-        private readonly SendGridClient _client;
+        private readonly SendGridClient? _client;
+        private readonly bool _isConfigured;
 
         private const string mailHeader =
             "<div style='background-color:transparent;font-family: system-ui;'><div class='m_-7955790069770508387block-grid' style='min-width:320px;max-width:600px;word-wrap:break-word;word-break:break-word;Margin:0 auto;background-color:#ffffff'><div style='border-collapse:collapse;display:table;width:100%;background-color:#ffffff'><div class='m_-7955790069770508387col' style='min-width:320px;max-width:600px;display:table-cell;vertical-align:top;width:600px'><div class='m_-7955790069770508387col_cont' style='width:100%!important'><div style='border-top:0px solid #000000;border-left:0px solid #000000;border-bottom:0px solid #000000;border-right:0px solid #000000;padding:0;'><table class='body-wrap' style='box-sizing: border-box; font-size: 14px; width: 100%; background-color: transparent; margin: 0;' bgcolor='transparent'><tr><td class='container' width='600' style='display: block !important; max-width: 600px !important; clear: both !important;' valign='top'><div class='content' style='padding: 20px;'><table class='main' width='100%' cellpadding='0' cellspacing='0' style='border: 1px solid rgba(130, 134, 156, 0.15);' bgcolor='transparent'><tr><td class='alert alert-primary border-0 bg-primary' style='padding: 20px; border-radius: 0; background:#E3EDF1; font-size: 21px; font-weight: 700;' align='center' valign='top'>Nest</td></tr><tr><td class='alert alert-dark border-0' style='padding: 20px; border-radius: 0;' align='center' valign='top'><p style='font-size:21px;color:#368EA8'><b>{Subject}</b></p></td></tr><tr><td style='padding: 5px'></td></tr></table></div></td></tr></table></div></div></div></div></div></div>";
@@ -30,22 +31,31 @@ namespace Server.Services.MessageServices
         {
             _logger = logger;
 
-            // Read from environment variables (Render) – set:
-            // SENDGRID_API_KEY, SENDGRID_FROM_EMAIL, SENDGRID_FROM_NAME
-            _apiKey = configuration["SENDGRID_API_KEY"] 
-                      ?? configuration["SendGrid:ApiKey"];
-            _fromEmail = configuration["SENDGRID_FROM_EMAIL"] 
-                         ?? configuration["SendGrid:FromEmail"];
-            _fromName = configuration["SENDGRID_FROM_NAME"] 
-                        ?? configuration["SendGrid:FromName"];
+            // Log what we see from configuration
+            var rawKey = configuration["SENDGRID_API_KEY"];
+            var rawFrom = configuration["SENDGRID_FROM_EMAIL"];
+            var rawName = configuration["SENDGRID_FROM_NAME"];
 
-            if (string.IsNullOrWhiteSpace(_apiKey))
-                throw new InvalidOperationException("SendGrid API key is not configured.");
+            _logger.LogWarning("SENDGRID_API_KEY exists? {Exists}",
+                string.IsNullOrWhiteSpace(rawKey) ? "NO" : "YES");
+            _logger.LogWarning("SENDGRID_FROM_EMAIL = {Email}",
+                string.IsNullOrWhiteSpace(rawFrom) ? "NULL" : rawFrom);
 
-            if (string.IsNullOrWhiteSpace(_fromEmail))
-                throw new InvalidOperationException("SendGrid FromEmail is not configured.");
+            // Read from env or appsettings
+            _apiKey    = rawKey    ?? configuration["SendGrid:ApiKey"];
+            _fromEmail = rawFrom   ?? configuration["SendGrid:FromEmail"];
+            _fromName  = rawName   ?? configuration["SendGrid:FromName"];
+
+            if (string.IsNullOrWhiteSpace(_apiKey) || string.IsNullOrWhiteSpace(_fromEmail))
+            {
+                _isConfigured = false;
+                _logger.LogError(
+                    "SendGrid is NOT configured correctly. API key or FromEmail is missing. Emails will NOT be sent.");
+                return;
+            }
 
             _client = new SendGridClient(_apiKey);
+            _isConfigured = true;
 
             _logger.LogInformation(
                 "SendGrid EmailService initialized. From={FromEmail}, Name={FromName}",
@@ -55,48 +65,67 @@ namespace Server.Services.MessageServices
         // Public sync wrapper to keep existing code working
         public void SendEmail(string toAddress, string subject, string body)
         {
-            // Fire-and-wait pattern; in new code prefer making this async.
-            SendEmailInternalAsync(toAddress, subject, body)
-                .GetAwaiter()
-                .GetResult();
+            if (!_isConfigured)
+            {
+                _logger.LogWarning("SendEmail called but SendGrid is not configured. To={To}", toAddress);
+                return;
+            }
+
+            try
+            {
+                SendEmailInternalAsync(toAddress, subject, body)
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in SendEmail wrapper");
+            }
         }
 
         private async Task SendEmailInternalAsync(string toAddress, string subject, string body)
         {
+            if (!_isConfigured || _client == null)
+            {
+                _logger.LogWarning("SendEmailInternalAsync called but SendGrid is not configured.");
+                return;
+            }
+
             try
             {
                 var header = mailHeader.Replace("{Subject}", subject);
                 var html = header + body + mailFooter;
 
-                // If you ever pass comma-separated recipients, split them:
                 var recipients = toAddress
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                 foreach (var recipient in recipients)
                 {
-                    var from = new EmailAddress(_fromEmail, _fromName);
+                    var from = new EmailAddress(_fromEmail!, _fromName ?? _fromEmail);
                     var to = new EmailAddress(recipient);
 
                     var msg = MailHelper.CreateSingleEmail(
                         from,
                         to,
                         subject,
-                        plainTextContent: null,   // you can add a text version if you want
-                        htmlContent: html
-                    );
+                        plainTextContent: null,
+                        htmlContent: html);
 
                     var response = await _client.SendEmailAsync(msg);
+                    var respBody = await response.Body.ReadAsStringAsync();
+
+                    _logger.LogInformation("SendGrid Response Status: {Status}", response.StatusCode);
+                    _logger.LogInformation("SendGrid Response Body: {Body}", respBody);
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        var respBody = await response.Body.ReadAsStringAsync();
                         _logger.LogError(
-                            "SendGrid failed for {To}. Status={Status}, Body={Body}",
-                            recipient, response.StatusCode, respBody);
+                            "SendGrid failed for {To}. Status={Status}",
+                            recipient, response.StatusCode);
                     }
                     else
                     {
-                        _logger.LogInformation("Email sent to {To}", recipient);
+                        _logger.LogInformation("Email accepted by SendGrid for {To}", recipient);
                     }
                 }
             }
