@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.js';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.js';
-import ProductGrid from '../components/ProductGrid';
+import ProductCard from '../components/ProductCard';
 import CategoryBanner from '../components/CategoryBanner';
 import type {Product} from '../../redux/slices/productsSlice';
 
@@ -88,7 +88,7 @@ const FreshPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-6">
+      <div className="p-4">
         {/* Banners */}
         <div className="mb-6">
           <div className="mb-4 grid gap-4 md:grid-cols-3">
@@ -111,7 +111,11 @@ const FreshPage: React.FC = () => {
         )}
 
         {!loading && !error && transformedProducts.length > 0 && (
-          <ProductGrid title="Fruits & Vegetables" products={transformedProducts} />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+            {transformedProducts.map((product, index) => (
+              <ProductCard key={`${product.itemName}-${index}`} {...product} />
+            ))}
+          </div>
         )}
 
         {!loading && !error && transformedProducts.length === 0 && (
