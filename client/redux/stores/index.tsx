@@ -8,12 +8,14 @@ import { persistSlice } from "../persistenceUtils";
 import { encrypt } from "../../utils/encryptionUtils";
 import { loginUser } from "../thunk/jwtVerify";
 import { registerUser } from "../thunk/jwtVerify";
+import paymentSlice from "../slices/paymentSlice";
 
 const rootReducer = combineReducers({
   loginUser: persistSlice(loginUserSlice, { sliceKey: "loginUser" }),
   products: persistSlice(productsReducer, { sliceKey: "products" }),
   cart: persistSlice(cartSlice, { sliceKey: "cart" }),
   user: persistSlice(userSlice, { sliceKey: "user" }),
+  payment: persistSlice(paymentSlice, { sliceKey: "payment" }),
   // Add other slices here
 });
 
