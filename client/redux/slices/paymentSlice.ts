@@ -1,6 +1,7 @@
 // src/redux/slices/paymentSlice.ts
 import { createSlice } from "@reduxjs/toolkit";
-import { createOrder, CreateOrderResponse } from "../thunk/payment";
+import { createOrder } from "../thunk/payment";
+import type  { CreateOrderResponse } from "../thunk/payment";
 
 interface PaymentState {
   clientSecret: string | null;
