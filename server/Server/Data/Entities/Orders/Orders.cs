@@ -13,6 +13,6 @@ namespace Server.Data.Entities.Orders
         public decimal TotalPrice { get; set; }
 
         [Column("status")]
-        public bool Status { get; set; }
+        public string Status { get; set; }
     }
 }
