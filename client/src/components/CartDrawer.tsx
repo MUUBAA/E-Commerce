@@ -9,7 +9,7 @@ import { addToCart, getCartItems, removeCartItem, type GetAllCartPayload } from 
 import type { CartItem } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
-import { createOrder } from '../../redux/thunk/payment';
+import { createOrderFromCart } from "../../redux/thunk/orders";
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -40,23 +40,20 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       }
 
       setLoading(true);
-      // TODO: Replace with real orderId logic if available
-      const orderId = 1;
       try {
         const resultAction = await dispatch(
-          createOrder({
-            orderId,
-            amount: totalPrice,
-            paymentMethod: "STRIPE",
-            token,
-          })
+          createOrderFromCart({ token })
         );
-        if (createOrder.fulfilled.match(resultAction)) {
+
+        if (createOrderFromCart.fulfilled.match(resultAction)) {
+          // Order created successfully, backend calculated total & set status=pending
+          toast.success("Order created successfully");
           onClose();
-          navigate("/checkout");
+          navigate("/checkout"); // Checkout page will now use orderId & totalPrice from Redux
         } else {
-          const err = (resultAction.payload as { message?: string })?.message || "Failed to create order";
-          toast.error(err);
+          const errMsg =
+            (resultAction.payload as string) || "Failed to create order";
+          toast.error(errMsg);
         }
       } catch (err) {
         console.error(err);

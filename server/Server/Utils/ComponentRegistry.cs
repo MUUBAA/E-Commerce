@@ -11,6 +11,7 @@ using Server.Services.Cache;
 using Server.Utils;
 using Server.Services.CartServices;
 using Server.Services.PaymentService;
+using Server.Services.OrderService;
 
 namespace Server.Utils
 {
@@ -65,6 +66,8 @@ namespace Server.Utils
             services.AddScoped<ICartServices, CartServices>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IOrdersRepository, OrdersRepository>();
+            services.AddScoped<IOrderService, OrderService>();
 
             return Task.CompletedTask;
         }
