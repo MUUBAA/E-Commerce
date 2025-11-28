@@ -120,14 +120,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {cartQuantity > 0 ? (
           <div className="absolute bottom-2 right-2 flex items-center rounded-md border border-pink-500 bg-white">
             <button
-              className="px-2 py-1 text-pink-500 text-lg font-bold"
+              className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
               onClick={handleDecrease}
             >
               −
             </button>
-            <span className="px-3 py-1 text-pink-500 font-semibold">{cartQuantity}</span>
+            <span className="px-3 py-1 text-pink-500 font-semibold cursor-pointer">{cartQuantity}</span>
             <button
-              className="px-2 py-1 text-pink-500 text-lg font-bold"
+              className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
               onClick={handleIncrease}
             >
               +

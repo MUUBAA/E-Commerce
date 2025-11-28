@@ -64,67 +64,54 @@ const CheckoutPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* LEFT: Stripe Checkout redirect */}
-        <div className="md:col-span-2 border rounded-xl p-4 min-h-[300px]">
-          <h2 className="text-lg font-semibold mb-4">Select Payment Method</h2>
-          <button
-            onClick={handleStripeCheckout}
-            disabled={paying}
-            className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-50"
-          >
-            {paying ? "Redirecting to Stripe…" : "Pay Now"}
-          </button>
+      <div className="border rounded-xl p-4 bg-white shadow-sm">
+        <h3 className="font-semibold mb-2">Delivery Address</h3>
+        <div className="text-sm text-gray-700 mb-4">
+          Home: Abd, 5/7, Bangla Sahib Road<br />
+          Sector 4, Gole Market, New Delhi, Delhi, India
         </div>
 
-        {/* RIGHT: Delivery address + cart summary with images */}
-        <div className="border rounded-xl p-4 bg-gray-50">
-          <h3 className="font-semibold mb-2">Delivery Address</h3>
-          <div className="text-sm text-gray-700 mb-4">
-            Home: Abd, 5/7, Bangla Sahib Road<br />
-            Sector 4, Gole Market, New Delhi, Delhi, India
-          </div>
-
-          <h3 className="font-semibold mb-2">My Cart</h3>
-          <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-            {cartItems.map((item) => (
-              <div
-                key={item.productId}
-                className="flex items-center justify-between text-sm bg-white rounded-lg p-2 shadow-sm"
-              >
-                {/* Image */}
-                {item.itemUrl && (
-                  <img
-                    src={item.itemUrl}
-                    alt={item.itemName}
-                    className="h-12 w-12 rounded-md object-cover mr-3 flex-shrink-0"
-                  />
-                )}
-
-                {/* Name + qty */}
-                <div className="flex-1 mr-2">
-                  <div className="font-medium">{item.itemName}</div>
-                  <div className="text-xs text-gray-500">
-                    {item.quantity} x ₹{item.price}
-                  </div>
-                </div>
-
-                {/* Line total */}
-                <div className="font-semibold">
-                  ₹{Number(item.price) * item.quantity}
+        <h3 className="font-semibold mb-2">My Cart</h3>
+        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+          {cartItems.map((item) => (
+            <div
+              key={item.productId}
+              className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2 shadow-sm"
+            >
+              {item.itemUrl && (
+                <img
+                  src={item.itemUrl}
+                  alt={item.itemName}
+                  className="h-12 w-12 rounded-md object-cover mr-3 flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 mr-2">
+                <div className="font-medium">{item.itemName}</div>
+                <div className="text-xs text-gray-500">
+                  {item.quantity} x ₹{item.price}
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="border-t mt-4 pt-3 flex justify-between font-bold">
-            <span>Total</span>
-            <span>₹{totalPrice}</span>
-          </div>
+              <div className="font-semibold">
+                ₹{Number(item.price) * item.quantity}
+              </div>
+            </div>
+          ))}
         </div>
+
+        <div className="border-t mt-4 pt-3 flex justify-between font-bold">
+          <span>Total</span>
+          <span>₹{totalPrice}</span>
+        </div>
+
+        <button
+          onClick={handleStripeCheckout}
+          disabled={paying}
+          className="w-full mt-6 rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        >
+          {paying ? "Redirecting to Stripe…" : "Pay Now"}
+        </button>
       </div>
     </div>
   );
