@@ -35,7 +35,7 @@ const CheckoutPage: React.FC = () => {
     }
 
     setPaying(true);
-    const orderId = 1;
+    const orderId = 2;
 
     try {
       const resultAction = await dispatch(
