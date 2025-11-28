@@ -27,6 +27,7 @@ import React from 'react';
 import SaltSugarPage from "./pages/SaltSugar";
 import ResetPassword from "./components/ResetPassword";
 import CheckoutPage from "./pages/CheckoutPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -93,7 +94,7 @@ function AppContent() {
         <Route path="/list" element={<ListPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/payment-success" element={<div>Payment Success!</div>} />
+        <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
       </Routes>
       <Footer />

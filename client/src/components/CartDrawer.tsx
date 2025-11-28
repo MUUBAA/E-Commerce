@@ -9,6 +9,7 @@ import { addToCart, getCartItems, removeCartItem, type GetAllCartPayload } from 
 import type { CartItem } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { createOrder } from '../../redux/thunk/payment';
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +26,7 @@ type ViewState = 'empty' | 'login' | 'register' | 'cart' | 'forgot';
 
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-    const handleProceedToCheckout = () => {
+    const handleProceedToCheckout = async () => {
       if (!hasItems) {
         toast.warn("Your cart is empty");
         return;
@@ -38,8 +39,31 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         return;
       }
 
-      onClose();
-      navigate("/checkout");
+      setLoading(true);
+      // TODO: Replace with real orderId logic if available
+      const orderId = 1;
+      try {
+        const resultAction = await dispatch(
+          createOrder({
+            orderId,
+            amount: totalPrice,
+            paymentMethod: "STRIPE",
+            token,
+          })
+        );
+        if (createOrder.fulfilled.match(resultAction)) {
+          onClose();
+          navigate("/checkout");
+        } else {
+          const err = (resultAction.payload as { message?: string })?.message || "Failed to create order";
+          toast.error(err);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to create order");
+      } finally {
+        setLoading(false);
+      }
     };
   const dispatch = useDispatch<AppDispatch>();
   const reduxCartItems = useSelector((state: RootState) => state.cart.items);
@@ -527,14 +551,14 @@ useEffect(() => {
                   {i.quantity > 0 ? (
                     <div className="flex items-center rounded-full border px-3 py-1 text-sm font-medium">
                         <button
-                          className="px-2 py-1 text-pink-500 text-lg font-bold hover:cursor-pointer"
+                          className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
                           onClick={() => handleDecrease(i)}
                         >
                           −
                         </button>
                         <span className="px-3 py-1 text-pink-500 font-semibold">{i.quantity}</span>
                         <button
-                          className="px-2 py-1 text-pink-500 text-lg font-bold hover:cursor-pointer"
+                          className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
                           onClick={() => handleIncrease(i)}
                         >
                           +
@@ -542,7 +566,7 @@ useEffect(() => {
                     </div>
                   ) : (
                     <button
-                      className="px-4 py-1 rounded-full border text-sm font-medium text-green-600 border-green-600 hover:bg-green-50"
+                      className="px-4 py-1 rounded-full border text-sm font-medium text-green-600 border-green-600 hover:bg-green-50 cursor-pointer"
                       onClick={() => handleIncrease(i)}
                     >
                       ADD
@@ -667,12 +691,13 @@ useEffect(() => {
 
           {/* Footer */}
           {hasItems && (
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 z-10">
               <button
-                className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
+                className="w-full rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 onClick={handleProceedToCheckout}
+                disabled={loading}
               >
-                Proceed to Checkout
+                {loading ? "Processing..." : "Proceed to Checkout"}
               </button>
             </div>
           )}
