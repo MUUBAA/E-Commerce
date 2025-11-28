@@ -2,19 +2,16 @@
 
 namespace Server.Data.Repositories
 {
-    public interface IOrderRepository
+    public interface IOrdersRepository
     {
         Orders CreateOrder(int userId, decimal totalPrice);
         Orders? GetOrder(int orderId);
         void MarkOrderPaid(int orderId);
     }
 
-    public class OrderRepository
+    public class OrdersRepository : IOrdersRepository
     {
-        public class OrdersRepository : IOrderRepository
-        {
-            private readonly Repository _repository;
-
+        private readonly Repository _repository;
             public OrdersRepository(Repository repo)
             {
                 _repository = repo;
@@ -56,4 +53,4 @@ namespace Server.Data.Repositories
         }
 
     }
-}
+
