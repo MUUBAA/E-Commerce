@@ -4,6 +4,7 @@ using Server.Data.Contract.Payments;
 using Server.Data.Dto;
 using Server.Data.Repositories;
 using Stripe;
+using Stripe.Checkout;
 
 namespace Server.Services.PaymentService
 {
@@ -11,6 +12,8 @@ namespace Server.Services.PaymentService
     {
         PaymentDto CreatePaymentOrder(PaymentCreateContract contract);
         bool VerifyPayment(PaymentVerifyContract contract);
+
+        CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl);
     }
 
     public class PaymentService : IPaymentService
@@ -23,46 +26,35 @@ namespace Server.Services.PaymentService
 
         public PaymentService(
             IPaymentRepository paymentRepository,
-            IConfiguration configuration,
-            ILogger<PaymentService> logger)
+            IConfiguration configuration
+           )
         {
             _paymentRepository = paymentRepository;
-            _logger = logger;
 
-            _logger.LogInformation("===== PaymentService constructor started =====");
 
             // NOTE: you are using Stripe_PublishableKey / Stripe_SecretKey keys.
             // Make sure your env vars in Render use EXACTLY those names.
             _stripePublishableKey = configuration["Stripe_PublishableKey"];
             _stripeSecretKey = configuration["Stripe_SecretKey"];
 
-            _logger.LogInformation("Stripe_PublishableKey from config: {Key}", _stripePublishableKey ?? "NULL");
-            _logger.LogInformation("Stripe_SecretKey from config: {Info}",
-                string.IsNullOrEmpty(_stripeSecretKey) ? "NULL" : $"Length={_stripeSecretKey.Length}");
 
             if (string.IsNullOrEmpty(_stripePublishableKey))
             {
-                _logger.LogError("Stripe Publishable Key is MISSING (Stripe_PublishableKey)!");
                 throw new Exception("Stripe PublishableKey not configured");
             }
 
             if (string.IsNullOrEmpty(_stripeSecretKey))
             {
-                _logger.LogError("Stripe Secret Key is MISSING (Stripe_SecretKey)!");
                 throw new Exception("Stripe SecretKey not configured");
             }
 
             StripeConfiguration.ApiKey = _stripeSecretKey;
             _paymentIntentService = new PaymentIntentService();
 
-            _logger.LogInformation("Stripe initialized successfully.");
-            _logger.LogInformation("===== PaymentService constructor finished =====");
         }
 
         public PaymentDto CreatePaymentOrder(PaymentCreateContract contract)
         {
-            _logger.LogInformation("CreatePaymentOrder called. OrderId={OrderId}, Amount={Amount}, PaymentMethod={Method}",
-                contract.OrderId, contract.Amount, contract.PaymentMethod);
 
             var amountInPaise = (long)(contract.Amount * 100);
 
@@ -87,7 +79,6 @@ namespace Server.Services.PaymentService
                 throw;
             }
 
-            _logger.LogInformation("Stripe PaymentIntent created: {PaymentIntentId}", paymentIntent.Id);
 
             _paymentRepository.CreatePayment(
                 orderId: contract.OrderId,
@@ -95,9 +86,6 @@ namespace Server.Services.PaymentService
                 paymentMethod: contract.PaymentMethod,
                 razorpayOrderId: paymentIntent.Id // storing PaymentIntent Id
             );
-
-            _logger.LogInformation("Payment DB record created for OrderId={OrderId}, PaymentIntent={PaymentIntentId}",
-                contract.OrderId, paymentIntent.Id);
 
             return new PaymentDto
             {
@@ -111,18 +99,14 @@ namespace Server.Services.PaymentService
 
         public bool VerifyPayment(PaymentVerifyContract contract)
         {
-            _logger.LogInformation("VerifyPayment called. PaymentIntentId(RazorpayOrderId)={PaymentIntentId}",
-                contract.RazorpayOrderId);
 
             try
             {
                 var paymentIntent = _paymentIntentService.Get(contract.RazorpayOrderId);
-                _logger.LogInformation("Stripe PaymentIntent status={Status}", paymentIntent.Status);
 
                 if (paymentIntent.Status == "succeeded")
                 {
                     var chargeId = paymentIntent.LatestChargeId;
-                    _logger.LogInformation("Payment succeeded. ChargeId={ChargeId}", chargeId);
 
                     _paymentRepository.MarkPaymentAsCompleted(
                         razorpayOrderId: contract.RazorpayOrderId,
@@ -131,8 +115,6 @@ namespace Server.Services.PaymentService
                     );
                     return true;
                 }
-
-                _logger.LogWarning("Payment not succeeded. Status={Status}", paymentIntent.Status);
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
                     errorMessage: $"Stripe PaymentIntent status: {paymentIntent.Status}"
@@ -141,8 +123,6 @@ namespace Server.Services.PaymentService
             }
             catch (StripeException ex)
             {
-                _logger.LogError(ex, "StripeException while verifying PaymentIntentId={PaymentIntentId}",
-                    contract.RazorpayOrderId);
 
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
@@ -152,8 +132,6 @@ namespace Server.Services.PaymentService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error while verifying PaymentIntentId={PaymentIntentId}",
-                    contract.RazorpayOrderId);
 
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
@@ -162,5 +140,69 @@ namespace Server.Services.PaymentService
                 return false;
             }
         }
+
+        public CheckoutSessionDto CreateCheckoutSession( PaymentCreateContract contract, string successUrl, string cancelUrl)
+        {
+            _logger.LogInformation("CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}",
+                contract.OrderId, contract.Amount);
+
+            var amountInPaise = (long)(contract.Amount * 100);
+
+            var options = new SessionCreateOptions
+            {
+                Mode = "payment",
+                SuccessUrl = successUrl,     // e.g. https://yourdomain.com/payment-success?session_id={CHECKOUT_SESSION_ID}
+                CancelUrl = cancelUrl,      // e.g. https://yourdomain.com/checkout
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                Quantity = 1,
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    Currency = "inr",
+                    UnitAmount = amountInPaise,
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = $"Order #{contract.OrderId}"
+                    }
+                }
+            }
+        },
+                // Let Stripe decide appropriate methods (cards/upi/netbanking/etc) for INR
+                AutomaticTax = new SessionAutomaticTaxOptions { Enabled = false }
+            };
+
+            var service = new SessionService();
+            Session session;
+
+            try
+            {
+                session = service.Create(options);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating Stripe Checkout Session for OrderId={OrderId}", contract.OrderId);
+                throw;
+            }
+
+            _logger.LogInformation("Stripe Checkout Session created: {SessionId}", session.Id);
+
+            // Optional: store Checkout Session in your Payments table
+            // Here we reuse RazorpayOrderId to store Session.Id to avoid entity changes.
+            _paymentRepository.CreatePayment(
+                orderId: contract.OrderId,
+                amount: contract.Amount,
+                paymentMethod: contract.PaymentMethod,
+                razorpayOrderId: session.Id
+            );
+
+            return new CheckoutSessionDto
+            {
+                SessionId = session.Id,
+                Url = session.Url // this is the Stripe-hosted checkout page URL
+            };
+        }
+
     }
 }

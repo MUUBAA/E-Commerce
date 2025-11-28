@@ -34,5 +34,23 @@ namespace Server.Controllers.PaymentController
 
 
         }
+
+        [HttpPost]
+        [Route("payment/create-checkout-session")]
+        public ActionResult<GenericApiResponse<CheckoutSessionDto>> CreateCheckoutSession(
+       [FromBody] PaymentCreateContract contract)
+        {
+            // build success/cancel URLs; you can also take them from config or request
+            var origin = $"{Request.Scheme}://{Request.Host}";
+            var successUrl = $"{origin}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
+            var cancelUrl = $"{origin}/checkout";
+
+            var result = paymentService.CreateCheckoutSession(contract, successUrl, cancelUrl);
+            return Ok(new GenericApiResponse<CheckoutSessionDto>(
+                true,
+                "Checkout session created successfully",
+                result
+            ));
+        }
     }
 }
