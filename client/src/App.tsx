@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import HomePage from "./pages/HomePage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import ListPage from "./pages/ListPage";
-import CheckoutPage from "./pages/CheckoutPage";
 import CategoryPage from "./pages/CategoryPage";
 import CafePage from "./pages/CafePage";
 import ToysPage from "./pages/ToysPage";
@@ -27,7 +26,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import SaltSugarPage from "./pages/SaltSugar";
 import ResetPassword from "./components/ResetPassword";
-import StripeCheckoutPage from "./pages/StripeCheckoutPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -92,9 +91,8 @@ function AppContent() {
         <Route path="/salt-sugar-jaggery" element={<SaltSugarPage />} />
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/list" element={<ListPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
-        <Route path="/checkout" element={<StripeCheckoutPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/payment-success" element={<div>Payment Success!</div>} />
 
       </Routes>
