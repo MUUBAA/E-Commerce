@@ -12,7 +12,6 @@ namespace Server.Services.PaymentService
     {
         PaymentDto CreatePaymentOrder(PaymentCreateContract contract);
         bool VerifyPayment(PaymentVerifyContract contract);
-
         CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl);
     }
 
@@ -26,35 +25,46 @@ namespace Server.Services.PaymentService
 
         public PaymentService(
             IPaymentRepository paymentRepository,
-            IConfiguration configuration
-           )
+            IConfiguration configuration,
+            ILogger<PaymentService> logger)
         {
             _paymentRepository = paymentRepository;
+            _logger = logger;
 
+            _logger.LogInformation("===== PaymentService constructor started =====");
 
             // NOTE: you are using Stripe_PublishableKey / Stripe_SecretKey keys.
             // Make sure your env vars in Render use EXACTLY those names.
             _stripePublishableKey = configuration["Stripe_PublishableKey"];
             _stripeSecretKey = configuration["Stripe_SecretKey"];
 
+            _logger.LogInformation("Stripe_PublishableKey from config: {Key}", _stripePublishableKey ?? "NULL");
+            _logger.LogInformation("Stripe_SecretKey from config: {Info}",
+                string.IsNullOrEmpty(_stripeSecretKey) ? "NULL" : $"Length={_stripeSecretKey.Length}");
 
             if (string.IsNullOrEmpty(_stripePublishableKey))
             {
+                _logger.LogError("Stripe Publishable Key is MISSING (Stripe_PublishableKey)!");
                 throw new Exception("Stripe PublishableKey not configured");
             }
 
             if (string.IsNullOrEmpty(_stripeSecretKey))
             {
+                _logger.LogError("Stripe Secret Key is MISSING (Stripe_SecretKey)!");
                 throw new Exception("Stripe SecretKey not configured");
             }
 
             StripeConfiguration.ApiKey = _stripeSecretKey;
             _paymentIntentService = new PaymentIntentService();
 
+            _logger.LogInformation("Stripe initialized successfully.");
+            _logger.LogInformation("===== PaymentService constructor finished =====");
         }
 
         public PaymentDto CreatePaymentOrder(PaymentCreateContract contract)
         {
+            _logger.LogInformation("CreatePaymentOrder called. OrderId={OrderId}, Amount={Amount}, PaymentMethod={Method}",
+                contract.OrderId, contract.Amount, contract.PaymentMethod);
 
             var amountInPaise = (long)(contract.Amount * 100);
 
@@ -79,6 +89,7 @@ namespace Server.Services.PaymentService
                 throw;
             }
 
+            _logger.LogInformation("Stripe PaymentIntent created: {PaymentIntentId}", paymentIntent.Id);
 
             _paymentRepository.CreatePayment(
                 orderId: contract.OrderId,
@@ -86,6 +97,9 @@ namespace Server.Services.PaymentService
                 paymentMethod: contract.PaymentMethod,
                 razorpayOrderId: paymentIntent.Id // storing PaymentIntent Id
             );
+
+            _logger.LogInformation("Payment DB record created for OrderId={OrderId}, PaymentIntent={PaymentIntentId}",
+                contract.OrderId, paymentIntent.Id);
 
             return new PaymentDto
             {
@@ -99,14 +113,18 @@ namespace Server.Services.PaymentService
 
         public bool VerifyPayment(PaymentVerifyContract contract)
         {
+            _logger.LogInformation("VerifyPayment called. PaymentIntentId(RazorpayOrderId)={PaymentIntentId}",
+                contract.RazorpayOrderId);
 
             try
             {
                 var paymentIntent = _paymentIntentService.Get(contract.RazorpayOrderId);
+                _logger.LogInformation("Stripe PaymentIntent status={Status}", paymentIntent.Status);
 
                 if (paymentIntent.Status == "succeeded")
                 {
                     var chargeId = paymentIntent.LatestChargeId;
+                    _logger.LogInformation("Payment succeeded. ChargeId={ChargeId}", chargeId);
 
                     _paymentRepository.MarkPaymentAsCompleted(
                         razorpayOrderId: contract.RazorpayOrderId,
@@ -115,6 +133,8 @@ namespace Server.Services.PaymentService
                     );
                     return true;
                 }
+
+                _logger.LogWarning("Payment not succeeded. Status={Status}", paymentIntent.Status);
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
                     errorMessage: $"Stripe PaymentIntent status: {paymentIntent.Status}"
@@ -123,6 +143,8 @@ namespace Server.Services.PaymentService
             }
             catch (StripeException ex)
             {
+                _logger.LogError(ex, "StripeException while verifying PaymentIntentId={PaymentIntentId}",
+                    contract.RazorpayOrderId);
 
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
@@ -132,6 +154,8 @@ namespace Server.Services.PaymentService
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while verifying PaymentIntentId={PaymentIntentId}",
+                    contract.RazorpayOrderId);
 
                 _paymentRepository.MarkPaymentFailed(
                     razorpayOrderId: contract.RazorpayOrderId,
@@ -140,8 +164,7 @@ namespace Server.Services.PaymentService
                 return false;
             }
         }
-
-        public CheckoutSessionDto CreateCheckoutSession( PaymentCreateContract contract, string successUrl, string cancelUrl)
+        public CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl)
         {
             _logger.LogInformation("CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}",
                 contract.OrderId, contract.Amount);
