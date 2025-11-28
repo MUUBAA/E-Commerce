@@ -22,17 +22,20 @@ namespace Server.Services.PaymentService
         private readonly string _stripeSecretKey;
         private readonly PaymentIntentService _paymentIntentService;
         private readonly ILogger<PaymentService> _logger;
+        private readonly IConfiguration _configuration;
 
         public PaymentService(
             IPaymentRepository paymentRepository,
             IConfiguration configuration,
             ILogger<PaymentService> logger)
+
         {
             _paymentRepository = paymentRepository;
             _logger = logger;
 
             _logger.LogInformation("===== PaymentService constructor started =====");
 
+            _configuration = configuration;
             // NOTE: you are using Stripe_PublishableKey / Stripe_SecretKey keys.
             // Make sure your env vars in Render use EXACTLY those names.
             _stripePublishableKey = configuration["Stripe_PublishableKey"];
@@ -164,19 +167,29 @@ namespace Server.Services.PaymentService
                 return false;
             }
         }
-        public CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl)
-        {
-            _logger.LogInformation("CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}",
-                contract.OrderId, contract.Amount);
+      public CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string? successUrlOverride, string? cancelUrlOverride)
+{
+    _logger.LogInformation("CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}",
+        contract.OrderId, contract.Amount);
 
-            var amountInPaise = (long)(contract.Amount * 100);
+    // 👇 FRONTEND URL (put this in appsettings / env)
+    var frontendUrl = _configuration["FrontendUrl"]
+                      ?? "https://nestonlinestore.vercel.app";
 
-            var options = new SessionCreateOptions
-            {
-                Mode = "payment",
-                SuccessUrl = successUrl,     // e.g. https://yourdomain.com/payment-success?session_id={CHECKOUT_SESSION_ID}
-                CancelUrl = cancelUrl,      // e.g. https://yourdomain.com/checkout
-                LineItems = new List<SessionLineItemOptions>
+    var successUrl = successUrlOverride
+                     ?? $"{frontendUrl}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
+
+    var cancelUrl = cancelUrlOverride
+                    ?? $"{frontendUrl}/checkout";
+
+    var amountInPaise = (long)(contract.Amount * 100);
+
+    var options = new SessionCreateOptions
+    {
+        Mode = "payment",
+        SuccessUrl = successUrl,
+        CancelUrl = cancelUrl,
+        LineItems = new List<SessionLineItemOptions>
         {
             new SessionLineItemOptions
             {
@@ -192,40 +205,24 @@ namespace Server.Services.PaymentService
                 }
             }
         },
-                // Let Stripe decide appropriate methods (cards/upi/netbanking/etc) for INR
-                AutomaticTax = new SessionAutomaticTaxOptions { Enabled = false }
-            };
+        AutomaticTax = new SessionAutomaticTaxOptions { Enabled = false }
+    };
 
-            var service = new SessionService();
-            Session session;
+    var service = new SessionService();
+    var session = service.Create(options);
 
-            try
-            {
-                session = service.Create(options);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating Stripe Checkout Session for OrderId={OrderId}", contract.OrderId);
-                throw;
-            }
+    _paymentRepository.CreatePayment(
+        orderId: contract.OrderId,
+        amount: contract.Amount,
+        paymentMethod: contract.PaymentMethod,
+        razorpayOrderId: session.Id
+    );
 
-            _logger.LogInformation("Stripe Checkout Session created: {SessionId}", session.Id);
-
-            // Optional: store Checkout Session in your Payments table
-            // Here we reuse RazorpayOrderId to store Session.Id to avoid entity changes.
-            _paymentRepository.CreatePayment(
-                orderId: contract.OrderId,
-                amount: contract.Amount,
-                paymentMethod: contract.PaymentMethod,
-                razorpayOrderId: session.Id
-            );
-
-            return new CheckoutSessionDto
-            {
-                SessionId = session.Id,
-                Url = session.Url // this is the Stripe-hosted checkout page URL
-            };
-        }
-
+    return new CheckoutSessionDto
+    {
+        SessionId = session.Id,
+        Url = session.Url!
+    };
+}
     }
 }
