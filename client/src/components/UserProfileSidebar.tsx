@@ -196,7 +196,8 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
       {/* Order List */}
       {!ordersLoading && orders.length > 0 && (
-        <div className="space-y-4">
+          <>
+            <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
           {orders.map((order) => (
             <div key={order.orderId} className="p-4 border rounded-lg shadow-sm bg-white">
               <div className="flex justify-between mb-2">
@@ -240,6 +241,19 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
             </div>
           ))}
         </div>
+            {/* Checkout Button: only if at least one order is pending */}
+            {orders.some((order) => order.status === "pending") && (
+              <button
+                className="w-full mt-4 rounded-xl bg-pink-500 px-6 py-3.5 font-semibold text-white transition-all duration-200 hover:bg-pink-600 hover:shadow-lg transform hover:scale-[1.02]"
+                onClick={() => {
+                  navigate("/checkout");
+                  onClose();
+                }}
+              >
+                Checkout
+              </button>
+            )}
+          </>
       )}
     </div>
   );
