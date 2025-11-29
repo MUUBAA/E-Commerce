@@ -4,48 +4,45 @@ using Server.Data.Contract.Payments;
 using Server.Data.Dto;
 using Server.Data.Repositories;
 using Stripe;
-using Stripe.Checkout;
 
 namespace Server.Services.PaymentService
 {
-    public interface IPaymentService
+     public interface IPaymentService
     {
-        PaymentDto CreatePaymentOrder(PaymentCreateContract contract);
-        bool VerifyPayment(PaymentVerifyContract contract);
-        CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl);
-    }
+        CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl
+        );
 
+        bool ConfirmCheckoutSession(string sessionId);
+    }
     public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository _paymentRepository;
-        private readonly string _stripePublishableKey;
-        private readonly string _stripeSecretKey;
-        private readonly PaymentIntentService _paymentIntentService;
+        private readonly IOrdersRepository _ordersRepository;
         private readonly ILogger<PaymentService> _logger;
-        private readonly IConfiguration _configuration;
+
+        private readonly string _stripeSecretKey;
 
         public PaymentService(
             IPaymentRepository paymentRepository,
+            IOrdersRepository ordersRepository,
             IConfiguration configuration,
             ILogger<PaymentService> logger)
-
         {
             _paymentRepository = paymentRepository;
+            _ordersRepository = ordersRepository;
             _logger = logger;
 
-            _logger.LogInformation("===== PaymentService constructor started =====");
+            _logger.LogInformation("===== PaymentService (Stripe Checkout) constructor started =====");
 
-            _configuration = configuration;
-            // NOTE: you are using Stripe_PublishableKey / Stripe_SecretKey keys.
-            // Make sure your env vars in Render use EXACTLY those names.
-            _stripePublishableKey = configuration["Stripe_PublishableKey"];
+            // use these exact env keys in Render
+            var publishableKey = configuration["Stripe_PublishableKey"];
             _stripeSecretKey = configuration["Stripe_SecretKey"];
 
-            _logger.LogInformation("Stripe_PublishableKey from config: {Key}", _stripePublishableKey ?? "NULL");
+            _logger.LogInformation("Stripe_PublishableKey from config: {Key}", publishableKey ?? "NULL");
             _logger.LogInformation("Stripe_SecretKey from config: {Info}",
                 string.IsNullOrEmpty(_stripeSecretKey) ? "NULL" : $"Length={_stripeSecretKey.Length}");
 
-            if (string.IsNullOrEmpty(_stripePublishableKey))
+            if (string.IsNullOrEmpty(publishableKey))
             {
                 _logger.LogError("Stripe Publishable Key is MISSING (Stripe_PublishableKey)!");
                 throw new Exception("Stripe PublishableKey not configured");
@@ -58,171 +55,183 @@ namespace Server.Services.PaymentService
             }
 
             StripeConfiguration.ApiKey = _stripeSecretKey;
-            _paymentIntentService = new PaymentIntentService();
 
-            _logger.LogInformation("Stripe initialized successfully.");
+            _logger.LogInformation("Stripe initialized successfully (Checkout).");
             _logger.LogInformation("===== PaymentService constructor finished =====");
         }
-
-        public PaymentDto CreatePaymentOrder(PaymentCreateContract contract)
+        public CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string successUrl, string cancelUrl)
         {
-            _logger.LogInformation("CreatePaymentOrder called. OrderId={OrderId}, Amount={Amount}, PaymentMethod={Method}",
+            _logger.LogInformation(
+                "CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}, PaymentMethod={Method}",
                 contract.OrderId, contract.Amount, contract.PaymentMethod);
 
+            // Stripe expects amount in smallest unit (paise)
             var amountInPaise = (long)(contract.Amount * 100);
 
-            var options = new PaymentIntentCreateOptions
+            // Use fully-qualified names to avoid ambiguity:
+            var options = new Stripe.Checkout.SessionCreateOptions
             {
-                Amount = amountInPaise,
-                Currency = "inr",
-                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                Mode = "payment",
+                SuccessUrl = successUrl,  // e.g. https://nestonlinestore.onrender.com/payment-success?session_id={CHECKOUT_SESSION_ID}
+                CancelUrl = cancelUrl,    // e.g. https://nestonlinestore.onrender.com/checkout
+
+                LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
                 {
-                    Enabled = true
+                    new Stripe.Checkout.SessionLineItemOptions
+                    {
+                        Quantity = 1,
+                        PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                        {
+                            Currency = "inr",
+                            UnitAmount = amountInPaise,
+                            ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = $"Order #{contract.OrderId}"
+                            }
+                        }
+                    }
+                },
+
+                // so we can map back to the order later
+                Metadata = new Dictionary<string, string>
+                {
+                    { "orderId", contract.OrderId.ToString() }
                 }
             };
 
-            PaymentIntent paymentIntent;
+            var service = new Stripe.Checkout.SessionService();
+            Stripe.Checkout.Session session;
+
             try
             {
-                paymentIntent = _paymentIntentService.Create(options);
+                session = service.Create(options);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating Stripe PaymentIntent for OrderId={OrderId}", contract.OrderId);
+                _logger.LogError(ex,
+                    "Error creating Stripe Checkout Session for OrderId={OrderId}", contract.OrderId);
                 throw;
             }
 
-            _logger.LogInformation("Stripe PaymentIntent created: {PaymentIntentId}", paymentIntent.Id);
+            _logger.LogInformation("Stripe Checkout Session created: {SessionId}", session.Id);
 
+            // Save payment row: reusing RazorpayOrderId to store Stripe SessionId
             _paymentRepository.CreatePayment(
                 orderId: contract.OrderId,
                 amount: contract.Amount,
                 paymentMethod: contract.PaymentMethod,
-                razorpayOrderId: paymentIntent.Id // storing PaymentIntent Id
+                razorpayOrderId: session.Id
             );
 
-            _logger.LogInformation("Payment DB record created for OrderId={OrderId}, PaymentIntent={PaymentIntentId}",
-                contract.OrderId, paymentIntent.Id);
+            _logger.LogInformation(
+                "Payment DB record created for OrderId={OrderId}, SessionId={SessionId}",
+                contract.OrderId, session.Id);
 
-            return new PaymentDto
+            return new CheckoutSessionDto
             {
-                RazorpayKey = _stripePublishableKey,      // actually Stripe publishable key
-                RazorpayOrderId = paymentIntent.Id,       // Stripe PaymentIntent Id
-                AmountInPaise = (int)amountInPaise,
-                Currency = "INR",
-                ClientSecret = paymentIntent.ClientSecret
+                SessionId = session.Id,
+                Url = session.Url
             };
         }
 
-        public bool VerifyPayment(PaymentVerifyContract contract)
+        public bool ConfirmCheckoutSession(string sessionId)
         {
-            _logger.LogInformation("VerifyPayment called. PaymentIntentId(RazorpayOrderId)={PaymentIntentId}",
-                contract.RazorpayOrderId);
+            _logger.LogInformation(
+                "ConfirmCheckoutSession called. SessionId={SessionId}",
+                sessionId);
+
+            var service = new Stripe.Checkout.SessionService();
+            Stripe.Checkout.Session session;
 
             try
             {
-                var paymentIntent = _paymentIntentService.Get(contract.RazorpayOrderId);
-                _logger.LogInformation("Stripe PaymentIntent status={Status}", paymentIntent.Status);
-
-                if (paymentIntent.Status == "succeeded")
-                {
-                    var chargeId = paymentIntent.LatestChargeId;
-                    _logger.LogInformation("Payment succeeded. ChargeId={ChargeId}", chargeId);
-
-                    _paymentRepository.MarkPaymentAsCompleted(
-                        razorpayOrderId: contract.RazorpayOrderId,
-                        razorpaymentId: chargeId ?? string.Empty,
-                        signature: string.Empty
-                    );
-                    return true;
-                }
-
-                _logger.LogWarning("Payment not succeeded. Status={Status}", paymentIntent.Status);
-                _paymentRepository.MarkPaymentFailed(
-                    razorpayOrderId: contract.RazorpayOrderId,
-                    errorMessage: $"Stripe PaymentIntent status: {paymentIntent.Status}"
-                );
-                return false;
+                session = service.Get(sessionId);
             }
             catch (StripeException ex)
             {
-                _logger.LogError(ex, "StripeException while verifying PaymentIntentId={PaymentIntentId}",
-                    contract.RazorpayOrderId);
+                _logger.LogError(ex,
+                    "StripeException while retrieving Checkout Session {SessionId}",
+                    sessionId);
 
+                // mark payment as failed
                 _paymentRepository.MarkPaymentFailed(
-                    razorpayOrderId: contract.RazorpayOrderId,
+                    razorpayOrderId: sessionId,
                     errorMessage: ex.Message
                 );
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error while verifying PaymentIntentId={PaymentIntentId}",
-                    contract.RazorpayOrderId);
+                _logger.LogError(ex,
+                    "Unexpected error while retrieving Checkout Session {SessionId}",
+                    sessionId);
 
                 _paymentRepository.MarkPaymentFailed(
-                    razorpayOrderId: contract.RazorpayOrderId,
+                    razorpayOrderId: sessionId,
                     errorMessage: ex.Message
                 );
                 return false;
             }
-        }
-      public CheckoutSessionDto CreateCheckoutSession(PaymentCreateContract contract, string? successUrlOverride, string? cancelUrlOverride)
-{
-    _logger.LogInformation("CreateCheckoutSession called. OrderId={OrderId}, Amount={Amount}",
-        contract.OrderId, contract.Amount);
 
-    // 👇 FRONTEND URL (put this in appsettings / env)
-    var frontendUrl = _configuration["FrontendUrl"]
-                      ?? "https://nestonlinestore.vercel.app";
+            _logger.LogInformation(
+                "Stripe Checkout Session retrieved. Status={Status}, PaymentStatus={PaymentStatus}",
+                session.Status, session.PaymentStatus);
 
-    var successUrl = successUrlOverride
-                     ?? $"{frontendUrl}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
+            // Stripe marks checkout session as paid this way
+            var isPaid = session.PaymentStatus == "paid"
+                         || string.Equals(session.Status, "complete", StringComparison.OrdinalIgnoreCase);
 
-    var cancelUrl = cancelUrlOverride
-                    ?? $"{frontendUrl}/checkout";
-
-    var amountInPaise = (long)(contract.Amount * 100);
-
-    var options = new SessionCreateOptions
-    {
-        Mode = "payment",
-        SuccessUrl = successUrl,
-        CancelUrl = cancelUrl,
-        LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
+            if (!isPaid)
             {
-                Quantity = 1,
-                PriceData = new SessionLineItemPriceDataOptions
+                _logger.LogWarning(
+                    "Checkout Session not paid. SessionId={SessionId}, Status={Status}, PaymentStatus={PaymentStatus}",
+                    sessionId, session.Status, session.PaymentStatus);
+
+                _paymentRepository.MarkPaymentFailed(
+                    razorpayOrderId: sessionId,
+                    errorMessage: $"Stripe session status: {session.Status}, paymentStatus: {session.PaymentStatus}"
+                );
+                return false;
+            }
+
+            // Get PaymentIntent id (for logging or storing as RazorpayPaymentId field)
+            var paymentIntentId = session.PaymentIntentId ?? string.Empty;
+
+            // Update Payments row → COMPLETED
+            _paymentRepository.MarkPaymentAsCompleted(
+                razorpayOrderId: sessionId,       // we stored Session.Id in Payments.RazorpayOrderId
+                razorpaymentId: paymentIntentId,  // store PaymentIntentId into RazorpayPaymentId
+                signature: string.Empty           // no real signature here, but keep param for compatibility
+            );
+
+            _logger.LogInformation(
+                "Payment marked as COMPLETED for SessionId={SessionId}, PaymentIntent={PaymentIntentId}",
+                sessionId, paymentIntentId);
+
+            // Mark the order as paid using metadata
+            if (session.Metadata != null &&
+                session.Metadata.TryGetValue("orderId", out var orderIdStr) &&
+                int.TryParse(orderIdStr, out var orderId))
+            {
+                try
                 {
-                    Currency = "inr",
-                    UnitAmount = amountInPaise,
-                    ProductData = new SessionLineItemPriceDataProductDataOptions
-                    {
-                        Name = $"Order #{contract.OrderId}"
-                    }
+                    _ordersRepository.MarkOrderPaid(orderId);
+                    _logger.LogInformation("Order {OrderId} marked as 'paid'", orderId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "Error marking Order {OrderId} as paid", orderId);
                 }
             }
-        },
-        AutomaticTax = new SessionAutomaticTaxOptions { Enabled = false }
-    };
+            else
+            {
+                _logger.LogWarning(
+                    "No valid orderId metadata found on Checkout Session {SessionId}. Order not updated.",
+                    sessionId);
+            }
 
-    var service = new SessionService();
-    var session = service.Create(options);
-
-    _paymentRepository.CreatePayment(
-        orderId: contract.OrderId,
-        amount: contract.Amount,
-        paymentMethod: contract.PaymentMethod,
-        razorpayOrderId: session.Id
-    );
-
-    return new CheckoutSessionDto
-    {
-        SessionId = session.Id,
-        Url = session.Url!
-    };
-}
+            return true;
+        }
     }
 }
