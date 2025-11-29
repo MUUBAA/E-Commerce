@@ -126,10 +126,10 @@ const CheckoutPage: React.FC = () => {
           {ordersLoading && (
             <div className="text-center text-gray-400 py-8">Loading...</div>
           )}
-          {!ordersLoading && orderItems.length === 0 && (
-            <div className="text-center text-gray-400 py-8">No items in your order.</div>
+          {!ordersLoading && (!pendingOrder || orderItems.length === 0) && (
+            <div className="text-center text-gray-400 py-8">No items in your Checkout List.</div>
           )}
-          {!ordersLoading && orderItems.map((item) => (
+          {!ordersLoading && pendingOrder && orderItems.map((item) => (
             <div
               key={item.orderItemId}
               className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2 shadow-sm"
