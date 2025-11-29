@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Package, MapPin, User, ChevronRight } from "lucide-react";
 import { getUserById } from "../../redux/thunk/user";
+import { fetchMyOrders } from "../../redux/thunk/orders";
+import type { MyOrderDto } from "../../redux/slices/orderSlice";
 import { resetJwt } from "../../redux/slices/loginUser";
 import { getDecryptedJwt } from '../../utils/auth';
 import { jwtDecode } from 'jwt-decode';
@@ -25,6 +27,29 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
   const { UserAccount, loading } = useSelector(
     (state: RootState) => state.user
   );
+  const [orders, setOrders] = useState<MyOrderDto[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+    useEffect(() => {
+      if (currentView !== "orders") return;
+
+      const token = getDecryptedJwt();
+      if (!token) {
+        // Optionally use toast if imported
+        // toast.warn("Please login first");
+        return;
+      }
+
+      setOrdersLoading(true);
+
+      dispatch(fetchMyOrders({ token }))
+        .unwrap()
+        .then((data) => setOrders(data))
+        .catch((err) => {
+          console.error("Failed to fetch orders:", err);
+          setOrders([]);
+        })
+        .finally(() => setOrdersLoading(false));
+    }, [currentView, dispatch]);
   const isLoggedIn = Boolean(localStorage.getItem('jwtToken'));
   const [values, setValues] = useState({
     name: "",
@@ -150,20 +175,72 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const renderOrdersView = () => (
     <div className="p-6">
-      <div className="text-center py-16">
-        <div className="w-20 h-20 bg-purple-500 rounded-full mx-auto mb-6 flex items-center justify-center">
-          <div className="w-8 h-8 bg-pink-500 rounded-sm flex items-center justify-center">
-            <span className="text-white font-bold text-sm">Z</span>
-          </div>
-          <div className="absolute w-4 h-4 bg-red-500 rounded-full -mt-2 -mr-2"></div>
+      {/* Loading Indicator */}
+      {ordersLoading && (
+        <div className="flex justify-center items-center py-16">
+          <svg className="animate-spin h-8 w-8 text-pink-500" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          No orders yet
-        </h3>
-        <button className="mt-6 cursor-pointer px-6 py-2 border border-purple-500 text-purple-500 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer">
-          Browse products
-        </button>
-      </div>
+      )}
+
+      {/* No Orders */}
+      {!ordersLoading && orders.length === 0 && (
+        <div className="text-center py-16">
+          <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900">No orders yet</h3>
+          <p className="text-gray-500 text-sm">Your past orders will appear here.</p>
+        </div>
+      )}
+
+      {/* Order List */}
+      {!ordersLoading && orders.length > 0 && (
+        <div className="space-y-4">
+          {orders.map((order) => (
+            <div key={order.orderId} className="p-4 border rounded-lg shadow-sm bg-white">
+              <div className="flex justify-between mb-2">
+                <span className="font-semibold text-gray-900">
+                  Order #{order.orderId}
+                </span>
+                <span
+                  className={`text-sm font-medium ${
+                    order.status === "paid"
+                      ? "text-green-600"
+                      : "text-yellow-600"
+                  }`}
+                >
+                  {order.status}
+                </span>
+              </div>
+
+              {/* Order Items */}
+              <div className="space-y-2">
+                {order.items.map((item) => (
+                  <div key={item.orderItemId} className="flex items-center gap-3">
+                    <img
+                      src={item.itemUrl || ""}
+                      alt={item.itemName}
+                      className="h-12 w-12 rounded object-cover bg-gray-100"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{item.itemName}</p>
+                      <p className="text-xs text-gray-500">
+                        {item.quantity} × ₹{item.linePrice}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total */}
+              <div className="text-right mt-3 font-semibold text-gray-800">
+                Total: ₹{order.totalPrice}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 

@@ -1,17 +1,20 @@
-﻿using Server.Data.Contract.CartItems;
+﻿using Server.Data.Dto.Orders;
 using Server.Data.Entities.Orders;
 using Server.Data.Repositories;
 
 namespace Server.Services.OrderService
 {
-   public interface IOrderService
+    public interface IOrderService
     {
         Orders CreateOrder(int userId);
+        List<UserOrderDto> GetUserOrders(int userId); 
+        void MarkOrderPaid(int orderId);
     }
+
     public class OrderService : IOrderService
     {
         private readonly IOrdersRepository _ordersRepo;
-        private readonly ICartRepository _cartRepo;
+        private readonly ICartRepository _cartRepo; 
 
         public OrderService(IOrdersRepository ordersRepo, ICartRepository cartRepo)
         {
@@ -21,26 +24,17 @@ namespace Server.Services.OrderService
 
         public Orders CreateOrder(int userId)
         {
-            // 1) Build contract for cart repo
-            var cartContract = new CartItemContract
-            {
-                UserId = userId,
-                Page = 0,
-                PageSize = 100,   
-            };
+            return _ordersRepo.CreateOrder(userId);
+        }
 
-            var (totalItems, totalPages, totalPrice, cartItems) = _cartRepo.GetCartItems(cartContract);
+        public List<UserOrderDto> GetUserOrders(int userId)
+        {
+            return _ordersRepo.GetUserOrdersWithItems(userId);
+        }
 
-            if (totalItems == 0 || cartItems == null || !cartItems.Any())
-            {
-                throw new Exception("Cart is empty");
-            }
-
-            decimal total = cartItems.Sum(x => x.Price * x.Quantity);
-
-            var order = _ordersRepo.CreateOrder(userId, total);
-
-            return order;
+        public void MarkOrderPaid(int orderId)
+        {
+            _ordersRepo.MarkOrderPaid(orderId);
         }
     }
 }

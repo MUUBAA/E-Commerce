@@ -1,62 +1,77 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import { createOrderFromCart } from "../thunk/orders";
-import type { CreateOrderResponseDto } from "../thunk/orders";
+// src/redux/slices/orderSlice.ts
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createOrderFromCart, fetchMyOrders } from "../thunk/orders";
+
+
+export interface CreateOrderResponseDto {
+  orderId: number;
+  totalPrice: number;
+  status: string;
+}
+
+export interface CheckoutSessionResponse {
+  url: string;
+}
+
+import type { OrderItemListDto } from "../thunk/orders";
+
+export interface MyOrderDto {
+  orderId: number;
+  totalPrice: number;
+  status: string;
+  createdAt: string;
+  items: OrderItemListDto[];
+}
 
 interface OrderState {
-  orderId: number | null;
-  totalPrice: number;
-  orderStatus: string | null;
+  currentOrder: CreateOrderResponseDto | null;
+  checkoutSession: CheckoutSessionResponse | null;
+  myOrders: MyOrderDto[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: OrderState = {
-  orderId: null,
-  totalPrice: 0,
-  orderStatus: null,
+  currentOrder: null,
+  checkoutSession: null,
+  myOrders: [],
   loading: false,
   error: null,
 };
 
 const orderSlice = createSlice({
-  name: "orders",
+  name: "order",
   initialState,
   reducers: {
-    resetOrder(state) {
-      state.orderId = null;
-      state.totalPrice = 0;
-      state.orderStatus = null;
-      state.loading = false;
-      state.error = null;
+    setCurrentOrder(state, action: PayloadAction<CreateOrderResponseDto>) {
+      state.currentOrder = action.payload;
     },
-    setOrderStatus(state, action: PayloadAction<string>) {
-      state.orderStatus = action.payload;
+    clearCurrentOrder(state) {
+      state.currentOrder = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createOrderFromCart.pending, (state) => {
+      .addCase(createOrderFromCart.fulfilled, (state, action) => {
+        state.currentOrder = action.payload;
+      })
+      .addCase(fetchMyOrders.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        createOrderFromCart.fulfilled,
-        (state, action: PayloadAction<CreateOrderResponseDto>) => {
-          state.loading = false;
-          state.error = null;
-          state.orderId = action.payload.orderId;
-          state.totalPrice = action.payload.totalPrice;
-          state.orderStatus = action.payload.status;
-        }
-      )
-      .addCase(createOrderFromCart.rejected, (state, action) => {
+      .addCase(fetchMyOrders.fulfilled, (state, action) => {
+        state.loading = false;
+        state.myOrders = action.payload;
+      })
+      .addCase(fetchMyOrders.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.payload || action.error.message || "Failed to create order";
+          (action.payload as string) ||
+          action.error.message ||
+          "Failed to fetch orders";
       });
   },
 });
 
-export const { resetOrder, setOrderStatus } = orderSlice.actions;
+export const { setCurrentOrder, clearCurrentOrder } = orderSlice.actions;
 export default orderSlice.reducer;

@@ -3,54 +3,64 @@ using Microsoft.AspNetCore.Mvc;
 using Server.Data.Contract.Payments;
 using Server.Data.Dto;
 using Server.Services.PaymentService;
+using Server.Services.OrderService;
 using Server.Utils;
 
 namespace Server.Controllers.PaymentController
 {
     [Authorize]
     [ApiController]
-    public class PaymentController(IPaymentService paymentService) : BaseController
+    public class PaymentController : BaseController
     {
-        [HttpPost]
-        [Route("payment/create-order")]
-        public ActionResult<GenericApiResponse<PaymentDto>> CreateOrder([FromBody] PaymentCreateContract contract)
-        {
+        private readonly IPaymentService _paymentService;
+        private readonly IOrderService _orderService;
 
-            var result = paymentService.CreatePaymentOrder(contract);
-            return Ok(new GenericApiResponse<PaymentDto>(true, "order created successfully", result));
+        public PaymentController(
+            IPaymentService paymentService,
+            IOrderService orderService
+        )
+        {
+            _paymentService = paymentService;
+            _orderService = orderService;
         }
 
         [HttpPost]
-        [Route("payment/verify")]
-        public ActionResult<GenericApiResponse<string>> Verify([FromBody] PaymentVerifyContract contract)
+        [Route("payment/create-checkout")]
+        public ActionResult<GenericApiResponse<CheckoutSessionDto>> CreateCheckout([FromBody] PaymentCreateContract contract)
         {
-            var success = paymentService.VerifyPayment(contract);
-            if (success)
+            try
             {
-                return BadRequest(new GenericApiResponse<string>(false, "Payment verification failed"));
+                string successUrl = $"{Request.Scheme}://{Request.Host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
+                string cancelUrl = $"{Request.Scheme}://{Request.Host}/checkout";
+
+                var session = _paymentService.CreateCheckoutSession(contract, successUrl, cancelUrl);
+
+                return Ok(new GenericApiResponse<CheckoutSessionDto>(true, "Checkout session created", session ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new GenericApiResponse<CheckoutSessionDto>( false, ex.Message ));
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("payment/confirm")]
+        public ActionResult<GenericApiResponse<string>> ConfirmPayment([FromQuery] string session_id)
+        {
+            if (string.IsNullOrEmpty(session_id))
+            {
+                return BadRequest(new GenericApiResponse<string>(false, "session_id missing"));
             }
 
-            return Ok(new GenericApiResponse<string>(true, "Payment verified sucessfully", null));
+            bool success = _paymentService.ConfirmCheckoutSession(session_id);
 
+            if (!success)
+            {
+                return BadRequest(new GenericApiResponse<string>(false, "Payment not completed" ));
+            }
 
-        }
-
-        [HttpPost]
-        [Route("payment/create-checkout-session")]
-        public ActionResult<GenericApiResponse<CheckoutSessionDto>> CreateCheckoutSession(
-       [FromBody] PaymentCreateContract contract)
-        {
-            // build success/cancel URLs; you can also take them from config or request
-            var origin = $"{Request.Scheme}://{Request.Host}";
-            var successUrl = $"{origin}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
-            var cancelUrl = $"{origin}/checkout";
-
-            var result = paymentService.CreateCheckoutSession(contract, successUrl, cancelUrl);
-            return Ok(new GenericApiResponse<CheckoutSessionDto>(
-                true,
-                "Checkout session created successfully",
-                result
-            ));
+            return Ok(new GenericApiResponse<string>(true, "Payment verified successfully", null));
         }
     }
 }

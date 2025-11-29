@@ -46,10 +46,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         );
 
         if (createOrderFromCart.fulfilled.match(resultAction)) {
-          // Order created successfully, backend calculated total & set status=pending
           toast.success("Order created successfully");
           onClose();
-          navigate("/checkout"); // Checkout page will now use orderId & totalPrice from Redux
+          navigate("/checkout");
         } else {
           const errMsg =
             (resultAction.payload as string) || "Failed to create order";
@@ -535,7 +534,7 @@ useEffect(() => {
 
                 {/* title + subtitle */}
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-900 line-clamp-2">
+                  <div className="text-sm font-semibold text-gray-900 break-words max-w-[120px] line-clamp-2">
                     {i.itemName}
                   </div>
                   <div className="text-xs text-gray-500">

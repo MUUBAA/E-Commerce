@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createCheckoutSession } from "../../redux/thunk/paymentCheckout";
-import { getDecryptedJwt } from "../../utils/auth";
 import { toast } from "react-toastify";
 import type { AppDispatch, RootState } from "../../redux/stores";
+import { jwtDecode } from "jwt-decode";
+import { getUserById } from "../../redux/thunk/user";
+
+import { getDecryptedJwt } from "../../utils/auth";
+import { createCheckoutSession } from "../../redux/thunk/paymentCheckout";
 
 interface CartItem {
   productId: number;
@@ -14,13 +17,45 @@ interface CartItem {
   quantity: number;
 }
 
-
-
-
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const cartItems = useSelector((state: RootState) => state.cart.items) as CartItem[];
-  const totalPrice = useSelector((state: RootState) => state.cart.totalPrice ?? 0);
+  // Get userId from JWT
+  const token = getDecryptedJwt();
+  let userIdFromToken: number | undefined;
+  if (token) {
+    try {
+      const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
+      userIdFromToken =
+        typeof decoded.id === 'number'
+          ? decoded.id
+          : decoded.sub
+            ? Number(decoded.sub)
+            : undefined;
+    } catch {
+      userIdFromToken = undefined;
+    }
+  }
+
+  // Fetch user info on mount
+  useEffect(() => {
+    if (userIdFromToken) {
+      dispatch(getUserById({ id: userIdFromToken }));
+    }
+  }, [dispatch, userIdFromToken]);
+
+  // Get user address from Redux
+  const userAccount = useSelector((state: RootState) => state.user.UserAccount);
+  const userAddress = userAccount?.address;
+
+  const cartItems = useSelector(
+    (state: RootState) => state.cart.items
+  ) as CartItem[];
+
+  const totalPrice = useSelector((state: RootState) => state.cart.totalPrice ?? 0
+  );
+
+  const currentOrder = useSelector((state: RootState) => state.orders.currentOrder);
+
   const [paying, setPaying] = useState(false);
 
   const handleStripeCheckout = async () => {
@@ -34,14 +69,20 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
+    if (!currentOrder) {
+      toast.error("No pending order found. Please go back to cart and try again.");
+      return;
+    }
+
     setPaying(true);
-    const orderId = 2;
 
     try {
+      const { orderId, totalPrice: backendTotal } = currentOrder;
+
       const resultAction = await dispatch(
         createCheckoutSession({
           orderId,
-          amount: totalPrice,
+          amount: backendTotal ?? totalPrice, // trust backend amount if present
           paymentMethod: "STRIPE_CHECKOUT",
           token,
         })
@@ -49,10 +90,11 @@ const CheckoutPage: React.FC = () => {
 
       if (createCheckoutSession.fulfilled.match(resultAction)) {
         const { url } = resultAction.payload;
-        window.location.href = url;
+        window.location.href = url; // redirect to Stripe Checkout
       } else {
         const msg =
-          (resultAction.payload as { message?: string })?.message || "Failed to start checkout";
+          (resultAction.payload as { message?: string })?.message ||
+          "Failed to start checkout";
         toast.error(msg);
       }
     } catch (err) {
@@ -66,11 +108,15 @@ const CheckoutPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <h1 className="text-2xl font-semibold mb-6">Checkout</h1>
+
       <div className="border rounded-xl p-4 bg-white shadow-sm">
         <h3 className="font-semibold mb-2">Delivery Address</h3>
         <div className="text-sm text-gray-700 mb-4">
-          Home: Abd, 5/7, Bangla Sahib Road<br />
-          Sector 4, Gole Market, New Delhi, Delhi, India
+          {userAddress ? (
+            <>{userAddress}</>
+          ) : (
+            <span className="italic text-gray-400">No address found</span>
+          )}
         </div>
 
         <h3 className="font-semibold mb-2">My Cart</h3>
