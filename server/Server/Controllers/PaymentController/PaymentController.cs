@@ -14,35 +14,42 @@ namespace Server.Controllers.PaymentController
     {
         private readonly IPaymentService _paymentService;
         private readonly IOrderService _orderService;
+        private readonly IConfiguration _configuration;
 
         public PaymentController(
             IPaymentService paymentService,
-            IOrderService orderService
+            IOrderService orderService,
+            IConfiguration configuration
         )
         {
             _paymentService = paymentService;
             _orderService = orderService;
+            _configuration = configuration;
         }
 
-        [HttpPost]
-        [Route("payment/create-checkout")]
-        public ActionResult<GenericApiResponse<CheckoutSessionDto>> CreateCheckout([FromBody] PaymentCreateContract contract)
+       [HttpPost]
+    [Route("payment/create-checkout")]
+    public ActionResult<GenericApiResponse<CheckoutSessionDto>> CreateCheckout(
+        [FromBody] PaymentCreateContract contract)
+    {
+        try
         {
-            try
-            {
-                string successUrl = $"{Request.Scheme}://{Request.Host}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
-                string cancelUrl = $"{Request.Scheme}://{Request.Host}/checkout";
+            // 👇 use FRONTEND url instead of backend host
+            var frontendUrl = _configuration["FrontendUrl"]
+                              ?? "https://nestonlinestore.vercel.app";
 
-                var session = _paymentService.CreateCheckoutSession(contract, successUrl, cancelUrl);
+            var successUrl = $"{frontendUrl}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
+            var cancelUrl  = $"{frontendUrl}/checkout";
 
-                return Ok(new GenericApiResponse<CheckoutSessionDto>(true, "Checkout session created", session ));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new GenericApiResponse<CheckoutSessionDto>( false, ex.Message ));
-            }
+            var session = _paymentService.CreateCheckoutSession(contract, successUrl, cancelUrl);
+
+            return Ok(new GenericApiResponse<CheckoutSessionDto>( true, "Checkout session created", session ));
         }
-
+        catch (Exception ex)
+        {
+            return BadRequest(new GenericApiResponse<CheckoutSessionDto>(false, ex.Message  ));
+        }
+    }
         [AllowAnonymous]
         [HttpGet]
         [Route("payment/confirm")]
