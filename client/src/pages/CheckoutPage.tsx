@@ -7,15 +7,10 @@ import { getUserById } from "../../redux/thunk/user";
 
 import { getDecryptedJwt } from "../../utils/auth";
 import { createCheckoutSession } from "../../redux/thunk/paymentCheckout";
+import { fetchMyOrders } from "../../redux/thunk/orders";
+import type { MyOrderDto } from "../../redux/slices/orderSlice";
 
-interface CartItem {
-  productId: number;
-  itemName: string;
-  itemDescription?: string;
-  itemUrl?: string;
-  price: number;
-  quantity: number;
-}
+
 
 const CheckoutPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,20 +38,27 @@ const CheckoutPage: React.FC = () => {
     }
   }, [dispatch, userIdFromToken]);
 
+
   // Get user address from Redux
   const userAccount = useSelector((state: RootState) => state.user.UserAccount);
   const userAddress = userAccount?.address;
 
-  const cartItems = useSelector(
-    (state: RootState) => state.cart.items
-  ) as CartItem[];
-
-  const totalPrice = useSelector((state: RootState) => state.cart.totalPrice ?? 0
-  );
-
-  const currentOrder = useSelector((state: RootState) => state.orders.currentOrder);
-
+  const myOrders = useSelector((state: RootState) => state.orders.myOrders);
+  const ordersLoading = useSelector((state: RootState) => state.orders.loading);
   const [paying, setPaying] = useState(false);
+
+  // Find the latest pending order (or adjust logic as needed)
+  const pendingOrder = myOrders.find((order: MyOrderDto) => order.status === "pending");
+  const orderItems = pendingOrder?.items || [];
+  const totalPrice = pendingOrder?.totalPrice || 0;
+
+
+  useEffect(() => {
+    const token = getDecryptedJwt();
+    if (token) {
+      dispatch(fetchMyOrders({ token }));
+    }
+  }, [dispatch]);
 
   const handleStripeCheckout = async () => {
     const token = getDecryptedJwt();
@@ -64,25 +66,24 @@ const CheckoutPage: React.FC = () => {
       toast.warn("Please login to continue");
       return;
     }
-    if (!cartItems.length) {
-      toast.warn("Cart is empty");
+    if (!userAddress || userAddress.trim() === "") {
+      toast.warn("Please select the address before pay");
       return;
     }
-
-    if (!currentOrder) {
-      toast.error("No pending order found. Please go back to cart and try again.");
+    if (!orderItems.length || !pendingOrder) {
+      toast.warn("No pending order found");
       return;
     }
 
     setPaying(true);
 
     try {
-      const { orderId, totalPrice: backendTotal } = currentOrder;
+      const { orderId, totalPrice: backendTotal } = pendingOrder;
 
       const resultAction = await dispatch(
         createCheckoutSession({
           orderId,
-          amount: backendTotal ?? totalPrice, // trust backend amount if present
+          amount: backendTotal ?? totalPrice,
           paymentMethod: "STRIPE_CHECKOUT",
           token,
         })
@@ -90,7 +91,7 @@ const CheckoutPage: React.FC = () => {
 
       if (createCheckoutSession.fulfilled.match(resultAction)) {
         const { url } = resultAction.payload;
-        window.location.href = url; // redirect to Stripe Checkout
+        window.location.href = url;
       } else {
         const msg =
           (resultAction.payload as { message?: string })?.message ||
@@ -119,11 +120,18 @@ const CheckoutPage: React.FC = () => {
           )}
         </div>
 
-        <h3 className="font-semibold mb-2">My Cart</h3>
+
+        <h3 className="font-semibold mb-2">Order Items</h3>
         <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-          {cartItems.map((item) => (
+          {ordersLoading && (
+            <div className="text-center text-gray-400 py-8">Loading...</div>
+          )}
+          {!ordersLoading && orderItems.length === 0 && (
+            <div className="text-center text-gray-400 py-8">No items in your order.</div>
+          )}
+          {!ordersLoading && orderItems.map((item) => (
             <div
-              key={item.productId}
+              key={item.orderItemId}
               className="flex items-center justify-between text-sm bg-gray-50 rounded-lg p-2 shadow-sm"
             >
               {item.itemUrl && (
@@ -136,11 +144,11 @@ const CheckoutPage: React.FC = () => {
               <div className="flex-1 mr-2">
                 <div className="font-medium">{item.itemName}</div>
                 <div className="text-xs text-gray-500">
-                  {item.quantity} x ₹{item.price}
+                  {item.quantity} x ₹{item.linePrice}
                 </div>
               </div>
               <div className="font-semibold">
-                ₹{Number(item.price) * item.quantity}
+                ₹{Number(item.linePrice) * item.quantity}
               </div>
             </div>
           ))}
