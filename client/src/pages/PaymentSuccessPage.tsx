@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import type { AppDispatch } from "../../redux/stores";
 import { resetPayment } from "../../redux/slices/paymentSlice";
+import axios from "axios";
 // import { clearCart } from "../redux/slices/cartSlice"; // if you have this
 
 const REDIRECT_SECONDS = 15; // or 10
@@ -15,6 +16,22 @@ const PaymentSuccessPage: React.FC = () => {
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
 
   const sessionId = searchParams.get("session_id"); // from Stripe Checkout
+
+  useEffect(() => {
+  const sessionId = searchParams.get("session_id");
+  if (!sessionId) return;
+
+  (async () => {
+    try {
+      await axios.get(`https://nestonlinestore.onrender.com/payment/confirm`, {
+        params: { session_id: sessionId },
+      });
+      // order is now marked as paid in backend
+    } catch (e) {
+      console.error("Confirm failed", e);
+    }
+  })();
+}, [searchParams]);
 
   useEffect(() => {
     // Optionally show a toast
