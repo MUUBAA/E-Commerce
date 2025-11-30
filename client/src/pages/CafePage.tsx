@@ -89,7 +89,7 @@ const CafePage: React.FC = () => {
           >
             <ChevronLeft className="h-5 w-5 text-gray-700" />
           </button>
-          <h1 className="text-lg font-bold text-gray-900">Zepto Café</h1>
+          <h1 className="text-lg font-bold text-gray-900">Nest Café</h1>
         </div>
       </div>
 
