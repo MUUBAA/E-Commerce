@@ -257,7 +257,7 @@ useEffect(() => {
       const response = await dispatch(forgotPassword({ email: formData.email }));
       if (response.type === 'forgotPassword/fulfilled') {
         toast.dismiss();
-        toast.success('If an account exists for this email, you will receive reset instructions');
+        toast.success('Password reset email sent! Please check your Inbox and spam folder also as it may be there.');
         setFormData({ email: '', name: '', password: '', confirmPassword: '' });
         setCurrentView('login');
       } else {
