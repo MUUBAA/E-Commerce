@@ -75,7 +75,7 @@ const JuicesHealthyDrinksPage: React.FC = () => {
       imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1763694968/tropicana_guava_juice_fgtjtw.webp',
       title: 'Tropicana Essentials',
       subtitle: 'IMMUNITY BOOSTERS',
-      buttonText: 'Order now',
+      buttonText: 'Order below',
       backgroundColor: 'bg-green-100',
       isDark: false,
     },
