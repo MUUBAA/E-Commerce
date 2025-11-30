@@ -33,7 +33,7 @@ const ResetPasswordTailwind: React.FC = () => {
       const resultAction = await dispatch(resetPassword({ token, newPassword: password }));
       if (resetPassword.fulfilled.match(resultAction)) {
         toast.success("Password reset successful");
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => navigate("/"), 2000);
       } else {
         const errorMsg = typeof resultAction.payload === 'string' && resultAction.payload
           ? resultAction.payload
@@ -65,7 +65,7 @@ const ResetPasswordTailwind: React.FC = () => {
             />
             <button
               type="button"
-              className="absolute right-3 top-9 text-pink-400 hover:text-pink-600 text-sm"
+              className="absolute right-3 top-9 text-pink-400 hover:text-pink-600 text-sm cursor-pointer"
               tabIndex={-1}
               onClick={() => setShowPassword(v => !v)}
             >
@@ -83,7 +83,7 @@ const ResetPasswordTailwind: React.FC = () => {
             />
             <button
               type="button"
-              className="absolute right-3 top-9 text-pink-400 hover:text-pink-600 text-sm"
+              className="absolute right-3 top-9 text-pink-400 hover:text-pink-600 text-sm cursor-pointer"
               tabIndex={-1}
               onClick={() => setShowConfirmPassword(v => !v)}
             >
@@ -92,7 +92,7 @@ const ResetPasswordTailwind: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="mt-2 w-full py-3 rounded-xl bg-pink-500 text-white font-semibold hover:bg-pink-600 transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-60"
+            className="mt-2 w-full py-3 rounded-xl bg-pink-500 text-white font-semibold hover:bg-pink-600 transition-all duration-200 hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-60 cursor-pointer"
             disabled={loading}
           >
             {loading ? "Resetting..." : "Reset Password"}
@@ -100,7 +100,7 @@ const ResetPasswordTailwind: React.FC = () => {
         </form>
         <button
           type="button"
-          className="mt-4 text-pink-600 hover:underline text-sm font-medium"
+          className="mt-4 text-pink-600 hover:underline text-sm font-medium cursor-pointer"
           onClick={() => navigate("/")}
         >
           Back to Home
