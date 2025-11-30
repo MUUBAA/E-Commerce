@@ -14,7 +14,6 @@ import SpicesSeasoningsPage from "./pages/SpicesSeasoningsPage";
 import ChipsCrispsPage from "./pages/ChipsCrispsPage";
 import JuicesHealthyDrinksPage from "./pages/JuicesHealthyDrinksPage";
 import CafeBestsellersPage from "./pages/CafeBestsellersPage";
-import CafeSnacksPage from "./pages/CafeSnacksPage";
 import Header from "./components/Header";
 // import SubHeader from "./components/SubHeader";
 import Footer from "./components/Footer";
@@ -87,7 +86,6 @@ function AppContent() {
         <Route path="/chips-crisps" element={<ChipsCrispsPage />} />
         <Route path="/juices-healthy-drinks" element={<JuicesHealthyDrinksPage />} />
         <Route path="/cafe-bestsellers" element={<CafeBestsellersPage />} />
-        <Route path="/cafe-snacks" element={<CafeSnacksPage />} />
         <Route path="/salt-sugar-jaggery" element={<SaltSugarPage />} />
         <Route path="/list" element={<ListPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
