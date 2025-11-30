@@ -126,7 +126,10 @@ const HomePage: React.FC = () => {
             Get fruits, veggies, dairy & more delivered fast!
           </p>
 
-          <button className="mt-4 cursor-pointer rounded-lg bg-red-600 px-4 py-2 font-bold text-white transition-transform hover:scale-105">
+          <button
+            className="mt-4 cursor-pointer rounded-lg bg-red-600 px-4 py-2 font-bold text-white transition-transform hover:scale-105"
+            onClick={() => navigate("/")}
+          >
             Order now
           </button>
         </div>
