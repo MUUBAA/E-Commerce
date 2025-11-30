@@ -1,4 +1,4 @@
-import React, {  useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
@@ -67,6 +67,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const [currentView, setCurrentView] = useState<ViewState>('empty');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const hasItems = cartItems.length > 0;
   const [formData, setFormData] = useState({
@@ -134,7 +135,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     }
   };
    
-  const FetchCartItems = async () => {
+  const FetchCartItems = useCallback(async () => {
+    setCartLoading(true);
     try {
       const preparePayload: GetAllCartPayload = {
         userId: userIdFromToken ?? 0,
@@ -149,6 +151,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         itemUrl: ''
       };
       const response = await dispatch(getCartItems(preparePayload));
+      setCurrentView('cart');
       if(response.meta.requestStatus === 'fulfilled') {
         if (Array.isArray(response.payload)) {
           setCartItems(response.payload);
@@ -156,6 +159,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           setCurrentView('cart');
         } 
         else if(response.payload && typeof response.payload === 'object' ) {
+          setCurrentView('cart');
           setCartItems(response?.payload?.items || []); 
           setTotalPrice(response?.payload?.totalPrice || 0);
           setCurrentView('cart');
@@ -168,8 +172,10 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error('Error fetching cart items:', error);
       setCartItems([]); 
+    } finally {
+      setCartLoading(false);
     }
-  }
+  }, [dispatch, userIdFromToken]);
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
@@ -190,7 +196,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     return () => {
       window.removeEventListener('user-logged-out', handleUserLoggedOut);
     };
-  }, [dispatch]);
+  }, [dispatch, FetchCartItems]);
       
  const handleSubmitRegister = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -487,7 +493,14 @@ useEffect(() => {
 
   const renderCart = () => (
     <div className="py-6">
-      {!hasItems ? (
+      {cartLoading ? (
+        <div className="flex justify-center items-center py-16">
+          <svg className="animate-spin h-8 w-8 text-pink-500" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+        </div>
+      ) : !hasItems ? (
         <div className="flex flex-col items-center justify-center text-center py-12">
           <div className="mb-6">
             <div className="mx-auto h-24 w-24 rounded-full bg-gray-50 flex items-center justify-center">
@@ -668,7 +681,7 @@ useEffect(() => {
             <h2 className="text-lg font-semibold">My Cart</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>

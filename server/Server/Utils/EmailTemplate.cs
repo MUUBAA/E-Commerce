@@ -25,10 +25,10 @@ namespace Server.Utils
         {
             string subject = "Nest Password Reset Request";
             string body = $@"
-<div style='font-family: Arial, sans-serif; background: #f7f7f7; padding: 32px;'>
+    <div style='font-family: Arial, sans-serif; background: #f7f7f7; padding: 32px;'>
     <div style='max-width: 480px; margin: auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px;'>
         <div style='text-align:center; margin-bottom: 24px;'>
-            <img src='' alt='Nest' style='height: 48px;'/>
+            <img src='https://res.cloudinary.com/dulie41id/image/upload/v1764480398/nest_email_template_comd2i.webp' alt='Nest' style='height: 48px;'/>
         </div>
         <h2 style='color: #2d3e50;'>Reset Your Password</h2>
         <p>Dear {user.Name},</p>
