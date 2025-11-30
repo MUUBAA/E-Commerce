@@ -37,11 +37,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
     const item = state.cart.items.find((ci) => ci.productId === id);
     return item ? item.quantity : 0;
   });
+  const [loading, setLoading] = React.useState(false);
   // Prefer userId from decrypted JWT; fallback to any stored profile if needed.
   const fallbackUserId = useSelector((state: RootState) => state.user.UserAccount?.id
     ?? state.user.userProfile?.Id
   );
   const handleIncrease = async () => {
+    setLoading(true);
     if (!id || Number(id) <= 0) {
       return toast.error('Invalid product. Please try again.');
     }
@@ -80,6 +82,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       toast.success('Added to cart');
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -135,10 +139,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         ) : (
           <button
-            className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50"
+            className="absolute bottom-2 right-2 cursor-pointer rounded-md border border-pink-500 bg-white px-3 py-1 text-sm font-semibold text-pink-500 transition-colors hover:bg-pink-50 flex items-center justify-center min-w-[60px]"
             onClick={handleIncrease}
+            disabled={loading}
           >
-            ADD
+            {loading ? (
+              <svg className="animate-spin h-4 w-4 text-pink-500" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+              </svg>
+            ) : (
+              'ADD'
+            )}
           </button>
         )}
       </div>
