@@ -4,7 +4,6 @@ import "react-toastify/dist/ReactToastify.css";
 import HomePage from "./pages/HomePage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import ListPage from "./pages/ListPage";
-import CategoryPage from "./pages/CategoryPage";
 import CafePage from "./pages/CafePage";
 import ToysPage from "./pages/ToysPage";
 import FreshPage from "./pages/FreshPage";
@@ -90,7 +89,6 @@ function AppContent() {
         <Route path="/cafe-bestsellers" element={<CafeBestsellersPage />} />
         <Route path="/cafe-snacks" element={<CafeSnacksPage />} />
         <Route path="/salt-sugar-jaggery" element={<SaltSugarPage />} />
-        <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/list" element={<ListPage />} />
         <Route path="/search" element={<SearchResultsPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
