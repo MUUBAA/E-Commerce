@@ -1,4 +1,6 @@
 ﻿﻿using System.Net.Mail;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Server.Services.MessageServices
 {
@@ -6,64 +8,98 @@ namespace Server.Services.MessageServices
     {
         void SendEmail(string to, string subject, string body);
     }
+
     public class EmailService : IEmailService
     {
-        private string _SmtpHost;
-        private int _SmtpPort;
-        private string _SmtpMailAddress;
-        private string _SmtpUsername;
-        private string _SmtpPassword;
-        private SmtpClient _client;
+        private readonly string _smtpHost;
+        private readonly int _smtpPort;
+        private readonly string _smtpMailAddress;
+        private readonly string _smtpUsername;
+        private readonly string _smtpPassword;
+        private readonly SmtpClient _client;
+        private readonly ILogger<EmailService> _logger;
 
-        private const string mailHeader = "<div style='background-color:transparent;font-family: system-ui;'><div class='m_-7955790069770508387block-grid' style='min-width:320px;max-width:600px;word-wrap:break-word;word-break:break-word;Margin:0 auto;background-color:#ffffff'><div style='border-collapse:collapse;display:table;width:100%;background-color:#ffffff'><div class='m_-7955790069770508387col' style='min-width:320px;max-width:600px;display:table-cell;vertical-align:top;width:600px'><div class='m_-7955790069770508387col_cont' style='width:100%!important'><div style='border-top:0px solid #000000;border-left:0px solid #000000;border-bottom:0px solid #000000;border-right:0px solid #000000;padding:0;'><table class='body-wrap' style='box-sizing: border-box; font-size: 14px; width: 100%; background-color: transparent; margin: 0;' bgcolor='transparent'><tr><td class='container' width='600' style='display: block !important; max-width: 600px !important; clear: both !important;' valign='top'><div class='content' style='padding: 20px;'><table class='main' width='100%' cellpadding='0' cellspacing='0' style='border: 1px solid rgba(130, 134, 156, 0.15);' bgcolor='transparent'><tr><td class='alert alert-primary border-0 bg-primary' style='padding: 20px; border-radius: 0; background:#E3EDF1; font-size: 21px; font-weight: 700;' align='center' valign='top'>Nest</td></tr><tr><td class='alert alert-dark border-0' style='padding: 20px; border-radius: 0;' align='center' valign='top'><p style='font-size:21px;color:#368EA8'><b>{Subject}</b></p></td></tr><tr><td style='padding: 5px'></td></tr></table></div></td></tr></table></div></div></div></div></div></div>";
-        private const string mailFooter = "<tr> <td class='content-block' style='font-size: 14px; padding: 10px;background-color:#449ad4;color:#ffffff' valign='top'><p style='text-align: center;'><b>Nest</td> </tr> </table> </td> </tr> </table> </div> </td> <td style='box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0;' valign='top'></td> </tr> </table> </div> </div> </div> </div> </div> </div> </div>";
+        private const string mailHeader = "...";   // your existing header
+        private const string mailFooter = "...";   // your existing footer
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
-            _SmtpHost = configuration["SMTP:Host"];
-            _SmtpPort = int.Parse(configuration["SMTP:Port"]);
-            _SmtpMailAddress = configuration["SMTP:MailAddress"];
-            _SmtpUsername = configuration["SMTP:UserName"];
-            _SmtpPassword = configuration["SMTP:Password"];
+            _logger = logger;
 
-            _client = new()
+            _smtpHost        = configuration["SMTP:Host"];
+            _smtpPort        = int.TryParse(configuration["SMTP:Port"], out var port) ? port : 0;
+            _smtpMailAddress = configuration["SMTP:MailAddress"];
+            _smtpUsername    = configuration["SMTP:UserName"];
+            _smtpPassword    = configuration["SMTP:Password"];
+
+            // Log what we got from config (NO real password)
+            _logger.LogInformation("EmailService SMTP config: Host={Host}, Port={Port}, Mail={Mail}, User={User}, PasswordEmpty={PwdEmpty}",
+                _smtpHost ?? "NULL",
+                _smtpPort,
+                _smtpMailAddress ?? "NULL",
+                _smtpUsername ?? "NULL",
+                string.IsNullOrEmpty(_smtpPassword));
+
+            // Basic validation so you'll see clear errors in Render logs
+            if (string.IsNullOrWhiteSpace(_smtpHost) ||
+                _smtpPort <= 0 ||
+                string.IsNullOrWhiteSpace(_smtpMailAddress) ||
+                string.IsNullOrWhiteSpace(_smtpUsername) ||
+                string.IsNullOrWhiteSpace(_smtpPassword))
             {
-                Port = _SmtpPort,
+                _logger.LogError("SMTP configuration is invalid. Check environment variables / appsettings (SMTP:Host, SMTP:Port, SMTP:MailAddress, SMTP:UserName, SMTP:Password).");
+            }
+
+            _client = new SmtpClient
+            {
+                Port = _smtpPort,
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
-                Credentials = new System.Net.NetworkCredential(_SmtpUsername, _SmtpPassword),
-                Host = _SmtpHost,
+                Credentials = new System.Net.NetworkCredential(_smtpUsername, _smtpPassword),
+                Host = _smtpHost,
                 EnableSsl = true,
             };
+
+            _logger.LogInformation("EmailService SMTP client initialized.");
         }
+
         public void SendEmail(string toAddress, string subject, string body)
         {
+            _logger.LogInformation("SendEmail called. To={To}, Subject={Subject}", toAddress, subject);
+
             try
             {
-                MailAddress fromAddress = new(_SmtpMailAddress, _SmtpUsername);
-                MailMessage mail = new();
-                mail.From = fromAddress;
-                foreach (var address in toAddress.Split([","], StringSplitOptions.RemoveEmptyEntries))
+                var fromAddress = new MailAddress(_smtpMailAddress, _smtpUsername);
+                using var mail = new MailMessage
                 {
-                    mail.To.Add(address);
+                    From = fromAddress,
+                    IsBodyHtml = true,
+                    Subject = subject,
+                    BodyEncoding = System.Text.Encoding.UTF8
+                };
+
+                foreach (var address in toAddress.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    mail.To.Add(address.Trim());
                 }
+
                 var header = mailHeader.Replace("{Subject}", subject);
                 string message = header + body + mailFooter;
-
-                mail.IsBodyHtml = true;
-                mail.Subject = subject;
                 mail.Body = message;
-                mail.BodyEncoding = System.Text.Encoding.UTF8;
+
+                _logger.LogInformation("Sending email via SMTP Host={Host}, Port={Port}. ToCount={ToCount}",
+                    _client.Host, _client.Port, mail.To.Count);
+
                 _client.Send(mail);
+
+                _logger.LogInformation("Email sent successfully to {To}", toAddress);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception occured - {0}", ex);
+                _logger.LogError(ex, "Error while sending email to {To} with subject {Subject}", toAddress, subject);
+                // Optionally rethrow if you want upper layers to know it failed
+                // throw;
             }
-
         }
-
     }
-
-
-    }
+}
