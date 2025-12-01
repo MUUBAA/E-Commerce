@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.js';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.js';
 import ProductCard from '../components/ProductCard';
-import CategoryBanner from '../components/CategoryBanner';
+import CategoryBanner from './CategoryBanner';
 import type {Product} from '../../redux/slices/productsSlice';
 
 const FreshPage: React.FC = () => {
@@ -11,6 +11,15 @@ const FreshPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]> ([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
   
+  // ref to products section
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProducts = () => {
+    if (productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload : GetAllProductsPayload = {
@@ -93,7 +102,7 @@ const FreshPage: React.FC = () => {
         <div className="mb-6">
           <div className="mb-4 grid gap-4 md:grid-cols-3">
             {banners.map((banner, index) => (
-              <CategoryBanner key={index} {...banner} />
+              <CategoryBanner key={index} {...banner} onClick={scrollToProducts} />
             ))}
           </div>
         </div>
@@ -111,10 +120,12 @@ const FreshPage: React.FC = () => {
         )}
 
         {!loading && !error && transformedProducts.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-            {transformedProducts.map((product, index) => (
-              <ProductCard key={`${product.itemName}-${index}`} {...product} />
-            ))}
+          <div ref={productsRef}>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+              {transformedProducts.map((product, index) => (
+                <ProductCard key={`${product.itemName}-${index}`} {...product} />
+              ))}
+            </div>
           </div>
         )}
 

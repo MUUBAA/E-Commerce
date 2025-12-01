@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.tsx';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.tsx';
@@ -13,12 +13,20 @@ const CafePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
 
-  // Fetch cafe products from API (categoryId=4)
-  const FetchProducts = async () => {
+  // ref to products section
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProducts = () => {
+    if (productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const FetchProducts = React.useCallback(async () => {
     try {
       const preparePayload: GetAllProductsPayload = {
         id: 0,
-        categoryId: 4, // Cafe category
+        categoryId: 4, 
         itemName: '',
         itemsPerPage: 20,
         totalItems: 0,
@@ -40,11 +48,11 @@ const CafePage: React.FC = () => {
       console.error('Failed to fetch products:', error);
       setProducts([]);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -55,9 +63,9 @@ const CafePage: React.FC = () => {
     itemDescription: product.itemDescription || 'No description available',
     originalPrice: product.itemPrice ? `₹${product.itemPrice + 20}` : undefined, // Example
     discount: product.itemPrice ? `₹20 OFF` : undefined,
-    rating: 4.2, // Placeholder, replace with real if available
-    reviews: '1k', // Placeholder, replace with real if available
-    weight: '1 pack', // Placeholder, replace with real if available
+    rating: 4.2, 
+    reviews: '1k', 
+    weight: '1 pack', 
   }));
 
   // Cafe banner data
@@ -69,14 +77,6 @@ const CafePage: React.FC = () => {
     imageUrl: 'https://i.ibb.co/9TRc4Tq/cafe.png'
   };
 
-  // What's On Your Mind categories (static)
-  // const mindCategories = [
-  //   { name: 'Breakfast', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/breakfast.jpg?ts=1709800030' },
-  //   { name: 'Meals', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/meals.jpg?ts=1709800030' },
-  //   { name: 'Chai', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/chai.jpg?ts=1709800030' },
-  //   { name: 'Coffee', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/coffee.jpg?ts=1709800030' },
-  //   { name: 'Desserts', imageUrl: 'https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/app/assets/products/large_images/jpeg/desserts.jpg?ts=1709800030' },
-  // ];
 
   return (
     <div className="bg-gray-50 min-h-screen pb-24">
@@ -103,7 +103,7 @@ const CafePage: React.FC = () => {
                 <span className="text-lg font-bold">{cafeBanner.subtitle}</span>
               </div>
               <p className="mt-2 text-sm font-semibold text-gray-700">{cafeBanner.description}</p>
-              <button className="mt-4 cursor-pointer rounded-full bg-gray-800 px-6 py-3 font-bold text-white transition-transform hover:scale-105">
+              <button className="mt-4 cursor-pointer rounded-full bg-gray-800 px-6 py-3 font-bold text-white transition-transform hover:scale-105" onClick={scrollToProducts}>
                 {cafeBanner.buttonText}
               </button>
             </div>
@@ -142,26 +142,28 @@ const CafePage: React.FC = () => {
         </div> */}
 
         {/* Cafe Product Grid (dynamic, like other categories) */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-          {transformedProducts.map((product, index) => (
-            <ProductCard key={`${product.itemName}-${index}`} {...product} />
-          ))}
+        <div ref={productsRef}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+            {transformedProducts.map((product, index) => (
+              <ProductCard key={`${product.itemName}-${index}`} {...product} />
+            ))}
+          </div>
+          {loading && (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+          {!loading && !error && transformedProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No cafe products available at the moment.
+            </div>
+          )}
         </div>
-        {loading && (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        {!loading && !error && transformedProducts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No cafe products available at the moment.
-          </div>
-        )}
       </div>
     </div>
   );
