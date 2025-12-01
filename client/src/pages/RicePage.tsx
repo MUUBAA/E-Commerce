@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -14,37 +14,46 @@ const RicePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
 
-  const FetchProducts = async () => {
-      try {
-        const preparePayload : GetAllProductsPayload = {
-          id: 0,
-          categoryId: 3, // Example categoryId for Fruits & Vegetables
-          itemName: "",
-          itemsPerPage: 20,
-          totalItems: 0,
-          totalPages: 0,
-          currentPage: 0,
-          pageSize: 60
-        };
-        const response = await dispatch(fetchAllProducts(preparePayload));
-        if (response.meta.requestStatus === 'fulfilled') {
-          if (Array.isArray(response.payload)) {
-            setProducts(response.payload);
-          } else if (response.payload && typeof response.payload === 'object') {
-            setProducts(response?.payload?.items || []); // Convert single product to array
-          } else {
-            console.error('Unexpected response payload:', response.payload);
-            setProducts([]); // Fallback to an empty array
-          }
+  // ref to products section
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProducts = () => {
+    if (productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const FetchProducts = React.useCallback(async () => {
+    try {
+      const preparePayload : GetAllProductsPayload = {
+        id: 0,
+        categoryId: 3, // Example categoryId for Fruits & Vegetables
+        itemName: "",
+        itemsPerPage: 20,
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: 0,
+        pageSize: 60
+      };
+      const response = await dispatch(fetchAllProducts(preparePayload));
+      if (response.meta.requestStatus === 'fulfilled') {
+        if (Array.isArray(response.payload)) {
+          setProducts(response.payload);
+        } else if (response.payload && typeof response.payload === 'object') {
+          setProducts(response?.payload?.items || []); // Convert single product to array
+        } else {
+          console.error('Unexpected response payload:', response.payload);
+          setProducts([]); // Fallback to an empty array
         }
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch]);
+  }, [FetchProducts]);
 
   // Transform API products to match ProductCard props
   const transformedProducts = products.map((product: Product) => ({
@@ -106,39 +115,41 @@ const RicePage: React.FC = () => {
         <div className="mb-6">
           <div className="mb-4 grid gap-4 md:grid-cols-3">
             {banners.map((banner, index) => (
-              <CategoryBanner key={index} {...banner} />
+              <CategoryBanner key={index} {...banner} onClick={scrollToProducts} />
             ))}
           </div>
         </div>
 
-        {loading && (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && transformedProducts.length > 0 && (
-          <>
-            {/* Products grid */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-              {transformedProducts.map((product, index) => (
-                <ProductCard key={`${product.itemName}-${index}`} {...product} />
-              ))}
+        <div ref={productsRef}>
+          {loading && (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             </div>
-          </>
-        )}
+          )}
 
-        {!loading && !error && transformedProducts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No rice products available at the moment.
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && transformedProducts.length > 0 && (
+            <>
+              {/* Products grid */}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+                {transformedProducts.map((product, index) => (
+                  <ProductCard key={`${product.itemName}-${index}`} {...product} />
+                ))}
+              </div>
+            </>
+          )}
+
+          {!loading && !error && transformedProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No rice products available at the moment.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

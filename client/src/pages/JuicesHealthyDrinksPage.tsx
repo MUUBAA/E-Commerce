@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.tsx';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.tsx';
@@ -13,6 +13,15 @@ const JuicesHealthyDrinksPage: React.FC = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
+
+  // ref to products section
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProducts = () => {
+    if (productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   // Fetch juices & healthy drinks products from API (categoryId=8)
   const FetchProducts = React.useCallback(async () => {
@@ -45,7 +54,7 @@ const JuicesHealthyDrinksPage: React.FC = () => {
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch, FetchProducts]);
+  }, [FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -109,32 +118,34 @@ const JuicesHealthyDrinksPage: React.FC = () => {
         <div className="mb-6">
           <div className="mb-4 grid gap-4 md:grid-cols-3">
             {banners.map((banner, index) => (
-              <CategoryBanner key={index} {...banner} />
+              <CategoryBanner key={index} {...banner} onClick={scrollToProducts} />
             ))}
           </div>
         </div>
 
         {/* Products grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-          {transformedProducts.map((product, index) => (
-            <ProductCard key={`${product.itemName}-${index}`} {...product} />
-          ))}
+        <div ref={productsRef}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+            {transformedProducts.map((product, index) => (
+              <ProductCard key={`${product.itemName}-${index}`} {...product} />
+            ))}
+          </div>
+          {loading && (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+          {!loading && !error && transformedProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No products available at the moment.
+            </div>
+          )}
         </div>
-        {loading && (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        {!loading && !error && transformedProducts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No products available at the moment.
-          </div>
-        )}
       </div>
     </div>
   );

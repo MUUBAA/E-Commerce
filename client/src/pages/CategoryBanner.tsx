@@ -21,23 +21,26 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({
   onClick,
 }) => {
   return (
-    <div className={`flex items-center rounded-2xl p-4 ${backgroundColor}`}>
+    <div
+      className={`flex items-center gap-8 rounded-3xl p-6 md:p-10 shadow-lg transition-transform hover:scale-[1.02] ${backgroundColor}`}
+      style={{ minHeight: '170px' }}
+    >
       <img
         src={imageUrl}
         alt={title}
-        className="h-20 w-20 rounded-xl object-cover mr-4 flex-shrink-0"
+        className="h-28 w-28 md:h-36 md:w-36 rounded-2xl object-cover shadow-md border-4 border-white flex-shrink-0"
       />
       <div className="flex-1">
         <h3
-          className={`text-sm font-bold mb-1 ${
+          className={`text-xl md:text-2xl font-extrabold mb-2 tracking-tight ${
             isDark ? "text-white" : "text-gray-900"
           }`}
         >
           {title}
         </h3>
         <p
-          className={`text-xs mb-3 ${
-            isDark ? "text-gray-100" : "text-gray-600"
+          className={`text-base md:text-lg mb-4 font-medium ${
+            isDark ? "text-gray-100" : "text-gray-700"
           }`}
         >
           {subtitle}
@@ -45,7 +48,7 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({
         <button
           type="button"
           onClick={onClick}
-          className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer
+          className={`inline-flex items-center px-5 py-2 rounded-full text-base font-bold shadow-md cursor-pointer transition-all duration-150
             ${isDark
               ? "bg-white text-gray-900 hover:bg-gray-100"
               : "bg-gray-900 text-white hover:bg-gray-800"
