@@ -1,5 +1,7 @@
 🛍️ Nest E-Commerce Web App: 
-Project SpecificationA modern full-stack e-commerce shopping experience built with React, Redux Toolkit, .NET Core Web API, MySQL Server, Entity Framework, Stripe Checkout, and Railway/Vercel Deployment.This application provides a seamless shopping experience with secure authentication, a robust cart system, order creation, and payment processing via Stripe.
+Project SpecificationA modern full-stack e-commerce shopping experience built with React, Redux Toolkit, 
+.NET Core Web API, MySQL Server, Entity Framework, Stripe Checkout, and Railway/Vercel Deployment.This application provides a seamless shopping experience with secure authentication, a robust cart system, order creation, and payment processing via Stripe.
+
 1.Technical Stack & Dependencies
 This project utilizes a modern and robust tech stack for both the client and server.CategoryComponentKey Technologies UsedFrontendClientReact + Vite, TypeScript, Redux Toolkit (State Management), Axios, Tailwind CSS (Styling), Lucide IconsBackendServer/API.NET Core 8 Web API, Entity Framework Core, MySQL (Database), Stripe Checkout (Payments), SendGrid (Email Service)DeploymentInfrastructureFrontend $\to$ Vercel, Backend $\to$ Railway, Database $\to$ aiven
 
