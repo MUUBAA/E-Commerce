@@ -45,7 +45,13 @@ const initialState: CartState = {
 const cartSlice = createSlice({
   name: "cart",
   initialState,
-  reducers: {},
+  reducers: {
+    clearCart: (state) => {
+      state.items = [];
+      state.totalItems = 0;
+      state.totalPrice = 0;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getCartItems.pending, (state) => {
@@ -178,6 +184,8 @@ const cartSlice = createSlice({
           (action.payload as string) || "Failed to remove product from cart";
       });
   },
+
 });
 
+export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
