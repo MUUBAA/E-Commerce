@@ -5,7 +5,7 @@ import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import CategoryBanner from '../components/CategoryBanner';
+import CategoryBanner from './CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const ChipsCrispsPage: React.FC = () => {

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.js';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.js';
 import ProductCard from '../components/ProductCard';
-import CategoryBanner from '../components/CategoryBanner';
+import CategoryBanner from './CategoryBanner';
 import type {Product} from '../../redux/slices/productsSlice';
 
 const FreshPage: React.FC = () => {

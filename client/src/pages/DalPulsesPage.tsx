@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import CategoryBanner from '../components/CategoryBanner';
+import CategoryBanner from './CategoryBanner';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Product } from '../../redux/slices/productsSlice';
 import type { AppDispatch, RootState } from '../../redux/stores';
