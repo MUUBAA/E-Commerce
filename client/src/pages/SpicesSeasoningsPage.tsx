@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../redux/stores/index.tsx';
 import { fetchAllProducts, type GetAllProductsPayload } from '../../redux/thunk/product.tsx';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
-import CategoryBanner from '../components/CategoryBanner';
+import CategoryBanner from './CategoryBanner';
 import type { Product } from '../../redux/slices/productsSlice.tsx';
 
 const SpicesSeasoningsPage: React.FC = () => {
@@ -13,6 +13,15 @@ const SpicesSeasoningsPage: React.FC = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const { loading, error } = useSelector((state: RootState) => state.products);
+
+  // 👇 ref to products section
+  const productsRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToProducts = () => {
+    if (productsRef.current) {
+      productsRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   // Fetch spices & seasonings products from API (categoryId=5)
   const FetchProducts = React.useCallback(async () => {
@@ -45,7 +54,7 @@ const SpicesSeasoningsPage: React.FC = () => {
 
   useEffect(() => {
     FetchProducts();
-  }, [dispatch, FetchProducts]);
+  }, [FetchProducts]);
 
   // Transform API products for ProductCard
   const transformedProducts = products.map((product: Product) => ({
@@ -56,9 +65,9 @@ const SpicesSeasoningsPage: React.FC = () => {
     itemDescription: product.itemDescription || 'No description available',
     originalPrice: product.itemPrice ? `₹${product.itemPrice + 20}` : undefined, // Example
     discount: product.itemPrice ? `₹20 OFF` : undefined,
-    rating: 4.2, // Placeholder, replace with real if available
-    reviews: '1k', // Placeholder, replace with real if available
-    weight: '1 pack', // Placeholder, replace with real if available
+    rating: 4.2, // Placeholder
+    reviews: '1k', // Placeholder
+    weight: '1 pack', // Placeholder
   }));
 
   // Banners for Spices & Seasonings
@@ -75,7 +84,7 @@ const SpicesSeasoningsPage: React.FC = () => {
       imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1764150534/orika_masalas_q7mtxv.webp',
       title: 'ORIKA Masalas',
       subtitle: 'SPICE UP YOUR MEALS',
-      buttonText: 'Order Now',
+      buttonText: 'Order below',
       backgroundColor: 'bg-yellow-100',
       isDark: false,
     },
@@ -109,32 +118,41 @@ const SpicesSeasoningsPage: React.FC = () => {
         <div className="mb-6">
           <div className="mb-4 grid gap-4 md:grid-cols-3">
             {banners.map((banner, index) => (
-              <CategoryBanner key={index} {...banner} />
+              <CategoryBanner
+                key={index}
+                {...banner}
+                onClick={scrollToProducts}   // 👈 hook buttons to scroll action
+              />
             ))}
           </div>
         </div>
 
         {/* Products grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-          {transformedProducts.map((product, index) => (
-            <ProductCard key={`${product.itemName}-${index}`} {...product} />
-          ))}
+        <div ref={productsRef}>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+            {transformedProducts.map((product, index) => (
+              <ProductCard key={`${product.itemName}-${index}`} {...product} />
+            ))}
+          </div>
+
+          {loading && (
+            <div className="flex justify-center items-center min-h-[200px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
+          {!loading && !error && transformedProducts.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              No products available at the moment.
+            </div>
+          )}
         </div>
-        {loading && (
-          <div className="flex justify-center items-center min-h-[200px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        {!loading && !error && transformedProducts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No products available at the moment.
-          </div>
-        )}
       </div>
     </div>
   );
