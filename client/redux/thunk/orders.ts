@@ -22,8 +22,10 @@ export const createOrderFromCart = createAsyncThunk<
   "order/createOrderFromCart",
   async ({ token }, { rejectWithValue }) => {
     try {
+      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/order/create`;
       const res = await axios.post<GenericApiResponse<CreateOrderResponseDto>>(
-        "https://nestonlinestore.onrender.com/order/create",
+        url,
         {},
         {
           headers: {
@@ -74,8 +76,10 @@ export const fetchMyOrders = createAsyncThunk<
   { rejectValue: string }
 >("orders/fetchMyOrders", async ({ token }, { rejectWithValue }) => {
   try {
+    const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+    const url = `${base.replace(/\/$/, '')}/order/my-orders`;
     const res = await axios.get<GenericApiResponse<UserOrderDto[]>>(
-      "https://nestonlinestore.onrender.com/order/my-orders",
+      url,
       {
         headers: {
           Authorization: `Bearer ${token}`,

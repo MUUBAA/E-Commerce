@@ -7,7 +7,7 @@
     "MaxTimeoutInSeconds": 120
   },
   "ProxyServer": {
-    "ProxyUrl": "https://nestonlinestore.onrender.com/",
+    "ProxyUrl": "https://e-commerce-production-0745.up.railway.app/",
     "ForceHttps": false
   }
 }
