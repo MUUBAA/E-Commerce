@@ -33,7 +33,7 @@ Payment Declined	4000 0000 0000 9995	Any future date	Any 3 digits
 7)  To simulate success:
 Just use 4242 4242 4242 4242
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                                                                                                     FEATURES
+                                                           FEATURES
 i) Features
 🛒 Storefront
 Browse products by categories
@@ -69,7 +69,7 @@ Protected routes
 Email verification (SendGrid/Gmail SMTP)
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                                                                                         TECHSTACK
+                                              TECHSTACK
 🏗️ Tech Stack
 Frontend
 React + Vite
