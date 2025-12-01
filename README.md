@@ -3,9 +3,9 @@
 A modern full-stack e-commerce shopping experience built with React, Redux Toolkit, .NET Core Web API, MYSQL Server, Entity Framework, Stripe Checkout, and Railway/Vercel Deployment.
 This app provides a seamless shopping experience with secure authentication, cart system, order creation, and payment using Stripe Checkout.
 
-🚀 Installation Guide
+Installation Guide
 Clone Repository
-git clone https://github.com/yourusername/nest-ecommerce.git
+git clone https://github.com/MUUBAA/nest-ecommerce.git
 cd nest
 
 Frontend Setup
@@ -19,12 +19,10 @@ dotnet build
 dotnet ef database update
 dotnet run
 
-🧪 Testing Payments (Stripe)
-
+Testing Payments (Stripe)
 Stripe test mode is enabled in this project.
 
-💳 Test Card Details (Stripe)
-
+ Test Card Details (Stripe)
 Use these to complete a successful payment during checkout:
 
 Card Type	Number	Expiry	CVC
@@ -32,7 +30,7 @@ Visa (successful)	4242 4242 4242 4242	Any future date	Any 3 digits
 3D Secure Card	4000 0027 6000 3184	Any future date	Any 3 digits
 Payment Declined	4000 0000 0000 9995	Any future date	Any 3 digits
 
-🟢 To simulate success:
+ To simulate success:
 Just use 4242 4242 4242 4242
 
 Features
@@ -57,7 +55,7 @@ Auto-redirect after payment
 Backend order verification
 Test mode ready (test cards included below)
 
-👤 User Account
+ User Account
 JWT login & register
 Password reset via email
 Saved address
