@@ -75,7 +75,7 @@ const SpicesSeasoningsPage: React.FC = () => {
       imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1764150534/orika_masalas_q7mtxv.webp',
       title: 'ORIKA Masalas',
       subtitle: 'SPICE UP YOUR MEALS',
-      buttonText: 'Order below',
+      buttonText: 'Order Now',
       backgroundColor: 'bg-yellow-100',
       isDark: false,
     },

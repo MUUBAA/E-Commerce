@@ -7,6 +7,7 @@ interface CategoryBannerProps {
   buttonText: string;
   backgroundColor: string;
   isDark?: boolean;
+  onClick?: () => void;
 }
 
 const CategoryBanner: React.FC<CategoryBannerProps> = ({
@@ -16,6 +17,7 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({
   buttonText,
   backgroundColor,
   isDark = false,
+  onClick,
 }) => {
   return (
     <div
@@ -32,6 +34,7 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({
               ? 'bg-white text-gray-800' 
               : 'bg-gray-800 text-white'
           }`}
+          onClick={onClick}
         >
           {buttonText}
         </button>

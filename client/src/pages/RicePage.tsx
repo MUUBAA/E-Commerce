@@ -72,7 +72,7 @@ const RicePage: React.FC = () => {
       imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581674/jeera_rice_mm1bj7.webp',
       title: 'SPECIALS JEERA RICE',
       subtitle: 'BEST DEALS',
-      buttonText: 'Order below',
+      buttonText: 'Order Now',
       backgroundColor: 'bg-green-700',
       isDark: true,
     },

@@ -73,7 +73,7 @@ const DalPulsesPage: React.FC = () => {
       imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581905/Split_masoor_dhal_svo39p.webp',
       title: 'Masoor Dal',
       subtitle: 'FRESH STOCK',
-      buttonText: 'Order below',
+      buttonText: 'Order Now',
       backgroundColor: 'bg-orange-200',
       isDark: false,
     },

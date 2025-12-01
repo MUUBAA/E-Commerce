@@ -74,7 +74,7 @@ const SaltSugarPage: React.FC = () => {
 			imageUrl: 'https://res.cloudinary.com/dulie41id/image/upload/v1762581920/SweetCare_sugar_fnowne.webp',
 			title: 'Organic Sugar',
 			subtitle: 'PURE & NATURAL',
-			buttonText: 'Order below',
+			buttonText: 'Order Now',
 			backgroundColor: 'bg-yellow-100',
 			isDark: false,
 		},
