@@ -5,6 +5,7 @@ import { getUserById } from "../../redux/thunk/user";
 import { fetchMyOrders } from "../../redux/thunk/orders";
 import type { MyOrderDto } from "../../redux/slices/orderSlice";
 import { resetJwt } from "../../redux/slices/loginUser";
+import { clearCart } from '../../redux/slices/cartSlice';
 import { getDecryptedJwt } from '../../utils/auth';
 import { jwtDecode } from 'jwt-decode';
 import { useDispatch, useSelector } from "react-redux";
@@ -63,6 +64,7 @@ const UserProfileSidebar: React.FC<UserProfileSidebarProps> = ({
 
   const handleLogout = () => {
     dispatch(resetJwt());
+    dispatch(clearCart()); // Clear cart count and items
     localStorage.removeItem("jwtToken");
     localStorage.clear();
     setValues({ name: "", email: "", address: "" });
