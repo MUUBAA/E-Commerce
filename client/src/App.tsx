@@ -43,18 +43,15 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     console.error("ErrorBoundary caught an error", error);
-    // Update state so the next render shows the fallback UI.
     return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // You can also log the error to an error reporting service
     console.error("ErrorBoundary caught an error", error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return <h1>Something went wrong.</h1>;
     }
 
@@ -64,49 +61,52 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 
 function AppContent() {
   const { isCartOpen, closeCart } = useCart();
-  const path = window.location.pathname;
-
-  // Only show ResetPassword without layout on /reset-password
-  if (path === "/reset-password") {
-    return <ResetPassword />;
-  }
 
   return (
     <>
-      <Header />
-      {/* <SubHeader /> */}
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/cafe" element={<CafePage />} />
-        <Route path="/toys" element={<ToysPage />} />
-        <Route path="/fresh" element={<FreshPage />} />
-        <Route path="/rice" element={<RicePage />} />
-        <Route path="/dal-pulses" element={<DalPulsesPage />} />
-        <Route path="/spices-seasonings" element={<SpicesSeasoningsPage />} />
-        <Route path="/chips-crisps" element={<ChipsCrispsPage />} />
-        <Route path="/juices-healthy-drinks" element={<JuicesHealthyDrinksPage />} />
-        <Route path="/cafe-bestsellers" element={<CafeBestsellersPage />} />
-        <Route path="/salt-sugar-jaggery" element={<SaltSugarPage />} />
-        <Route path="/list" element={<ListPage />} />
-        <Route path="/search" element={<SearchResultsPage />} />
-        <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/payment-success" element={<PaymentSuccessPage />} />
+        {/* Reset Password Route - No Header/Footer */}
+        <Route path="/reset-password" element={<ResetPassword />} />
 
+        {/* All other routes with Header/Footer */}
+        <Route path="*" element={
+          <>
+            <Header />
+            {/* <SubHeader /> */}
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/cafe" element={<CafePage />} />
+              <Route path="/toys" element={<ToysPage />} />
+              <Route path="/fresh" element={<FreshPage />} />
+              <Route path="/rice" element={<RicePage />} />
+              <Route path="/dal-pulses" element={<DalPulsesPage />} />
+              <Route path="/spices-seasonings" element={<SpicesSeasoningsPage />} />
+              <Route path="/chips-crisps" element={<ChipsCrispsPage />} />
+              <Route path="/juices-healthy-drinks" element={<JuicesHealthyDrinksPage />} />
+              <Route path="/cafe-bestsellers" element={<CafeBestsellersPage />} />
+              <Route path="/salt-sugar-jaggery" element={<SaltSugarPage />} />
+              <Route path="/list" element={<ListPage />} />
+              <Route path="/search" element={<SearchResultsPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/payment-success" element={<PaymentSuccessPage />} />
+            </Routes>
+            <Footer />
+            <BottomNav />
+            <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
+          </>
+        } />
       </Routes>
-      <Footer />
-      <BottomNav />
-      <CartDrawer isOpen={isCartOpen} onClose={closeCart} />
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
     </>
   );
 }
