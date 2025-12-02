@@ -71,7 +71,7 @@ const SearchResultsPage: React.FC = () => {
         </div>
       )}
       {isLoading && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-6 lg:gap-6 xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {Array.from({ length: 12 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))}
@@ -88,7 +88,7 @@ const SearchResultsPage: React.FC = () => {
         </div>
       )}
       {hasSearched && !isLoading && products.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-6 lg:gap-6 xl:grid-cols-8">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product: Product) => (
             <ProductCard
               key={product.id}
