@@ -116,13 +116,14 @@ const SpicesSeasoningsPage: React.FC = () => {
       <div className="p-4">
         {/* Banners */}
         <div className="mb-6">
-          <div className="mb-4 grid gap-4 md:grid-cols-3">
+          <div className="mb-4 flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible">
             {banners.map((banner, index) => (
-              <CategoryBanner
-                key={index}
-                {...banner}
-                onClick={scrollToProducts}   // 👈 hook buttons to scroll action
-              />
+              <div key={index} className="flex-shrink-0 w-[85%] snap-center md:w-auto">
+                <CategoryBanner
+                  {...banner}
+                  onClick={scrollToProducts}   // 👈 hook buttons to scroll action
+                />
+              </div>
             ))}
           </div>
         </div>
