@@ -10,36 +10,53 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
+const SkeletonCard: React.FC = () => (
+  <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+    <div className="w-full aspect-square bg-gray-200"></div>
+    <div className="p-3 space-y-2">
+      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+      <div className="h-6 bg-gray-200 rounded w-2/3 mt-2"></div>
+    </div>
+  </div>
+);
+
 const SearchResultsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const query = useQuery();
   const searchTerm = query.get('query') || '';
   const [hasSearched, setHasSearched] = useState(false);
-  const { loading, error } = useSelector((state: RootState) => state.products);
+  const [isLoading, setIsLoading] = useState(false);
+  const { error } = useSelector((state: RootState) => state.products);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (searchTerm) {
       const fetchProducts = async () => {
-        const response = await dispatch(fetchAllProducts({
-          id: 0,
-          totalItems: 0,
-          totalPages: 0,
-          currentPage: 0,
-          itemName: searchTerm,
-        }));
-        if (response.meta.requestStatus === 'fulfilled') {
-          if (Array.isArray(response.payload)) {
-            setProducts(response.payload);
-          } else if (response.payload && typeof response.payload === 'object') {
-            setProducts(response?.payload?.items || []);
+        setIsLoading(true);
+        try {
+          const response = await dispatch(fetchAllProducts({
+            id: 0,
+            totalItems: 0,
+            totalPages: 0,
+            currentPage: 0,
+            itemName: searchTerm,
+          }));
+          if (response.meta.requestStatus === 'fulfilled') {
+            if (Array.isArray(response.payload)) {
+              setProducts(response.payload);
+            } else if (response.payload && typeof response.payload === 'object') {
+              setProducts(response?.payload?.items || []);
+            } else {
+              setProducts([]);
+            }
           } else {
             setProducts([]);
           }
-        } else {
-          setProducts([]);
+        } finally {
+          setIsLoading(false);
+          setHasSearched(true);
         }
-        setHasSearched(true);
       };
       fetchProducts();
     }
@@ -53,22 +70,24 @@ const SearchResultsPage: React.FC = () => {
           <p>Type a product name in the search box above and press Enter to see results.</p>
         </div>
       )}
-      {hasSearched && loading && (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      {isLoading && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
         </div>
       )}
-      {hasSearched && error && (
+      {hasSearched && error && !isLoading && (
         <div className="text-center text-red-600 p-4">
           <p>Error loading products: {error}</p>
         </div>
       )}
-      {hasSearched && !loading && products.length === 0 && (
+      {hasSearched && !isLoading && products.length === 0 && (
         <div className="text-center text-gray-500 p-8">
           <p>No products found for "{searchTerm}"</p>
         </div>
       )}
-      {hasSearched && !loading && products.length > 0 && (
+      {hasSearched && !isLoading && products.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
           {products.map((product: Product) => (
             <ProductCard

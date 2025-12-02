@@ -306,7 +306,7 @@ useEffect(() => {
         })
       ).unwrap();
       toast.success('Added to cart');
-      await FetchCartItems();
+      // await FetchCartItems();
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
     }
@@ -546,28 +546,28 @@ useEffect(() => {
                 />
 
                 {/* title + subtitle */}
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-900 break-words max-w-[120px] line-clamp-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-gray-900 line-clamp-1 overflow-hidden text-ellipsis">
                     {i.itemName}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 line-clamp-1 overflow-hidden text-ellipsis">
                     {i.itemDescription}
                   </div>
                 </div>
 
                 {/* qty controls + price */}
-                <div className="flex flex-col items-end gap-1">
+                <div className="flex flex-col items-end gap-1 flex-shrink-0">
                   {i.quantity > 0 ? (
-                    <div className="flex items-center rounded-full border px-3 py-1 text-sm font-medium">
+                    <div className="flex items-center rounded-full border px-2 py-0.5 text-sm font-medium">
                         <button
-                          className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
+                          className="px-1.5 py-0.5 text-pink-500 text-base font-bold cursor-pointer"
                           onClick={() => handleDecrease(i)}
                         >
                           −
                         </button>
-                        <span className="px-3 py-1 text-pink-500 font-semibold">{i.quantity}</span>
+                        <span className="px-2 py-0.5 text-pink-500 font-semibold min-w-[20px] text-center">{i.quantity}</span>
                         <button
-                          className="px-2 py-1 text-pink-500 text-lg font-bold cursor-pointer"
+                          className="px-1.5 py-0.5 text-pink-500 text-base font-bold cursor-pointer"
                           onClick={() => handleIncrease(i)}
                         >
                           +
@@ -581,7 +581,7 @@ useEffect(() => {
                       ADD
                     </button>
                   )}
-                  <div className="text-sm font-semibold text-gray-900">
+                  <div className="text-sm font-semibold text-gray-900 whitespace-nowrap">
                     ₹{i.price}
                   </div>
                 </div>
