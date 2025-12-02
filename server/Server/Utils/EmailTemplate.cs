@@ -15,7 +15,7 @@ namespace Server.Utils
         public (string subject, string body) SendWelcomeEmail(User user)
         {
             string subject = "Welcome to Nest!";
-            string body = $"<h1>Welcome, {user}!</h1>" +
+            string body = $"<h1>Welcome, {user.Name}!</h1>" +
                           "<p>Thank you for signing up Nest. We're excited to have you on board!</p>" +
                           "<p>If you have any questions, feel free to reach out to our support team.</p>" +
                           "<p>Best regards,<br/>The Team</p>";
