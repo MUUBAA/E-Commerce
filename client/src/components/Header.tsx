@@ -3,17 +3,17 @@ import { Search, ChevronDown, User, ShoppingCart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import UserProfileSidebar from './UserProfileSidebar';
 import LocationModal from './LocationModal';
-import { useDispatch, useSelector } from 'react-redux';
-import type { AppDispatch, RootState } from '../../redux/stores';
-import { getCartItems } from '../../redux/thunk/cart';
+import {  useSelector } from 'react-redux';
+import type {  RootState } from '../../redux/stores';
+// import { getCartItems } from '../../redux/thunk/cart';
 
 import { useNavigate } from 'react-router-dom';
-import { getDecryptedJwt } from '../../utils/auth';
-import { jwtDecode } from 'jwt-decode';
+// import { getDecryptedJwt } from '../../utils/auth';
+// import { jwtDecode } from 'jwt-decode';
 
 const Header: React.FC = () => {
   const { openCart } = useCart();
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const [isProfileSidebarOpen, setIsProfileSidebarOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,23 +39,8 @@ const cartCount = useSelector((state: RootState) =>
 
   
 
-  const handleCartClick = async () => {
-    // Try to fetch items for logged-in user before opening
-    const token = getDecryptedJwt();
-    if (token) {
-      try {
-        const decoded = jwtDecode<{ id?: number; sub?: string }>(token);
-        const uid =
-          typeof decoded.id === 'number'
-            ? decoded.id
-            : decoded.sub
-            ? Number(decoded.sub)
-            : 0; // Default to 0 if undefined
-        await dispatch(
-          getCartItems({ id: 0,userId: uid, page: 1, pageSize: 10 })
-        ).unwrap().catch(() => {});
-      } catch { /* ignore */ }
-    }
+  const handleCartClick = () => {
+    // Open cart immediately - fetching will happen inside CartDrawer
     openCart();
   };
 
@@ -80,7 +65,10 @@ const cartCount = useSelector((state: RootState) =>
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white shadow-sm">
         <div className="container mx-auto flex items-center justify-between p-2 md:p-4">
           <div className="flex items-center">
-            <h1 className="font-italic text-4xl font-bold text-red-600">
+            <h1 
+              className="font-italic text-4xl font-bold text-red-600 cursor-pointer hover:text-red-700 transition-colors"
+              onClick={() => navigate('/')}
+            >
              Nest
             </h1>
             <div 

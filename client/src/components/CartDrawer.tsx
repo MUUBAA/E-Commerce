@@ -176,17 +176,25 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       setCartLoading(false);
     }
   }, [dispatch, userIdFromToken]);
+  
+  // Set initial view based on login status
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
     if (token) {
-
-      FetchCartItems();
       setCurrentView('cart');
     } else {
-      setCartItems([]);
       setCurrentView('login');
     }
+  }, []);
 
+  // Fetch cart items every time the drawer opens
+  useEffect(() => {
+    if (isOpen && currentView === 'cart') {
+      FetchCartItems();
+    }
+  }, [isOpen, currentView, FetchCartItems]);
+
+  useEffect(() => {
     // Listen for logout event to reset cart and show login view
     const handleUserLoggedOut = () => {
       setCartItems([]);
@@ -196,7 +204,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     return () => {
       window.removeEventListener('user-logged-out', handleUserLoggedOut);
     };
-  }, [dispatch, FetchCartItems]);
+  }, []);
       
  const handleSubmitRegister = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -305,7 +313,6 @@ useEffect(() => {
           price: numericPrice,
         })
       ).unwrap();
-      toast.success('Added to cart');
       // await FetchCartItems();
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
