@@ -127,7 +127,7 @@ const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose }) => {
   const saveAddressToBackend = async (address: string) => {
     const token = getDecryptedJwt();
     if (!token) throw new Error('Not authenticated');
-    const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+    const base = import.meta.env.VITE_API_BASE_URL || '/';
     await axios.put(
       `${base.replace(/\/$/, '')}/users/address`,
       { address },

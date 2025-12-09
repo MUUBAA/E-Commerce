@@ -4,6 +4,10 @@
 **/obj/
 **/out/
 
+# Sensitive configuration files
+**/appsettings.local.json
+**/appsettings.*.local.json
+
 # User-specific files
 *.rsuser
 *.suo

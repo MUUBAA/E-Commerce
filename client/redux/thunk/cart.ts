@@ -38,7 +38,7 @@ export const getCartItems = createAsyncThunk<any, GetAllCartPayload>(
         if(!decodedToken) {
           return rejectWithValue('Invalid authentication token');
         } 
-        const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+        const base = import.meta.env.VITE_API_BASE_URL || '/';
         const url = `${base.replace(/\/$/, '')}/cart/get-all`;
         const response = await axios.post(
           url, Payload || {},
@@ -90,7 +90,7 @@ export const addToCart = createAsyncThunk<
 
       // Use API base URL when running client directly (e.g., Vite on 5015).
       // When using SpaProxy and browsing via backend, keep it relative.
-      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
       const url = `${base.replace(/\/$/, '')}/cart/add`;
       const response = await axios.post(
         url,
@@ -134,7 +134,7 @@ export const removeCartItem = createAsyncThunk<
       const token = getDecryptedJwt();
       if (!token) return rejectWithValue('No authentication token found');
 
-      const base = (import.meta as any)?.env?.VITE_API_BASE_URL || '/';
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
       const url = `${base.replace(/\/$/, '')}/cart/remove?productId=${productId}&userId=${userId}`;
       await axios.delete(url, {
         headers: {

@@ -14,32 +14,43 @@ export default defineConfig({
   server: {
     proxy: {
       "/swagger": {
-        target: "https://nestonlinestore.onrender.com/",
+        target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,
       },
 
       "^/auth/.*": {
-        target: "https://nestonlinestore.onrender.com/",
+        target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,
       },
       "^/users/.*": {
-        target: "https://nestonlinestore.onrender.com/",
+        target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,
       },
       "^/product/.*": {
-        target: "https://nestonlinestore.onrender.com/",
+        target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,
       },
       "^/cart/.*": {
-        target: "https://nestonlinestore.onrender.com/",
+        target: "https://localhost:5200/",
         secure: false,
         changeOrigin: true,
       },
+      "^/order/.*": {
+        target: "https://localhost:5200/",
+        secure: false,
+        changeOrigin: true,
+      },
+      "^/payment/.*": {
+        target: "https://localhost:5200/",
+        secure: false,
+        changeOrigin: true,
+      },
+      
     },
-    port: 5015
+    port: 5015,
   }
 })

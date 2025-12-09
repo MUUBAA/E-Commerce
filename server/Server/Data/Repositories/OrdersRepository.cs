@@ -37,10 +37,12 @@ namespace Server.Data.Repositories
                 UserId = userId,
                 TotalPrice = totalPrice,
                 Status = "pending",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId.ToString(),
+                IsDeleted = false
             };
 
-            _repository.Add(order);
+            _repository.Orders.Add(order);
             _repository.SaveChanges();
 
                var orderItems = cartItems.Select(c => new OrderItems
@@ -49,7 +51,9 @@ namespace Server.Data.Repositories
                 ProductId = c.ProductId,
                 Quantity = c.Quantity,
                 Price = c.Price,          // this is line total; use ItemPrice if you want unit price
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = userId.ToString(),
+                IsDeleted = false
             }).ToList();
 
             _repository.OrderItems.AddRange(orderItems);

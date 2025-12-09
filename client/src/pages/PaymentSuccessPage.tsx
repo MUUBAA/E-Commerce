@@ -23,7 +23,7 @@ const PaymentSuccessPage: React.FC = () => {
 
   (async () => {
     try {
-      await axios.get(`https://nestonlinestore.onrender.com/payment/confirm`, {
+      await axios.get(`https://localhost:5015/payment/confirm`, {
         params: { session_id: sessionId },
       });
       // order is now marked as paid in backend
