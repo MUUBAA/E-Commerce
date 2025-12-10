@@ -26,6 +26,7 @@ import SaltSugarPage from "./pages/SaltSugar";
 import ResetPassword from "./components/ResetPassword";
 import CheckoutPage from "./pages/CheckoutPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import AdminRoutes from "./admin/routes/AdminRoutes";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -67,6 +68,7 @@ function AppContent() {
       <Routes>
         {/* Reset Password Route - No Header/Footer */}
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/admin/*" element={<AdminRoutes />} />
 
         {/* All other routes with Header/Footer */}
         <Route path="*" element={

@@ -20,5 +20,11 @@ namespace Server.Data.Entities.Products
         public int StockQuantity { get; set; }
         [Column("item_url")]
         public string? ItemUrl { get; set; }
+        [Column("image_url")]
+        public string? ImageUrl { get; set; }
+        [Column("discount_percent")]
+        public decimal DiscountPercent { get; set; }
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
     }
 }

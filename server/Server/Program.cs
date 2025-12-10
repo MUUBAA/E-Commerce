@@ -10,26 +10,39 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
 
-    // Add CORS
+    // CORS
+    const string CorsPolicyName = "AllowClient";
+    var allowedOrigins = new[]
+    {
+        "http://localhost:5015",
+        "https://localhost:5015",
+        "http://localhost:5173",
+        "https://localhost:5173",
+        "http://localhost:3000",
+        "https://localhost:3000"
+    };
     builder.Services.AddCors(options =>
     {
         options.AddDefaultPolicy(policy =>
         {
-            policy.WithOrigins(
-                "https://localhost:5200",
-                "http://localhost:5200",
-                "https://localhost:5173",
-                "http://localhost:5173",
-                "https://localhost:5015",
-                "http://localhost:5015"
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials();
+            policy
+                .WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+                // If you add cookie-based auth later, also call: .AllowCredentials();
         });
     });
 
-    AuthProvider.Configure(builder.Services, builder.Configuration);
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("AdminOnly", policy =>
+            policy.RequireRole("Admin"));
+    });
+
+    // Swagger / OpenAPI
+    builder.Services.AddEndpointsApiExplorer();
+
+    AuthProvider.Confiqure(builder.Services, builder.Configuration);
     SwaggerProvider.Configure(builder.Services);
     ComponentRegistry.Registry(builder.Services, builder.Configuration).GetAwaiter().GetResult();
 
@@ -48,7 +61,9 @@ try
 
     app.UseCors();
 
+    app.UseAuthentication();
     app.UseAuthorization();
+    app.UseMiddleware<Server.Middlewares.AdminAuthorizationMiddleware>();
 
     app.MapControllers();
 

@@ -94,6 +94,8 @@ namespace Server.Data.Repositories
                     PasswordHash = u.PasswordHash!,
                     CreatedAt = u.CreatedAt,
                     CreatedBy = u.CreatedBy!,
+                    Role = u.Role,
+                    IsBlocked = u.IsBlocked,
                 })
                 .FirstOrDefault();
             return user;

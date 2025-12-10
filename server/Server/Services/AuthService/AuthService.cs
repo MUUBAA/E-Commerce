@@ -10,6 +10,7 @@ using Server.Services.MessageServices;
 using Server.Utils;
 using System.Security.Cryptography;
 using Server.Data.Contract.Auth;
+using System.Security.Principal;
 
 namespace Server.Services.AuthService
 {
@@ -31,6 +32,10 @@ namespace Server.Services.AuthService
         public string Login(string email, string password)
         {
             var user = _userService.GetUserByEmail(email) ?? throw new Exception("User not found");
+            if (user.IsBlocked)
+            {
+                throw new Exception("User is blocked. Contact support.");
+            }
             var passwordHasher = new PasswordHasher<User>();
             var passwordVerificationResult = passwordHasher.VerifyHashedPassword(null, user.PasswordHash, password);
             if (passwordVerificationResult == PasswordVerificationResult.Failed)
@@ -42,7 +47,8 @@ namespace Server.Services.AuthService
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                Role = user.Role
             }, 2);
             return generatedToken;
 
@@ -73,7 +79,8 @@ namespace Server.Services.AuthService
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Role = user.Role
             };
 
             var token = GenerateToken(jwtParam, 7);
@@ -103,6 +110,7 @@ namespace Server.Services.AuthService
                 .AddClaim(ClaimTypes.NameIdentifier, userParam.Id.ToString())
                 // keep email for compatibility
                 .AddClaim(ClaimTypes.Email, userParam.Email)
+                .AddClaim(ClaimTypes.Role, userParam.Role ?? "User")
                 .Encode();
             return token;
         }

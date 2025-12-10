@@ -37,9 +37,9 @@ namespace Server.Data.Repositories
                 UserId = userId,
                 TotalPrice = totalPrice,
                 Status = "pending",
-                CreatedAt = DateTime.UtcNow,
-                CreatedBy = userId.ToString(),
-                IsDeleted = false
+                OrderStatus = "Pending",
+                PaymentStatus = "Pending",
+                CreatedAt = DateTime.UtcNow
             };
 
             _repository.Orders.Add(order);

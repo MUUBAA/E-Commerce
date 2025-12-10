@@ -68,7 +68,7 @@ namespace Server.Data.Repositories
               var page = contract.Page <= 0 ? 1 : contract.Page;
               var pageSize = contract.PageSize <= 0 ? 10 : contract.PageSize;
 
-              var query = repository.Products.Where(c => !c.IsDeleted);
+              var query = repository.Products.Where(c => !c.IsDeleted && c.IsActive);
               if(!string.IsNullOrEmpty(contract.ItemName))
               {
                   query = query.Where(p => p.ItemName != null && p.ItemName.Contains(contract.ItemName));

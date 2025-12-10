@@ -4,9 +4,11 @@
 **/obj/
 **/out/
 
-# Sensitive configuration files
-**/appsettings.local.json
-**/appsettings.*.local.json
+# Environment variables
+.env
+.env.local
+**/.env
+**/.env.local
 
 # User-specific files
 *.rsuser
