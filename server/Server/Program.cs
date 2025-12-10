@@ -1,13 +1,14 @@
 using Server.Utils;
 
+
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // IMPORTANT: Bind to PORT env var for Render
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
+    // Add services to the container.
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
 
     // CORS
     const string CorsPolicyName = "AllowClient";
@@ -22,7 +23,7 @@ try
     };
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy(CorsPolicyName, policy =>
+        options.AddDefaultPolicy(policy =>
         {
             policy
                 .WithOrigins(allowedOrigins)
@@ -43,19 +44,22 @@ try
 
     AuthProvider.Confiqure(builder.Services, builder.Configuration);
     SwaggerProvider.Configure(builder.Services);
-
-    // Registers controllers, DbContext, services, etc.
-    await ComponentRegistry.Registry(builder.Services, builder.Configuration);
+    ComponentRegistry.Registry(builder.Services, builder.Configuration).GetAwaiter().GetResult();
 
     var app = builder.Build();
 
     DataMigration.Configure(app.Services);
 
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+
+    // Configure the HTTP request pipeline.
     app.UseSwagger();
     app.UseSwaggerUI();
 
+    app.UseHttpsRedirection();
 
-    app.UseCors(CorsPolicyName);
+    app.UseCors();
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -63,10 +67,17 @@ try
 
     app.MapControllers();
 
+    app.UseStaticFiles();
+
+
+    app.MapFallbackToFile("/index.html");
+
     app.Run();
 }
 catch (Exception ex)
 {
+    // Log the exception or handle it as needed
     Console.WriteLine($"An error occurred: {ex.Message}");
+    // Optionally, rethrow the exception if you want to terminate the application
     throw;
 }

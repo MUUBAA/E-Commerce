@@ -16,42 +16,34 @@ using Server.Services.Admin;
 
 namespace Server.Utils
 {
-    public class ComponentRegistry
+   public class ComponentRegistry
     {
         public static Task Registry(IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers().AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.Converters.Add(new StringEnumConverter());
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });
+              {
+                  options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                  options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+              });
+
             // Mysql Database connection
             services.AddDbContext<Repository>(options =>
             {
-                // Prefer environment variable (for Render / production)
-                var connectionString = Environment.GetEnvironmentVariable("MYSQL_URL")
-                                     ?? configuration.GetConnectionString("Repository");
-
-                if (string.IsNullOrEmpty(connectionString))
-                {
-                    throw new InvalidOperationException(
-                        "No MySQL connection string found. Set MYSQL_URL env var or ConnectionStrings:Repository in appsettings.json.");
-                }
-
-                options.UseMySql(
-                    connectionString,
-                    ServerVersion.AutoDetect(connectionString) // lets EF figure out the MySQL version
-                );
+                string? ConnectionString = configuration.GetConnectionString("Repository");
+                options.UseMySql(ConnectionString, new MySqlServerVersion(new Version(8, 0, 25)));
             });
 
+            // added custom exception filter
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(typeof(CustomException));
+            });
 
             services.AddHttpContextAccessor();
             // Register HttpClient factory for external API calls
             services.AddHttpClient();
-
             // Register Memory Cache
             services.AddMemoryCache();
-
             // Registering Components
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();

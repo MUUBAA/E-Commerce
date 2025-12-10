@@ -36,7 +36,7 @@ namespace Server.Controllers.PaymentController
         {
             // 👇 use FRONTEND url instead of backend host
             var frontendUrl = _configuration["FrontendUrl"]
-                              ?? "https://nestonlinestore.vercel.app";
+                              ?? "https://localhost:5015"; // default for local dev
 
             var successUrl = $"{frontendUrl}/payment-success?session_id={{CHECKOUT_SESSION_ID}}";
             var cancelUrl  = $"{frontendUrl}/checkout";

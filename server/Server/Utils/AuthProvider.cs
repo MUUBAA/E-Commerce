@@ -12,7 +12,7 @@ namespace Server.Utils
 {
     public class AuthProvider
     {
-        public static void Confiqure(IServiceCollection services, IConfiguration configuration)
+        public static void Configure(IServiceCollection services, IConfiguration configuration)
         {
             var cacheService = new CacheService(new MemoryCache(new MemoryCacheOptions()));
 
