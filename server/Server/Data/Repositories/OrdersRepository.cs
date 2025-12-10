@@ -37,6 +37,8 @@ namespace Server.Data.Repositories
                 UserId = userId,
                 TotalPrice = totalPrice,
                 Status = "pending",
+                OrderStatus = "Pending",
+                PaymentStatus = "Pending",
                 CreatedAt = DateTime.UtcNow
             };
 

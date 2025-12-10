@@ -12,6 +12,7 @@ using Server.Utils;
 using Server.Services.CartServices;
 using Server.Services.PaymentService;
 using Server.Services.OrderService;
+using Server.Services.Admin;
 
 namespace Server.Utils
 {
@@ -68,6 +69,13 @@ namespace Server.Utils
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IOrdersRepository, OrdersRepository>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IAdminAuthService, AdminAuthService>();
+            services.AddScoped<IAdminProductService, AdminProductService>();
+            services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+            services.AddScoped<IAdminOrderService, AdminOrderService>();
+            services.AddScoped<IAdminUserService, AdminUserService>();
+            services.AddScoped<IInventoryService, InventoryService>();
+            services.AddScoped<IPaymentMonitoringService, PaymentMonitoringService>();
 
             return Task.CompletedTask;
         }

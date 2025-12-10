@@ -11,17 +11,31 @@ try
 
     // CORS
     const string CorsPolicyName = "AllowClient";
+    var allowedOrigins = new[]
+    {
+        "http://localhost:5015",
+        "https://localhost:5015",
+        "http://localhost:5173",
+        "https://localhost:5173",
+        "http://localhost:3000",
+        "https://localhost:3000"
+    };
     builder.Services.AddCors(options =>
     {
         options.AddPolicy(CorsPolicyName, policy =>
         {
-            // DEBUG: Allow any origin for troubleshooting
             policy
-                .SetIsOriginAllowed(_ => true)
+                .WithOrigins(allowedOrigins)
                 .AllowAnyHeader()
                 .AllowAnyMethod();
-                // .AllowCredentials(); // Uncomment only if you use cookies/auth
+                // If you add cookie-based auth later, also call: .AllowCredentials();
         });
+    });
+
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("AdminOnly", policy =>
+            policy.RequireRole("Admin"));
     });
 
     // Swagger / OpenAPI
@@ -43,7 +57,9 @@ try
 
     app.UseCors(CorsPolicyName);
 
+    app.UseAuthentication();
     app.UseAuthorization();
+    app.UseMiddleware<Server.Middlewares.AdminAuthorizationMiddleware>();
 
     app.MapControllers();
 

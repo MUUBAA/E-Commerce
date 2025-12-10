@@ -14,5 +14,9 @@ namespace Server.Data.Entities.Orders
 
         [Column("status")]
         public string Status { get; set; }
+        [Column("order_status")]
+        public string OrderStatus { get; set; } = "Pending";
+        [Column("payment_status")]
+        public string PaymentStatus { get; set; } = "Pending";
     }
 }
