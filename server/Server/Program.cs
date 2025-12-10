@@ -42,7 +42,7 @@ try
     // Swagger / OpenAPI
     builder.Services.AddEndpointsApiExplorer();
 
-    AuthProvider.Confiqure(builder.Services, builder.Configuration);
+    AuthProvider.Configure(builder.Services, builder.Configuration);
     SwaggerProvider.Configure(builder.Services);
     ComponentRegistry.Registry(builder.Services, builder.Configuration).GetAwaiter().GetResult();
 

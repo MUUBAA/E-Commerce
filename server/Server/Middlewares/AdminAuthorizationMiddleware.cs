@@ -15,7 +15,12 @@ namespace Server.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
+            var path = context.Request.Path;
+
+            // Skip admin auth endpoints to allow login/validate without existing token
+            var isAdminAuthPath = path.StartsWithSegments("/admin/auth", StringComparison.OrdinalIgnoreCase);
+
+            if (path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase) && !isAdminAuthPath)
             {
                 var role = context.User.FindFirstValue(ClaimTypes.Role);
                 if (!string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase))

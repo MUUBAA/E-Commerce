@@ -125,7 +125,8 @@ namespace Server.Services.Admin
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Name),
                 new Claim(ClaimTypes.Role, user.Role ?? "Admin"),
-                new Claim("isAdmin", "true")
+                new Claim("isAdmin", "true"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
             var jwt = new JwtSecurityToken(
@@ -315,7 +316,30 @@ namespace Server.Services.Admin
 
         public List<Category> GetAll()
         {
-            return _db.Categories.AsNoTracking().Where(c => !c.IsDeleted).OrderBy(c => c.Name).ToList();
+            // Primary source: categories table (non-deleted)
+            var categories = _db.Categories.AsNoTracking()
+                .Where(c => !c.IsDeleted)
+                .OrderBy(c => c.Name)
+                .ToList();
+
+            // Fallback: if no categories are present yet, derive from products' category metadata
+            if (categories.Count == 0)
+            {
+                categories = _db.Products.AsNoTracking()
+                    .Where(p => !p.IsDeleted && !string.IsNullOrEmpty(p.CategoryName))
+                    .GroupBy(p => new { p.CategoryId, p.CategoryName })
+                    .Select(g => new Category
+                    {
+                        Id = g.Key.CategoryId,
+                        Name = g.Key.CategoryName ?? $"Category-{g.Key.CategoryId}",
+                        Description = null,
+                        IsActive = true
+                    })
+                    .OrderBy(c => c.Name)
+                    .ToList();
+            }
+
+            return categories;
         }
     }
 
@@ -338,9 +362,7 @@ namespace Server.Services.Admin
         public Orders UpdateStatus(OrderStatusUpdateDto dto, string performedBy)
         {
             var order = _db.Orders.FirstOrDefault(o => o.Id == dto.OrderId) ?? throw new Exception("Order not found");
-            order.OrderStatus = dto.OrderStatus;
-            order.PaymentStatus = dto.PaymentStatus;
-            order.Status = dto.OrderStatus.ToLower();
+            order.Status = dto.OrderStatus;
             order.UpdatedAt = DateTime.UtcNow;
             order.UpdatedBy = performedBy;
             _db.SaveChanges();
