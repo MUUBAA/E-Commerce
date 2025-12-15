@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
-using Server.Services.Admin;
+using Server.Services.Admin.AdminAuthService;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminAuthController
 {
     [ApiController]
     [Route("admin/auth")]

@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import adminApi from '../services/api';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AdminRootState, AdminDispatch } from '../redux/store';
+import { fetchAdminOrders, updateAdminOrderStatus } from '../redux/thunk/adminOrders';
 import DataTable from '../components/DataTable';
 import type { AdminOrder, OrderStatus, PaymentStatus } from '../types';
 import { 
@@ -26,37 +28,18 @@ const orderStatuses: OrderStatus[] = [
 const paymentStatuses: PaymentStatus[] = ["Pending", "Success", "Failed"];
 
 const OrdersPage = () => {
-  const [orders, setOrders] = useState<AdminOrder[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const { data } = await adminApi.get('/admin/orders');
-      const normalized = (data as AdminOrder[]).map((o) => ({
-        ...o,
-        orderStatus: o.orderStatus ?? (o as unknown as { status?: string }).status ?? 'Pending',
-        paymentStatus: o.paymentStatus ?? 'Pending',
-      }));
-      setOrders(normalized);
-    } catch (error) {
-      console.error('Failed to load orders:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useDispatch<AdminDispatch>();
+  const { orders, loading } = useSelector((s: AdminRootState) => s.adminOrders);
 
   useEffect(() => {
-    load();
-  }, []);
+    dispatch(fetchAdminOrders());
+  }, [dispatch]);
 
   const updateStatus = async (order: AdminOrder, orderStatus: OrderStatus, paymentStatus: PaymentStatus) => {
     try {
-      await adminApi.patch(`/admin/orders/${order.id}/status`, {
-        orderStatus,
-        paymentStatus,
-      });
-      load();
+      await dispatch(updateAdminOrderStatus({ orderId: order.id, orderStatus, paymentStatus })).unwrap();
+      // refetch orders to update UI
+      dispatch(fetchAdminOrders());
     } catch (error) {
       console.error('Failed to update order status:', error);
     }
@@ -180,7 +163,7 @@ const OrdersPage = () => {
           searchable={true}
           actions={
             <button 
-              onClick={() => load()}
+              onClick={() => dispatch(fetchAdminOrders())}
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-xl hover:bg-pink-100 transition-colors cursor-pointer"
             >

@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
+using Server.Services.Admin.PaymentMonitoringService;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminPaymentController
 {
     [ApiController]
     [Route("admin/payments")]

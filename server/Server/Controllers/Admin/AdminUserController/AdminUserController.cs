@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
+using Server.Services.Admin.AdminUserService;
 using System.Security.Claims;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminUserController
 {
     [ApiController]
     [Route("admin/users")]

@@ -57,7 +57,7 @@ namespace Server.Services.ProductService
         
         public Product GetProductById(int productId)
         {
-            var product = _productsRepository.GetProductById(productId) ?? throw new NotFoundException("User not Found");
+            var product = _productsRepository.GetProductById(productId) ?? throw new NotFoundException("Product not Found");
             return product;
         }
 

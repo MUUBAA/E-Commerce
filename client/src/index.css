@@ -4,6 +4,14 @@
   html {
     font-family: 'Poppins', system-ui, sans-serif;
   }
+  /* make interactive elements show pointer cursor */
+  button, a, [role="button"], .clickable {
+    cursor: pointer;
+  }
+  /* ensure inline svgs inside buttons or clickable elements also show pointer */
+  button svg, .clickable svg, a svg {
+    cursor: pointer;
+  }
 }
 
 @layer utilities {

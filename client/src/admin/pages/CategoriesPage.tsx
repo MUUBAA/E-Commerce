@@ -1,63 +1,45 @@
 import { useEffect, useState } from "react";
-import adminApi from "../services/api";
+import { useDispatch, useSelector } from 'react-redux';
 import DataTable from "../components/DataTable";
 import type { AdminCategory } from "../types";
+import type { AdminDispatch, AdminRootState } from '../redux/store';
+import { fetchAdminCategories, createAdminCategory, updateAdminCategory } from '../redux/thunk/adminCategory';
 
 const CategoriesPage = () => {
-  const [categories, setCategories] = useState<AdminCategory[]>([]);
+  const dispatch = useDispatch<AdminDispatch>();
+  const { categories, loading, error } = useSelector((s: AdminRootState) => s.adminCategories);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await adminApi.get("/admin/categories");
-      setCategories(data);
-    } catch (err) {
-      console.error("Failed to load categories", err);
-      setError("Failed to load categories");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    load();
-  }, []);
+    dispatch(fetchAdminCategories());
+  }, [dispatch]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
     try {
-      await adminApi.post("/admin/categories", { name, description, isActive: true });
+      await dispatch(createAdminCategory({ id: 0, name, description, isActive: true })).unwrap();
       setName("");
       setDescription("");
-      await load();
+      // refetch
+      dispatch(fetchAdminCategories());
     } catch (err) {
-      console.error("Failed to create category", err);
-      setError("Failed to create category");
-      setLoading(false);
+      console.error('Failed to create category', err);
     }
   };
 
   const toggle = async (cat: AdminCategory) => {
-    setLoading(true);
-    setError(null);
     try {
-      await adminApi.put(`/admin/categories/${cat.id}`, {
-        ...cat,
-        isActive: !cat.isActive,
-      });
-      await load();
+      await dispatch(updateAdminCategory({ ...cat, description: cat.description ?? '', isActive: !cat.isActive })).unwrap();
+      dispatch(fetchAdminCategories());
     } catch (err) {
-      console.error("Failed to update category", err);
-      setError("Failed to update category");
-      setLoading(false);
+      console.error('Failed to update category', err);
     }
+  };
+
+  const load = () => {
+    dispatch(fetchAdminCategories());
   };
 
   return (

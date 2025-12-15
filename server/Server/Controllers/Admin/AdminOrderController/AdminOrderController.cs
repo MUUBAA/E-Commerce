@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
+using Server.Services.Admin.AdminOrderService;
+using Server.Services.Admin.InventoryService;
 using System.Security.Claims;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminOrderController
 {
     [ApiController]
     [Route("admin/orders")]

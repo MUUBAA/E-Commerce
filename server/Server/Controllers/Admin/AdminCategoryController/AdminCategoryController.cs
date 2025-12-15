@@ -2,9 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
+using Server.Services.Admin.AdminCategoryService;
 using System.Security.Claims;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminCategoryController
 {
     [ApiController]
     [Route("admin/categories")]
@@ -32,11 +33,13 @@ namespace Server.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] AdminCategoryDto dto)
+        public IActionResult Update(int id, AdminCategoryDto dto)
         {
-            dto.Id = id;
-            _categoryService.Update(dto, GetAdmin());
-            return NoContent();
+            if (id != dto.Id)
+                return BadRequest("Route ID and DTO ID do not match");
+
+            _categoryService.Update(dto, User.Identity!.Name!);
+            return Ok();
         }
 
         [HttpDelete("{id}")]

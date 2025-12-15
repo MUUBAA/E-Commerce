@@ -10,6 +10,7 @@ import InventoryPage from "../pages/InventoryPage";
 import CategoriesPage from "../pages/CategoriesPage";
 import AdminGuard from "../guards/AdminGuard";
 import { adminStore } from "../redux/store";
+import EditProductPage from "../pages/EditProductPage"; // Import the EditProductPage
 
 const AdminRoutes = () => {
   return (
@@ -28,6 +29,7 @@ const AdminRoutes = () => {
                   <Route path="/users" element={<UsersPage />} />
                   <Route path="/inventory" element={<InventoryPage />} />
                   <Route path="/categories" element={<CategoriesPage />} />
+                  <Route path="/edit-product/:productId" element={<EditProductPage />} /> // Register the EditProductPage route
                   <Route path="*" element={<Navigate to="/admin" replace />} />
                 </Routes>
               </AdminLayout>

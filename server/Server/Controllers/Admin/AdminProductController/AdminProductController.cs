@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
-using Server.Services.Admin;
+using Server.Services.Admin.AdminProductService;
+using Server.Services.Admin.InventoryService;
 using System.Security.Claims;
 
-namespace Server.Controllers
+namespace Server.Controllers.Admin.AdminProductController
 {
     [ApiController]
     [Route("admin/products")]
@@ -99,6 +100,14 @@ namespace Server.Controllers
             var alerts = _inventoryService.GetLowStockAlerts(threshold);
             return Ok(alerts);
         }
+
+        [HttpGet("getById/{id}")]
+        public IActionResult GetProductById(int id)
+        {
+            var product = _productService.GetProductById(id);
+            return Ok(product);
+        }
+
 
         private string GetAdminUser()
         {

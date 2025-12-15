@@ -60,7 +60,9 @@ namespace Server.Data.Repositories
 
          public Product? GetProductById(int productId)
         {
-            return  repository.Products.FirstOrDefault(p => p.Id == productId); 
+           
+            var product = repository.Products.FirstOrDefault(p => p.Id == productId);
+            return product;
         }
 
         public (long, int, List<Product> products) GetAllProducts(ProductsContract contract)

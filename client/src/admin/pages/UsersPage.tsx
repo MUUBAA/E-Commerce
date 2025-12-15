@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import adminApi from '../services/api';
 import DataTable from '../components/DataTable';
 import type { AdminUser } from '../types';
+import type { AdminRootState, AdminDispatch } from '../redux/store';
+import { fetchAdminUsers } from '../redux/thunk/adminUsers';
 import { 
   Users, 
   UserCheck, 
@@ -16,31 +19,19 @@ import {
 } from 'lucide-react';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const { data } = await adminApi.get('/admin/users');
-      setUsers(data);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const dispatch = useDispatch<AdminDispatch>();
+  const { users, loading } = useSelector((s: AdminRootState) => s.adminUsers);
 
   useEffect(() => {
-    load();
-  }, []);
+    dispatch(fetchAdminUsers());
+  }, [dispatch]);
 
   const toggleBlock = async (user: AdminUser) => {
     try {
       await adminApi.patch(`/admin/users/${user.id}/block`, {
         block: !user.isBlocked,
       });
-      load();
+      dispatch(fetchAdminUsers());
     } catch (error) {
       console.error('Failed to toggle user block status:', error);
     }
@@ -149,7 +140,7 @@ const UsersPage = () => {
           searchable={true}
           actions={
             <button 
-              onClick={() => load()}
+              onClick={() => dispatch(fetchAdminUsers())}
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-xl hover:bg-pink-100 transition-colors cursor-pointer disabled:opacity-60"
             >
