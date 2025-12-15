@@ -23,7 +23,7 @@ try
                     "https://localhost:5200",
                     "http://localhost:5200",
                     "https://nestonlinestore.vercel.app/",
-                    ""
+                    "https://e-commerce-production-0745.up.railway.app"
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
