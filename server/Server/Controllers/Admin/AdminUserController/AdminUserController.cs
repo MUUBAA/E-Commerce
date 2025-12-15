@@ -1,0 +1,43 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Server.Data.Contract;
+using Server.Data.Dto.Admin;
+using Server.Services.Admin;
+using Server.Services.Admin.AdminUserService;
+using System.Security.Claims;
+
+namespace Server.Controllers.Admin.AdminUserController
+{
+    [ApiController]
+    [Route("admin/users")]
+    [Authorize(Roles = "Admin")]
+    public class AdminUserController : ControllerBase
+    {
+        private readonly IAdminUserService _userService;
+
+        public AdminUserController(IAdminUserService userService)
+        {
+            _userService = userService;
+        }
+
+        [HttpGet]
+        public IActionResult GetAll([FromQuery] PaginationContract pagination)
+        {
+            return Ok(_userService.GetAll(pagination));
+        }
+
+        [HttpPatch("{id}/block")]
+        public IActionResult BlockUser(int id, [FromBody] UserBlockDto dto)
+        {
+            dto.UserId = id;
+            _userService.BlockUser(dto, GetAdmin());
+            return NoContent();
+        }
+
+        private string GetAdmin()
+        {
+            return User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "system";
+        }
+    }
+}
+

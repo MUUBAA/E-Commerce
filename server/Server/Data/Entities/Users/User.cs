@@ -18,6 +18,10 @@ namespace Server.Data.Entities.Users
         public DateTime? PasswordResetTokenExpiry { get; set; }
         [Column("address")]
         public string? Address { get; set; }
+        [Column("role")]
+        public string Role { get; set; } = "User";
+        [Column("is_blocked")]
+        public bool IsBlocked { get; set; } = false;
 
     }
 }

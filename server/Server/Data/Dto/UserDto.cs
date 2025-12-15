@@ -9,5 +9,7 @@
         public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? Address { get; set; }
+        public string Role { get; set; } = "User";
+        public bool IsBlocked { get; set; }
     }
 }

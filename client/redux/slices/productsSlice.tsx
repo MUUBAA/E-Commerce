@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAllProducts } from "../thunk/product";
+import { fetchAllProducts, fetchProductById } from "../thunk/product";
 
 export interface Product {
     id: number;
@@ -22,6 +22,7 @@ export interface Product {
 
 interface ProductState {
     products: Product[];
+    selectedProduct: Product | null; // Added selectedProduct property
     loading: boolean;
     totalItems: number;
     error: string | null;
@@ -30,6 +31,7 @@ interface ProductState {
 
 const initialState: ProductState = {
     products: [],
+    selectedProduct: null, // Initialize selectedProduct as null
     loading: false,
     totalItems: 0,
     error: null,
@@ -43,7 +45,10 @@ const productsSlice = createSlice({
         clearProductsState: (state) => {
             state.loading = false;
             state.error = null;
-        }
+        },
+        setSelectedProduct: (state, action) => {
+            state.selectedProduct = action.payload; // Added reducer to set selectedProduct
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -59,9 +64,24 @@ const productsSlice = createSlice({
             .addCase(fetchAllProducts.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message || 'Failed to fetch products';
+            });
+        builder
+            .addCase(fetchProductById.pending, (state) => {
+                state.loading = true;
+                state.error = null;
             })
+            .addCase(fetchProductById.fulfilled, (state, action) => {
+                state.loading = false;
+                // API response may contain the product under `data` or `Data`, or be the product directly.
+                state.selectedProduct = (action.payload && (action.payload.data ?? action.payload.Data)) || action.payload || null;
+                state.success = true;
+            })
+            .addCase(fetchProductById.rejected, (state, action) => {
+                state.loading = false;
+                state.error = (action as any).payload?.message || action.error.message || 'Failed to fetch product';
+            });
     },
 });
 
-export const { clearProductsState } = productsSlice.actions;
+export const { clearProductsState, setSelectedProduct } = productsSlice.actions; // Exported setSelectedProduct action
 export default productsSlice.reducer;

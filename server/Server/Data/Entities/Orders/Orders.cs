@@ -14,5 +14,17 @@ namespace Server.Data.Entities.Orders
 
         [Column("status")]
         public string Status { get; set; }
+
+        // Legacy compatibility: map OrderStatus/PaymentStatus to Status until DB adds columns
+        [NotMapped]
+        public string OrderStatus
+        {
+            get => Status;
+            set => Status = value;
+        }
+
+        // PaymentStatus not stored in DB yet; keep in-memory default
+        [NotMapped]
+        public string PaymentStatus { get; set; } = "Pending";
     }
 }

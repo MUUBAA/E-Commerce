@@ -34,7 +34,7 @@ public class ProductsController : BaseController
         return Ok(new GenericApiResponse<bool>(true, "Product Updated Sucessfully", result));
     }
     [HttpGet]
-    [Route("/product/get-by-id")]
+    [Route("/product/get-by-id/{productId}")]
     public IActionResult GetProductById([FromRoute] int productId)
     {
         var product = _productService.GetProductById(productId);

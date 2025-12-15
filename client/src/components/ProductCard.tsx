@@ -79,7 +79,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
           price: numericPrice,
         })
       ).unwrap();
-      toast.success('Added to cart');
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to add to cart');
     } finally {
@@ -111,7 +110,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
         removeCartItem({ productId: id, userId: UserId })
       ).unwrap();
       await dispatch(getCartItems({ userId: UserId, id: 0, page: 0, pageSize: 20, productId: 0, quantity: 0, price: 0, itemDescription: '', itemName: '', itemUrl: '' }));
-      toast.success('Removed from cart');
     } catch (err: unknown) {
       toast.error(typeof err === 'string' ? err : 'Failed to remove from cart');
     }

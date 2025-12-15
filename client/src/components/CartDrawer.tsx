@@ -324,6 +324,11 @@ useEffect(() => {
     FetchCartItems();
   };
 
+  const adminLogin = () => {
+    navigate('/admin/login');
+    onClose();
+  };
+
   const renderEmptyCart = () => (
     <div className="flex flex-col items-center justify-center text-center py-8">
       <div className="mb-6">
@@ -386,13 +391,21 @@ useEffect(() => {
           />
         </div>
 
-        <div className="text-right">
+        <div className="flex justify-end gap-4">
           <button
             type="button"
             onClick={handleForgotOpen}
             className="text-pink-500 text-sm hover:text-pink-600 transition-colors cursor-pointer"
           >
             Forgot Password?
+          </button>
+
+          <button
+            type="button"
+            onClick={adminLogin}
+            className="text-pink-500 text-sm hover:text-pink-600 transition-colors cursor-pointer"
+          >
+            Login as Admin?
           </button>
         </div>
 

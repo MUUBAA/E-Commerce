@@ -12,14 +12,21 @@ using Server.Utils;
 using Server.Services.CartServices;
 using Server.Services.PaymentService;
 using Server.Services.OrderService;
+using Server.Services.Admin.AdminAuthService;
+using Server.Services.Admin.AdminProductService;
+using Server.Services.Admin.AdminCategoryService;
+using Server.Services.Admin.AdminOrderService;
+using Server.Services.Admin.AdminUserService;
+using Server.Services.Admin.InventoryService;
+using Server.Services.Admin.PaymentMonitoringService;
 
 namespace Server.Utils
 {
-    public class ComponentRegistry
+   public class ComponentRegistry
     {
         public static Task Registry(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers().AddNewtonsoftJson(options =>
+             services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -43,14 +50,11 @@ namespace Server.Utils
                 );
             });
 
-
             services.AddHttpContextAccessor();
             // Register HttpClient factory for external API calls
             services.AddHttpClient();
-
             // Register Memory Cache
             services.AddMemoryCache();
-
             // Registering Components
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
@@ -68,6 +72,13 @@ namespace Server.Utils
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IOrdersRepository, OrdersRepository>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IAdminAuthService, AdminAuthService>();
+            services.AddScoped<IAdminProductService, AdminProductService>();
+            services.AddScoped<IAdminCategoryService, AdminCategoryService>();
+            services.AddScoped<IAdminOrderService, AdminOrderService>();
+            services.AddScoped<IAdminUserService, AdminUserService>();
+            services.AddScoped<IInventoryService, InventoryService>();
+            services.AddScoped<IPaymentMonitoringService, PaymentMonitoringService>();
 
             return Task.CompletedTask;
         }

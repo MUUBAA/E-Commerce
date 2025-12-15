@@ -21,8 +21,10 @@ export const createCheckoutSession = createAsyncThunk<
   "payment/createCheckoutSession",
   async ({ orderId, amount, paymentMethod, token }, { rejectWithValue }) => {
     try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/payment/create-checkout`;
       const res = await axios.post<GenericApiResponse<CheckoutSessionResponse>>(
-        "https://nestonlinestore.onrender.com/payment/create-checkout", // FIXED ROUTE
+        url,
         { orderId, amount, paymentMethod },
         {
           headers: {
@@ -58,8 +60,10 @@ export const confirmCheckoutPayment = createAsyncThunk<
   "payment/confirmCheckoutPayment",
   async ({ sessionId }, { rejectWithValue }) => {
     try {
+      const base = import.meta.env.VITE_API_BASE_URL || '/';
+      const url = `${base.replace(/\/$/, '')}/payment/confirm`;
       const res = await axios.get<GenericApiResponse<string>>(
-        "https://nestonlinestore.onrender.com/payment/confirm",
+        url,
         {
           params: {
             session_id: sessionId,  

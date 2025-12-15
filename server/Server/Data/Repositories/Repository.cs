@@ -6,6 +6,7 @@ using Server.Data.Entities.CartItems;
 using Server.Data.Entities.OrderItems;
 using Server.Data.Entities.Orders;
 using Server.Data.Entities.Payments;
+using Server.Data.Entities.Categories;
 
 namespace Server.Data.Repositories
 {
@@ -21,6 +22,7 @@ namespace Server.Data.Repositories
         public DbSet<OrderItems> OrderItems { get; set; }
         public DbSet<Orders> Orders { get; set; }
         public DbSet<Payments> Payments { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
     }
 }
