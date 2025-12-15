@@ -26,23 +26,28 @@ namespace Server.Utils
     {
         public static Task Registry(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers().AddNewtonsoftJson(options =>
-              {
-                  options.SerializerSettings.Converters.Add(new StringEnumConverter());
-                  options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-              });
-
+             services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            });
             // Mysql Database connection
             services.AddDbContext<Repository>(options =>
             {
-                string? ConnectionString = configuration.GetConnectionString("Repository");
-                options.UseMySql(ConnectionString, new MySqlServerVersion(new Version(8, 0, 25)));
-            });
+                // Prefer environment variable (for Render / production)
+                var connectionString = Environment.GetEnvironmentVariable("MYSQL_URL")
+                                     ?? configuration.GetConnectionString("Repository");
 
-            // added custom exception filter
-            services.AddControllers(options =>
-            {
-                options.Filters.Add(typeof(CustomException));
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException(
+                        "No MySQL connection string found. Set MYSQL_URL env var or ConnectionStrings:Repository in appsettings.json.");
+                }
+
+                options.UseMySql(
+                    connectionString,
+                    ServerVersion.AutoDetect(connectionString) // lets EF figure out the MySQL version
+                );
             });
 
             services.AddHttpContextAccessor();
