@@ -7,14 +7,14 @@ import { fetchAdminCategories, createAdminCategory, updateAdminCategory } from '
 
 const CategoriesPage = () => {
   const dispatch = useDispatch<AdminDispatch>();
-  const { categories, loading, error } = useSelector((s: AdminRootState) => s.adminCategories);
+  const { categories, loading, error, page, pageSize, total } = useSelector((s: AdminRootState) => s.adminCategories);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    dispatch(fetchAdminCategories());
-  }, [dispatch]);
+    dispatch(fetchAdminCategories({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ const CategoriesPage = () => {
       setName("");
       setDescription("");
       // refetch
-      dispatch(fetchAdminCategories());
+      dispatch(fetchAdminCategories({ page, pageSize }));
     } catch (err) {
       console.error('Failed to create category', err);
     }
@@ -32,14 +32,14 @@ const CategoriesPage = () => {
   const toggle = async (cat: AdminCategory) => {
     try {
       await dispatch(updateAdminCategory({ ...cat, description: cat.description ?? '', isActive: !cat.isActive })).unwrap();
-      dispatch(fetchAdminCategories());
+      dispatch(fetchAdminCategories({ page, pageSize }));
     } catch (err) {
       console.error('Failed to update category', err);
     }
   };
 
   const load = () => {
-    dispatch(fetchAdminCategories());
+    dispatch(fetchAdminCategories({ page, pageSize }));
   };
 
   return (
@@ -100,6 +100,9 @@ const CategoriesPage = () => {
             },
           ]}
           data={categories}
+          pagination={{ page, pageSize, total }}
+          onPageChange={(p, ps) => dispatch(fetchAdminCategories({ page: p, pageSize: ps }))}
+          onSearch={(s) => dispatch(fetchAdminCategories({ page: 1, pageSize, search: s }))}
         />
       </div>
     </div>

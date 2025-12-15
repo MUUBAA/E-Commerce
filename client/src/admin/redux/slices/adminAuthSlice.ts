@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import adminApi from "../../services/api";
-
 interface LoginPayload {
   email: string;
   password: string;

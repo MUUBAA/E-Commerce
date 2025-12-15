@@ -7,7 +7,7 @@ import {
   Users, 
   ShieldCheck,
   ChevronRight,
-  Settings,
+  // Settings,
   BarChart3
 } from 'lucide-react';
 
@@ -73,7 +73,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Settings Section */}
-      <div className="border-t border-slate-200 pt-4 mt-4">
+      {/* <div className="border-t border-slate-200 pt-4 mt-4">
         <NavLink 
           to="/admin/settings" 
           className={navClasses}
@@ -85,7 +85,7 @@ const Sidebar = () => {
             className="ml-auto opacity-0 group-hover:opacity-100 transform group-hover:translate-x-1 transition-all duration-200" 
           />
         </NavLink>
-      </div>
+      </div> */}
 
       {/* Footer */}
       <div className="mt-4 p-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl">

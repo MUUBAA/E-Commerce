@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Data.Dto.Admin;
+using Server.Data.Contract;
 using Server.Data.Entities.OrderItems;
 using Server.Data.Entities.Orders;
 using Server.Data.Repositories;
@@ -8,7 +9,7 @@ namespace Server.Services.Admin.AdminOrderService
 {
     public interface IAdminOrderService
     {
-        List<Orders> GetAll();
+        PagedResult<Orders> GetAll(PaginationContract pagination);
         Orders UpdateStatus(OrderStatusUpdateDto dto, string performedBy);
         Orders? GetById(int orderId);
         List<OrderItems> GetOrderItems(int orderId);
@@ -24,9 +25,45 @@ namespace Server.Services.Admin.AdminOrderService
             _logger = logger;
         }
 
-        public List<Orders> GetAll()
+        public PagedResult<Orders> GetAll(PaginationContract pagination)
         {
-            return _db.Orders.AsNoTracking().OrderByDescending(o => o.CreatedAt).ToList();
+            var page = pagination != null && pagination.Page > 0 ? pagination.Page : 1;
+            var pageSize = pagination != null && pagination.PageSize > 0 ? pagination.PageSize : 20;
+
+            var search = pagination?.Search?.Trim();
+
+            var query = _db.Orders
+                .AsNoTracking()
+                .Where(o => !o.IsDeleted);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                // try numeric id match
+                if (int.TryParse(search, out var idSearch) && idSearch > 0)
+                {
+                    query = query.Where(o => o.Id == idSearch);
+                }
+                else
+                {
+                    // match status or user name/email
+                    query = query.Where(o => o.Status != null && o.Status.Contains(search)
+                        || _db.Users.Any(u => u.Id == o.UserId && ((u.Name != null && u.Name.Contains(search)) || (u.Email != null && u.Email.Contains(search)))));
+                }
+            }
+
+            var total = query.Count();
+
+            var items = query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<Orders>
+            {
+                Items = items,
+                Total = total
+            };
         }
 
         public Orders UpdateStatus(OrderStatusUpdateDto dto, string performedBy)

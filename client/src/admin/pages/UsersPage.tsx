@@ -20,11 +20,11 @@ import {
 
 const UsersPage = () => {
   const dispatch = useDispatch<AdminDispatch>();
-  const { users, loading } = useSelector((s: AdminRootState) => s.adminUsers);
+  const { users, loading, page, pageSize, total } = useSelector((s: AdminRootState) => s.adminUsers);
 
   useEffect(() => {
-    dispatch(fetchAdminUsers());
-  }, [dispatch]);
+    dispatch(fetchAdminUsers({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
 
   const toggleBlock = async (user: AdminUser) => {
     try {
@@ -69,7 +69,7 @@ const UsersPage = () => {
           </div>
           <div className="text-left sm:text-right flex-shrink-0">
             <p className="text-green-100 text-xs sm:text-sm">Total Users</p>
-            <p className="text-xl sm:text-2xl font-bold">{users.length}</p>
+            <p className="text-xl sm:text-2xl font-bold">{total ?? users.length}</p>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@ const UsersPage = () => {
           searchable={true}
           actions={
             <button 
-              onClick={() => dispatch(fetchAdminUsers())}
+              onClick={() => dispatch(fetchAdminUsers({ page, pageSize }))}
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-xl hover:bg-pink-100 transition-colors cursor-pointer disabled:opacity-60"
             >
@@ -205,15 +205,18 @@ const UsersPage = () => {
                     {u.isBlocked ? <UserCheck size={14} /> : <UserX size={14} />}
                     {u.isBlocked ? 'Unblock' : 'Block'}
                   </button>
-                  <button className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-all cursor-pointer">
+                  {/* <button className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-all cursor-pointer">
                     <Mail size={14} />
                     Contact
-                  </button>
+                  </button> */}
                 </div>
               ),
             },
           ]}
           data={users}
+          pagination={{ page, pageSize, total }}
+          onPageChange={(p, ps) => dispatch(fetchAdminUsers({ page: p, pageSize: ps }))}
+          onSearch={(s) => dispatch(fetchAdminUsers({ page: 1, pageSize, search: s }))}
         />
       </div>
     </div>

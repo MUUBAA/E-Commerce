@@ -5,12 +5,18 @@ interface AdminUserState {
   users: any[];
   loading: boolean;
   error: string | null;
+  page: number;
+  pageSize: number;
+  total?: number;
 }
 
 const initialState: AdminUserState = {
   users: [],
   loading: false,
   error: null,
+  page: 1,
+  pageSize: 10,
+  total: 0,
 };
 
 const adminUserSlice = createSlice({
@@ -26,7 +32,19 @@ const adminUserSlice = createSlice({
       })
       .addCase(fetchAdminUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        if (Array.isArray(action.payload)) {
+          state.users = action.payload as any[];
+        } else if (action.payload && typeof action.payload === 'object') {
+          const payload: any = action.payload;
+          state.users = payload.items ?? payload.data ?? payload;
+          if (typeof payload.total === 'number') state.total = payload.total;
+        } else {
+          state.users = [];
+        }
+
+        const arg = action.meta?.arg as { page?: number; pageSize?: number } | undefined;
+        if (arg?.page) state.page = arg.page;
+        if (arg?.pageSize) state.pageSize = arg.pageSize;
       })
       .addCase(fetchAdminUsers.rejected, (state, action) => {
         state.loading = false;

@@ -10,6 +10,9 @@ interface AdminOrderState {
   selectedOrder: any | null;
   loading: boolean;
   error: string | null;
+  page: number;
+  pageSize: number;
+  total?: number;
 }
 
 const initialState: AdminOrderState = {
@@ -17,6 +20,9 @@ const initialState: AdminOrderState = {
   selectedOrder: null,
   loading: false,
   error: null,
+  page: 1,
+  pageSize: 10,
+  total: 0,
 };
 
 const adminOrderSlice = createSlice({
@@ -32,7 +38,19 @@ const adminOrderSlice = createSlice({
       })
       .addCase(fetchAdminOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+        if (Array.isArray(action.payload)) {
+          state.orders = action.payload as any[];
+        } else if (action.payload && typeof action.payload === 'object') {
+          const payload: any = action.payload;
+          state.orders = payload.items ?? payload.data ?? payload;
+          if (typeof payload.total === 'number') state.total = payload.total;
+        } else {
+          state.orders = [];
+        }
+
+        const arg = action.meta?.arg as { page?: number; pageSize?: number } | undefined;
+        if (arg?.page) state.page = arg.page;
+        if (arg?.pageSize) state.pageSize = arg.pageSize;
       })
       .addCase(fetchAdminOrders.rejected, (state, action) => {
         state.loading = false;

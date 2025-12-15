@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Data.Dto.Admin;
+using Server.Data.Contract;
 using Server.Services.Admin.AdminProductService;
 using Server.Services.Admin.InventoryService;
 using System.Security.Claims;
@@ -27,9 +28,9 @@ namespace Server.Controllers.Admin.AdminProductController
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] PaginationContract pagination)
         {
-            var products = _productService.GetAll();
+            var products = _productService.GetAll(pagination);
             return Ok(products);
         }
 

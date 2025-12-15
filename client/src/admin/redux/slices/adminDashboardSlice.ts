@@ -29,10 +29,17 @@ export const fetchDashboardData = createAsyncThunk(
         adminApi.get("/admin/products/alerts/low-stock"),
       ]);
 
+      const normalize = (res: any) => {
+        if (!res) return [];
+        const d = res.data ?? res;
+        if (Array.isArray(d)) return d;
+        return d.items ?? d.data ?? [];
+      };
+
       return {
-        orders: ordersRes.data as AdminOrder[],
-        users: usersRes.data as AdminUser[],
-        products: productsRes.data as AdminProduct[],
+        orders: normalize(ordersRes) as AdminOrder[],
+        users: normalize(usersRes) as AdminUser[],
+        products: normalize(productsRes) as AdminProduct[],
         lowStock: alertRes.data as InventoryAlert[],
       };
     } catch (error: any) {

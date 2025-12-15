@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Data.Contract.Products;
+using Server.Data.Contract;
 using Server.Data.Dto.Admin;
 using Server.Data.Entities.Products;
 using Server.Data.Repositories;
@@ -14,7 +15,7 @@ namespace Server.Services.Admin.AdminProductService
         void UpdateStatus(ProductStatusUpdateDto dto, string performedBy);
         void UpdatePricing(ProductPriceStockDto dto, string performedBy);
         void UpdateImage(int productId, string imageUrl, string performedBy);
-        List<Product> GetAll();
+        PagedResult<Product> GetAll(PaginationContract pagination);
         Product GetProductById(int productId);
     }
     public class AdminProductService : IAdminProductService
@@ -117,9 +118,35 @@ namespace Server.Services.Admin.AdminProductService
             _db.SaveChanges();
         }
 
-        public List<Product> GetAll()
+        public PagedResult<Product> GetAll(PaginationContract pagination)
         {
-            return _db.Products.AsNoTracking().OrderByDescending(p => p.CreatedAt).ToList();
+            var page = pagination != null && pagination.Page > 0 ? pagination.Page : 1;
+            var pageSize = pagination != null && pagination.PageSize > 0 ? pagination.PageSize : 20;
+
+            var query = _db.Products
+                .AsNoTracking()
+                .Where(p => !p.IsDeleted);
+
+            // Optional product name search filter
+            if (!string.IsNullOrWhiteSpace(pagination?.Search))
+            {
+                var search = pagination!.Search!.Trim();
+                query = query.Where(p => p.ItemName != null && p.ItemName.Contains(search));
+            }
+
+            var total = query.Count();
+
+            var items = query
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<Product>
+            {
+                Items = items,
+                Total = total
+            };
         }
 
         public Product GetProductById(int productId)

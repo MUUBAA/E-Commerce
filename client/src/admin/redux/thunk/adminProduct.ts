@@ -6,11 +6,18 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/';
 // Thunk for fetching admin products
 export const fetchAdminProducts = createAsyncThunk(
   'admin/products/fetch',
-  async (_, thunkAPI) => {
+  async (pagination: { page?: number; pageSize?: number; search?: string } | undefined, thunkAPI) => {
     try {
       const state = thunkAPI.getState() as {adminAuth: { token: string };} // Explicitly typing state
       const token = state.adminAuth.token; // Assuming token is stored in auth slice
+      const page = pagination?.page ?? 1;
+      const pageSize = pagination?.pageSize ?? 20;
       const response = await axios.get(`${BASE_URL}/admin/products`, {
+        params: {
+          Page: page,
+          PageSize: pageSize,
+          Search: pagination?.search,
+        },
         headers: {
           'accept': '*/*',
           'Authorization': `Bearer ${token}`,
@@ -18,7 +25,7 @@ export const fetchAdminProducts = createAsyncThunk(
       });
       console.log('fetchAdminProducts CALLED', response.data);
       return response.data;
-      
+
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An error occurred');
     }

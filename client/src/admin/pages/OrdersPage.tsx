@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AdminRootState, AdminDispatch } from '../redux/store';
-import { fetchAdminOrders, updateAdminOrderStatus } from '../redux/thunk/adminOrders';
+import { fetchAdminOrders } from '../redux/thunk/adminOrders';
 import DataTable from '../components/DataTable';
-import type { AdminOrder, OrderStatus, PaymentStatus } from '../types';
+// import type { AdminOrder, OrderStatus, PaymentStatus } from '../types';
 import { 
   ShoppingCart, 
   User, 
@@ -17,33 +17,33 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const orderStatuses: OrderStatus[] = [
-  "Pending",
-  "Paid",
-  "Packed",
-  "Shipped",
-  "Delivered",
-  "Cancelled",
-];
-const paymentStatuses: PaymentStatus[] = ["Pending", "Success", "Failed"];
+// const orderStatuses: OrderStatus[] = [
+//   "Pending",
+//   "Paid",
+//   "Packed",
+//   "Shipped",
+//   "Delivered",
+//   "Cancelled",
+// ];
+// const paymentStatuses: PaymentStatus[] = ["Pending", "Success", "Failed"];
 
 const OrdersPage = () => {
   const dispatch = useDispatch<AdminDispatch>();
-  const { orders, loading } = useSelector((s: AdminRootState) => s.adminOrders);
+  const { orders, loading, page, pageSize, total } = useSelector((s: AdminRootState) => s.adminOrders);
 
   useEffect(() => {
-    dispatch(fetchAdminOrders());
-  }, [dispatch]);
+    dispatch(fetchAdminOrders({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
 
-  const updateStatus = async (order: AdminOrder, orderStatus: OrderStatus, paymentStatus: PaymentStatus) => {
-    try {
-      await dispatch(updateAdminOrderStatus({ orderId: order.id, orderStatus, paymentStatus })).unwrap();
-      // refetch orders to update UI
-      dispatch(fetchAdminOrders());
-    } catch (error) {
-      console.error('Failed to update order status:', error);
-    }
-  };
+  // const updateStatus = async (order: AdminOrder, orderStatus: OrderStatus, paymentStatus: PaymentStatus) => {
+  //   try {
+  //     await dispatch(updateAdminOrderStatus({ orderId: order.id, orderStatus, paymentStatus })).unwrap();
+  //     // refetch orders to update UI
+  //     dispatch(fetchAdminOrders({ page, pageSize }));
+  //   } catch (error) {
+  //     console.error('Failed to update order status:', error);
+  //   }
+  // };
 
   const getOrderStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -92,7 +92,7 @@ const OrdersPage = () => {
           </div>
           <div className="text-left sm:text-right flex-shrink-0">
             <p className="text-blue-100 text-xs sm:text-sm">Total Orders</p>
-            <p className="text-xl sm:text-2xl font-bold">{orders.length}</p>
+            <p className="text-xl sm:text-2xl font-bold">{total ?? orders.length}</p>
           </div>
         </div>
       </div>
@@ -161,9 +161,9 @@ const OrdersPage = () => {
         <DataTable
           title="Order Management"
           searchable={true}
-          actions={
+            actions={
             <button 
-              onClick={() => dispatch(fetchAdminOrders())}
+              onClick={() => dispatch(fetchAdminOrders({ page, pageSize }))}
               disabled={loading}
               className="flex items-center gap-2 px-4 py-2 bg-pink-50 text-pink-600 rounded-xl hover:bg-pink-100 transition-colors cursor-pointer"
             >
@@ -215,37 +215,40 @@ const OrdersPage = () => {
                 </span>
               )
             },
-            {
-              header: 'Quick Actions',
-              accessor: (o) => (
-                <div className="flex flex-col gap-2">
-                  <select
-                    className="border border-slate-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={o.orderStatus}
-                    onChange={(e) =>
-                      updateStatus(o, e.target.value as OrderStatus, o.paymentStatus)
-                    }
-                  >
-                    {orderStatuses.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="border border-slate-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={o.paymentStatus}
-                    onChange={(e) =>
-                      updateStatus(o, o.orderStatus, e.target.value as PaymentStatus)
-                    }
-                  >
-                    {paymentStatuses.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-              ),
-            },
+            // {
+            //   header: 'Quick Actions',
+            //   accessor: (o) => (
+            //     <div className="flex flex-col gap-2">
+            //       <select
+            //         className="border border-slate-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            //         value={o.orderStatus}
+            //         onChange={(e) =>
+            //           updateStatus(o, e.target.value as OrderStatus, o.paymentStatus)
+            //         }
+            //       >
+            //         {orderStatuses.map((s) => (
+            //           <option key={s} value={s}>{s}</option>
+            //         ))}
+            //       </select>
+            //       <select
+            //         className="border border-slate-300 rounded-lg px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            //         value={o.paymentStatus}
+            //         onChange={(e) =>
+            //           updateStatus(o, o.orderStatus, e.target.value as PaymentStatus)
+            //         }
+            //       >
+            //         {paymentStatuses.map((s) => (
+            //           <option key={s} value={s}>{s}</option>
+            //         ))}
+            //       </select>
+            //     </div>
+            //   ),
+            // },
           ]}
           data={orders}
+          pagination={{ page, pageSize, total }}
+          onPageChange={(p, ps) => dispatch(fetchAdminOrders({ page: p, pageSize: ps }))}
+          onSearch={(s) => dispatch(fetchAdminOrders({ page: 1, pageSize, search: s }))}
         />
       </div>
     </div>

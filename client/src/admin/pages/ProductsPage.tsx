@@ -48,7 +48,7 @@ const ProductsPage: React.FC = () => {
   const dispatch = useDispatch<AdminDispatch>();
   const navigate = useNavigate();
 
-  const { products, loading, error } = useSelector(
+  const { products, loading, error, page, pageSize, total } = useSelector(
     (state: AdminRootState) => state.adminProducts
   );
 
@@ -71,12 +71,12 @@ const ProductsPage: React.FC = () => {
   /* ---------------- EFFECTS ---------------- */
 
   useEffect(() => {
-    dispatch(fetchAdminProducts());
-  }, [dispatch]);
+    dispatch(fetchAdminProducts({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
 
   const refreshProducts = useCallback(() => {
-    dispatch(fetchAdminProducts());
-  }, [dispatch]);
+    dispatch(fetchAdminProducts({ page, pageSize }));
+  }, [dispatch, page, pageSize]);
 
   /* ---------------- HANDLERS ---------------- */
 
@@ -146,7 +146,7 @@ const ProductsPage: React.FC = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-purple-100">Total Products</p>
-            <p className="text-2xl font-bold">{products.length}</p>
+            <p className="text-2xl font-bold">{total ?? products.length}</p>
           </div>
         </div>
       </div>
@@ -358,6 +358,9 @@ const ProductsPage: React.FC = () => {
               },
             },
           ]}
+          pagination={{ page, pageSize, total }}
+          onPageChange={(p, ps) => dispatch(fetchAdminProducts({ page: p, pageSize: ps }))}
+          onSearch={(s) => dispatch(fetchAdminProducts({ page: 1, pageSize, search: s }))}
         />
       </div>
     </div>

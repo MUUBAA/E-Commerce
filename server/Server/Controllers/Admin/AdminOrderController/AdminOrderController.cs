@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.Data.Contract;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
 using Server.Services.Admin.AdminOrderService;
@@ -23,9 +24,9 @@ namespace Server.Controllers.Admin.AdminOrderController
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] PaginationContract pagination)
         {
-            return Ok(_orderService.GetAll());
+            return Ok(_orderService.GetAll(pagination));
         }
 
         [HttpGet("{id}")]

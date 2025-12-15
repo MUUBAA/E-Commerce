@@ -14,10 +14,20 @@ interface Props<T> {
   searchable?: boolean;
   title?: string;
   actions?: React.ReactNode;
+  pagination?: {
+    page: number;
+    pageSize: number;
+    total?: number;
+  };
+  onPageChange?: (page: number, pageSize: number) => void;
+  onSearch?: (search: string) => void;
+  debounceMs?: number;
 }
 
-const DataTable = <T,>({ columns, data, searchable = true, title, actions }: Props<T>) => {
+const DataTable = <T,>({ columns, data, searchable = true, title, actions, pagination, onPageChange, onSearch, debounceMs }: Props<T>) => {
   const [search, setSearch] = useState('');
+  const localDebounceMs = debounceMs ?? 400;
+  const searchDebounceRef = React.useRef<number | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -54,6 +64,32 @@ const DataTable = <T,>({ columns, data, searchable = true, title, actions }: Pro
     }
   };
 
+  const currentPage = pagination?.page ?? 1;
+  const currentPageSize = pagination?.pageSize ?? 20;
+  const totalEntries = pagination?.total ?? data.length;
+
+  const totalPages = Math.max(1, Math.ceil(totalEntries / currentPageSize));
+
+  const canPrev = currentPage > 1;
+  // If total is provided, use it to determine if we can go next. Otherwise infer from current data length vs pageSize.
+  const hasTotal = typeof pagination?.total === 'number' && pagination!.total! >= 0;
+  const canNext = hasTotal
+    ? currentPage < totalPages
+    : (sortedData.length >= currentPageSize);
+
+  const goToPage = (p: number) => {
+    if (!onPageChange) return;
+    let next = p;
+    if (next < 1) next = 1;
+    if (hasTotal) next = Math.min(totalPages, next);
+    onPageChange(next, currentPageSize);
+  };
+
+  const changePageSize = (size: number) => {
+    if (!onPageChange) return;
+    onPageChange(1, size);
+  };
+
   return (
     <div className="bg-white rounded-2xl lg:rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
       {(title || searchable || actions) && (
@@ -79,7 +115,20 @@ const DataTable = <T,>({ columns, data, searchable = true, title, actions }: Pro
                     type="text"
                     placeholder="Search..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setSearch(v);
+                      if (onSearch) {
+                        if (searchDebounceRef.current) {
+                          window.clearTimeout(searchDebounceRef.current);
+                        }
+                        // @ts-ignore - window.setTimeout returns number in browsers
+                        searchDebounceRef.current = window.setTimeout(() => {
+                          onSearch(v);
+                          searchDebounceRef.current = null;
+                        }, localDebounceMs) as unknown as number;
+                      }
+                    }}
                     className="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200"
                   />
                 </div>
@@ -158,13 +207,33 @@ const DataTable = <T,>({ columns, data, searchable = true, title, actions }: Pro
       
       {sortedData.length > 0 && (
         <div className="px-3 sm:px-6 py-3 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm text-slate-600">
-          <span className="text-center sm:text-left">Showing {sortedData.length} of {data.length} entries</span>
+          <div className="flex items-center gap-3">
+            <span className="text-center sm:text-left">Showing {sortedData.length} of {totalEntries} entries</span>
+            {onPageChange && (canPrev || canNext) && (
+              <div className="hidden sm:flex items-center gap-2 text-slate-600">
+                <button className="px-2 py-1 border rounded" onClick={() => goToPage(currentPage - 1)} disabled={!canPrev}>Prev</button>
+                <span>Page</span>
+                <input
+                  type="number"
+                  value={currentPage}
+                  onChange={(e) => goToPage(Number(e.target.value))}
+                  className="w-16 text-center border rounded px-1 py-1"
+                />
+                <span>of {totalPages}</span>
+                <button className="px-2 py-1 border rounded" onClick={() => goToPage(currentPage + 1)} disabled={!canNext}>Next</button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center justify-center sm:justify-end gap-2">
             <span className="hidden sm:inline">Rows per page:</span>
-            <select className="border border-slate-300 rounded px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer">
-              <option>10</option>
-              <option>25</option>
-              <option>50</option>
+            <select
+              className="border border-slate-300 rounded px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent cursor-pointer"
+              value={currentPageSize}
+              onChange={(e) => changePageSize(Number(e.target.value))}
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
             </select>
           </div>
         </div>

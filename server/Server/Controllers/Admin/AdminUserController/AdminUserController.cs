@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Server.Data.Contract;
 using Server.Data.Dto.Admin;
 using Server.Services.Admin;
 using Server.Services.Admin.AdminUserService;
@@ -20,9 +21,9 @@ namespace Server.Controllers.Admin.AdminUserController
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] PaginationContract pagination)
         {
-            return Ok(_userService.GetAll());
+            return Ok(_userService.GetAll(pagination));
         }
 
         [HttpPatch("{id}/block")]

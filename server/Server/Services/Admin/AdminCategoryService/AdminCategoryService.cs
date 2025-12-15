@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Server.Data.Dto.Admin;
+using Server.Data.Contract;
 using Server.Data.Entities.Categories;
 using Server.Data.Repositories;
 
@@ -10,7 +11,7 @@ namespace Server.Services.Admin.AdminCategoryService
         int Add(AdminCategoryDto dto, string performedBy);
         void Update(AdminCategoryDto dto, string performedBy);
         void Delete(int id, string performedBy);
-        List<Category> GetAll();
+        PagedResult<Category> GetAll(PaginationContract pagination);
     }
     public class AdminCategoryService : IAdminCategoryService
     {
@@ -65,21 +66,45 @@ namespace Server.Services.Admin.AdminCategoryService
             _db.SaveChanges();
         }
 
-        public List<Category> GetAll()
+        public PagedResult<Category> GetAll(PaginationContract pagination)
         {
+            var page = pagination != null && pagination.Page > 0 ? pagination.Page : 1;
+            var pageSize = pagination != null && pagination.PageSize > 0 ? pagination.PageSize : 20;
+            var search = pagination?.Search?.Trim();
+
             // Primary source: categories table (non-deleted)
-            var categories = _db.Categories
+            var query = _db.Categories
                 .AsNoTracking()
                 .Where(c => !c.IsDeleted)
-                .OrderBy(c => c.Name)
+                ;
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c => c.Name != null && c.Name.Contains(search));
+            }
+
+            query = query.OrderBy(c => c.Name);
+
+            var total = query.Count();
+
+            var categories = query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
             // Fallback: derive categories from products if none exist
             if (categories.Count == 0)
             {
-                categories = _db.Products
+                var fallbackQuery = _db.Products
                     .AsNoTracking()
-                    .Where(p => !p.IsDeleted && !string.IsNullOrEmpty(p.CategoryName))
+                    .Where(p => !p.IsDeleted && !string.IsNullOrEmpty(p.CategoryName));
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    fallbackQuery = fallbackQuery.Where(p => p.CategoryName != null && p.CategoryName.Contains(search));
+                }
+
+                var fallbackGrouped = fallbackQuery
                     .GroupBy(p => new
                     {
                         p.CategoryId,
@@ -92,11 +117,21 @@ namespace Server.Services.Admin.AdminCategoryService
                         Description = null,
                         IsActive = true
                     })
-                    .OrderBy(c => c.Name)
+                    .OrderBy(c => c.Name);
+
+                total = fallbackGrouped.Count();
+
+                categories = fallbackGrouped
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
                     .ToList();
             }
 
-            return categories;
+            return new PagedResult<Category>
+            {
+                Items = categories,
+                Total = total
+            };
         }
     }
 

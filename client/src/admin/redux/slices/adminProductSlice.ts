@@ -24,6 +24,9 @@ export interface AdminProductState {
   product: AdminProduct | null;
   loading: boolean;
   error: string | null;
+  page: number;
+  pageSize: number;
+  total?: number;
 }
 
 const initialState: AdminProductState = {
@@ -31,6 +34,9 @@ const initialState: AdminProductState = {
   product: null,
   loading: false,
   error: null,
+  page: 1,
+  pageSize: 10,
+  total: 0,
 };
 
 const adminProductSlice = createSlice({
@@ -46,7 +52,19 @@ const adminProductSlice = createSlice({
       })
       .addCase(fetchAdminProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        if (Array.isArray(action.payload)) {
+          state.products = action.payload as AdminProduct[];
+        } else if (action.payload && typeof action.payload === 'object') {
+          const payload: any = action.payload;
+          state.products = payload.items ?? payload.data ?? payload;
+          if (typeof payload.total === 'number') state.total = payload.total;
+        } else {
+          state.products = [];
+        }
+
+        const arg = action.meta?.arg as { page?: number; pageSize?: number } | undefined;
+        if (arg?.page) state.page = arg.page;
+        if (arg?.pageSize) state.pageSize = arg.pageSize;
       })
       .addCase(fetchAdminProducts.rejected, (state, action) => {
         state.loading = false;
