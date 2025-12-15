@@ -15,12 +15,19 @@ try
     {
         options.AddPolicy(CorsPolicyName, policy =>
         {
-            // DEBUG: Allow any origin for troubleshooting
+            // Allow known local dev origins (adjust as needed)
             policy
-                .SetIsOriginAllowed(_ => true)
+                .WithOrigins(
+                    "https://localhost:5015",
+                    "http://localhost:5015",
+                    "https://localhost:5200",
+                    "http://localhost:5200",
+                    "https://nestonlinestore.vercel.app/",
+                    ""
+                )
                 .AllowAnyHeader()
-                .AllowAnyMethod();
-                // .AllowCredentials(); // Uncomment only if you use cookies/auth
+                .AllowAnyMethod()
+                .AllowCredentials(); // allow cookies/auth if used by client
         });
     });
 
