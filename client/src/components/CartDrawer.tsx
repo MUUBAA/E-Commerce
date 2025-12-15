@@ -391,7 +391,7 @@ useEffect(() => {
           />
         </div>
 
-        <div className="text-right">
+        <div className="flex justify-end gap-4">
           <button
             type="button"
             onClick={handleForgotOpen}
@@ -399,8 +399,7 @@ useEffect(() => {
           >
             Forgot Password?
           </button>
-        </div>
-          <div className="text-right">
+
           <button
             type="button"
             onClick={adminLogin}
