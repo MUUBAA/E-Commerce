@@ -23,7 +23,6 @@ export const fetchAdminProducts = createAsyncThunk(
           'Authorization': `Bearer ${token}`,
         },
       });
-      console.log('fetchAdminProducts CALLED', response.data);
       return response.data;
 
     } catch (error: any) {

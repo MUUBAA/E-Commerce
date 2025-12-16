@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchAdminProductById, updateAdminProduct } from '../redux/thunk/adminProduct';
 import type { AdminDispatch, AdminRootState } from '../redux/store';
+import { toast, ToastContainer } from 'react-toastify';
 
 const EditProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -60,11 +61,11 @@ const EditProductPage = () => {
         imageUrl: '',
         isActive: true,
       })).unwrap();
-      alert('Product updated successfully!');
+      toast.success('Product updated successfully!');
       navigate('/admin/products');
     } catch (error) {
       console.error('Failed to update product:', error);
-      alert('Failed to update product.');
+      toast.error('Failed to update product.');
     }
   };
 
@@ -74,6 +75,7 @@ const EditProductPage = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <ToastContainer />
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-6 py-5 border-b">
           <h1 className="text-2xl font-semibold text-slate-800">Edit Product</h1>

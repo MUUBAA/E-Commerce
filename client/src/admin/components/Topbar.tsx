@@ -23,7 +23,7 @@ const Topbar = () => {
         {/* Left Section */}
         <div className="flex items-center gap-6">
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Good Morning! 👋</h1>
+            <h1 className="text-xl font-bold text-slate-800">Here’s what’s happening </h1>
             <p className="text-sm text-slate-600">Welcome back to your admin dashboard</p>
           </div>
         </div>
