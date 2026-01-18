@@ -20,11 +20,11 @@ namespace Server.Services.MessageServices
 
         public EmailService(IConfiguration configuration)
         {
-            _SmtpHost = configuration["SMTP:Host"];
-            _SmtpPort = int.Parse(configuration["SMTP:Port"]);
-            _SmtpMailAddress = configuration["SMTP:MailAddress"];
-            _SmtpUsername = configuration["SMTP:UserName"];
-            _SmtpPassword = configuration["SMTP:Password"];
+            _SmtpHost = configuration["SMTP_Host"];
+            _SmtpPort = int.Parse(configuration["SMTP_Port"]);
+            _SmtpMailAddress = configuration["SMTP_MailAddress"];
+            _SmtpUsername = configuration["SMTP_UserName"];
+            _SmtpPassword = configuration["SMTP_Password"];
 
             _client = new()
             {
