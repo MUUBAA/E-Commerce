@@ -4,10 +4,9 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-    // IMPORTANT: Bind to PORT env var for Render
-    var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+    // Fly.io + Render compatible port binding
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
-
 
     // CORS
     const string CorsPolicyName = "AllowClient";
@@ -15,12 +14,10 @@ try
     {
         options.AddPolicy(CorsPolicyName, policy =>
         {
-            // DEBUG: Allow any origin for troubleshooting
             policy
                 .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
                 .AllowAnyMethod();
-                // .AllowCredentials(); // Uncomment only if you use cookies/auth
         });
     });
 
@@ -30,7 +27,6 @@ try
     AuthProvider.Configure(builder.Services, builder.Configuration);
     SwaggerProvider.Configure(builder.Services);
 
-    // Registers controllers, DbContext, services, etc.
     await ComponentRegistry.Registry(builder.Services, builder.Configuration);
 
     var app = builder.Build();
@@ -39,7 +35,6 @@ try
 
     app.UseSwagger();
     app.UseSwaggerUI();
-
 
     app.UseCors(CorsPolicyName);
 
@@ -51,6 +46,6 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"An error occurred: {ex.Message}");
+    Console.WriteLine($"Startup error: {ex}");
     throw;
 }
