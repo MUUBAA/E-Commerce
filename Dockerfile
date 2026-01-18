@@ -1,21 +1,21 @@
 # Runtime image (Linux, .NET 8)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8080
 
-# NOTE: we don't set ASPNETCORE_URLS here.
-# Your Program.cs reads the PORT env var from Render and binds to it.
+# Fly.io requires explicit port binding
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
 
 # Build image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG configuration=Release
 WORKDIR /src
 
-# Copy csproj and restore as distinct layers
+# Copy csproj and restore
 COPY ["server/Server/Server.csproj", "server/Server/"]
 RUN dotnet restore "server/Server/Server.csproj"
 
-# Copy everything and build
+# Copy everything and publish
 COPY . .
 WORKDIR "/src/server/Server"
 RUN dotnet publish "Server.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
